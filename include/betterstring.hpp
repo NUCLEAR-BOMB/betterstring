@@ -54,7 +54,7 @@ public:
 
     constexpr string_view() noexcept : string_data(nullptr), string_size(0) {}
 
-    constexpr string_view(const string_view) noexcept = default;
+    constexpr string_view(const string_view&) noexcept = default;
 
     constexpr string_view(const const_pointer str, const size_type count)
         : string_data(str), string_size(count) {}
@@ -68,6 +68,8 @@ public:
         , string_size(static_cast<size_type>(last - first)) {}
 
     constexpr string_view(std::nullptr_t) = delete;
+
+    constexpr string_view(const string_view&) noexcept = default;
 
 private:
     const_pointer string_data;
