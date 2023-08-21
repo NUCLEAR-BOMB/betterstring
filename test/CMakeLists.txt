@@ -1,5 +1,6 @@
 
-add_executable(betterstring-test main.cpp)
+add_executable(betterstring-test main.cpp string_view.cpp)
+target_link_libraries(betterstring-test PRIVATE betterstring)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -14,4 +15,4 @@ set(BUILD_GMOCK NO CACHE BOOL "" FORCE)
 set(INSTALL_GTEST NO CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-target_link_libraries(betterstring-test PRIVATE betterstring GTest::gtest)
+target_link_libraries(betterstring-test PRIVATE GTest::gtest)
