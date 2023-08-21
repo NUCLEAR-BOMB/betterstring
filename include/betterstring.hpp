@@ -101,6 +101,14 @@ public:
 
     [[nodiscard]] constexpr empty() const noexcept { return size() == 0; }
 
+    constexpr void remove_prefix(const size_type count) noexcept {
+        string_data += count;
+        string_size -= count;
+    }
+    constexpr void remove_suffix(const size_type count) noexcept {
+        string_size -= count;
+    }
+
 private:
     const_pointer string_data;
     const_pointer string_size;
