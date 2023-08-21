@@ -94,6 +94,11 @@ TEST_F(string_view, substr) {
 TEST_F(string_view, starts_with) {
     EXPECT_TRUE(str.starts_with("test"));
     EXPECT_FALSE(bs::string_view("hello").starts_with("hello!"));
+
+    EXPECT_TRUE(str.starts_with(str));
+
+    EXPECT_TRUE(str.starts_with('t'));
+    EXPECT_FALSE(str.starts_with('e'));
 }
 
 }
