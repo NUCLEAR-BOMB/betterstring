@@ -63,4 +63,9 @@ TEST_F(string_view, max_size) {
     (void)str.max_size();
 }
 
+TEST_F(string_view, empty) {
+    EXPECT_FALSE(str.empty());
+    EXPECT_TRUE(bs::string_view("").empty());
+}
+
 }
