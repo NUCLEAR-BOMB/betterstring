@@ -109,6 +109,17 @@ public:
         string_size -= count;
     }
 
+    constexpr string_view operator()(const size_type start, const size_type finish) const noexcept {
+        return string_view(start, finish);
+    }
+
+    constexpr string_view substr(const size_type position) const noexcept {
+        return (*this)(position, size());
+    }
+    constexpr string_view substr(const size_type position, const size_type count) const noexcept {
+        return (*this)(position, position + count);
+    }
+
 private:
     const_pointer string_data;
     const_pointer string_size;
