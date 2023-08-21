@@ -101,4 +101,14 @@ TEST_F(string_view, starts_with) {
     EXPECT_FALSE(str.starts_with('e'));
 }
 
+TEST_F(string_view, ends_with) {
+    EXPECT_TRUE(str.ends_with("string"));
+    EXPECT_FALSE(str.ends_with("strin"));
+
+    EXPECT_TRUE(str.ends_with(str));
+
+    EXPECT_TRUE(str.ends_with('g'));
+    EXPECT_FALSE(str.ends_with('n'));
+}
+
 }
