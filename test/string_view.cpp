@@ -38,4 +38,9 @@ TEST_F(string_view, begin_end) {
     (void)str.crend();
 }
 
+TEST_F(string_view, subscript) {
+    EXPECT_EQ(str[0], 't');
+    EXPECT_EQ(str[10], 'g');
+}
+
 }
