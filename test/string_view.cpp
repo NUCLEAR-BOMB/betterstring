@@ -54,4 +54,9 @@ TEST_F(string_view, data) {
     EXPECT_EQ(strview.data(), cstring);
 }
 
+TEST_F(string_view, size_length) {
+    EXPECT_EQ(str.size(), 11);
+    EXPECT_EQ(str.length(), str.size());
+}
+
 }
