@@ -111,4 +111,35 @@ TEST_F(string_view, ends_with) {
     EXPECT_FALSE(str.ends_with('n'));
 }
 
+TEST_F(string_view, operators) {
+    // ==
+    EXPECT_TRUE(str == str);
+    EXPECT_TRUE(str == "test string");
+    EXPECT_FALSE(str == "hello");
+    // !=
+    EXPECT_FALSE(str != str);
+    EXPECT_TRUE(str != "a");
+    EXPECT_FALSE(str != "test string");
+    // >
+    EXPECT_FALSE(str > str);
+    EXPECT_TRUE(str > "a");
+    EXPECT_FALSE(str > "test string+");
+    EXPECT_TRUE(str > "test strina");
+    // >=
+    EXPECT_TRUE(str >= str);
+    EXPECT_TRUE(str >= "b");
+    EXPECT_FALSE(str >= "test string+");
+    EXPECT_TRUE(str >= "test strina");
+    // <
+    EXPECT_FALSE(str < str);
+    EXPECT_TRUE(str < "test string!");
+    EXPECT_FALSE(str < "test-");
+    EXPECT_TRUE(str < "test strinj");
+    // <=
+    EXPECT_TRUE(str <= str);
+    EXPECT_TRUE(str <= "test string!!!");
+    EXPECT_FALSE(str <= "...");
+    EXPECT_TRUE(str <= "test strinj");
+}
+
 }
