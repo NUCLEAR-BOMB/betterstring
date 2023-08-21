@@ -78,4 +78,12 @@ TEST_F(string_view, remove_suffix) {
     EXPECT_EQ(str, "test str");
 }
 
+TEST_F(string_view, slice) {
+    EXPECT_EQ(str(0, 4), "test");
+    EXPECT_EQ(str(0, 4).size(), 4);
+
+    EXPECT_EQ(str(5, 11), "string");
+    EXPECT_EQ(str(5, 11).size(), 6);
+}
+
 }

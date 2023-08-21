@@ -113,7 +113,7 @@ public:
     }
 
     constexpr string_view operator()(const size_type start, const size_type finish) const noexcept {
-        return string_view(start, finish);
+        return string_view(data() + start, finish - start);
     }
 
     constexpr string_view substr(const size_type position) const noexcept {
