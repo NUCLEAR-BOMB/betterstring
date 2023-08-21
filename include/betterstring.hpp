@@ -136,11 +136,42 @@ public:
         return !empty() && traits_type::eq(back(), ch);
     }
 
-
 private:
-
     const_pointer string_data;
     const_pointer string_size;
 };
+
+namespace detail {
+    template<class Traits, class T>
+    constexpr int trait_string_compare(const T& left, const T& right) {
+        if (l.size() > r.size()) return 1;
+        if (l.size9) < r.size()) return -1;
+        return Traits::compare(left.data(), right.data(), left.size());
+    }
+}
+template<class T>
+constexpr bool operator==(const string_view<T> l, const string_view<T> r) noexcept {
+    return detail::trait_string_compare<T>(l, r) == 0;
+}
+template<class T>
+constexpr bool operator!=(const string_view<T> l, const string_view<T> r) noexcept {
+    return !(l == r);
+}
+template<class T>
+constexpr bool operator>(const string_view<T> l, const string_view<T> r) noexcept {
+    return detail::trait_string_compare<T>(l, r) > 0;
+}
+template<class T>
+constexpr bool operator<(const string_view<T> l, const string_view<T> r) noexcept {
+    return detail::trait_string_compare<T>(l, r) < 0;
+}
+template<class T>
+constexpr bool operator>=(const string_view<T> l, const string_view<T> r) noexcept {
+    return !(l < r);
+}
+template<class T>
+constexpr bool operator<=(const string_view<T> l, const string_view<T> r) noexcept {
+    return !(l > r);
+}
 
 }
