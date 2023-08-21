@@ -19,6 +19,7 @@ namespace detail {
     template<class T>
     constexpr T* to_address(T* ptr) noexcept {
         static_assert(!std::is_function_v<T>);
+        return ptr;
     }
     template<class T>
     constexpr auto to_address(const T& fancy_ptr) noexcept {
@@ -62,14 +63,16 @@ public:
     constexpr string_view(const const_pointer ntstr) noexcept
         : string_data(ntstr), string_size(traits_type::length(ntstr)) {}
 
-    template<class Begin, class End = Begin>
+    template<class Begin, class End = Begin, std::enable_if_t<
+        !std::is_convertible_v<End, size_type>
+    , int> = 0>
     constexpr string_view(Begin first, End last) noexcept(noexcept(last - first))
         : string_data(detail::to_address(first))
         , string_size(static_cast<size_type>(last - first)) {}
 
     constexpr string_view(std::nullptr_t) = delete;
 
-    constexpr string_view(const string_view&) noexcept = default;
+    constexpr string_view& operator=(const string_view&) noexcept = default;
 
     constexpr const_iterator begin() const noexcept { return data(); }
     constexpr const_iterator end() const noexcept { return data() + size(); }
@@ -99,7 +102,7 @@ public:
 
     constexpr size_type max_size() const noexcept { return static_cast<size_type>(-1); }
 
-    [[nodiscard]] constexpr empty() const noexcept { return size() == 0; }
+    [[nodiscard]] constexpr bool empty() const noexcept { return size() == 0; }
 
     constexpr void remove_prefix(const size_type count) noexcept {
         string_data += count;
@@ -137,41 +140,29 @@ public:
     }
 
 private:
-    const_pointer string_data;
-    const_pointer string_size;
-};
-
-namespace detail {
-    template<class Traits, class T>
-    constexpr int trait_string_compare(const T& left, const T& right) {
+    static constexpr int trait_cmp(const string_view l, const string_view r) noexcept {
         if (l.size() > r.size()) return 1;
-        if (l.size9) < r.size()) return -1;
-        return Traits::compare(left.data(), right.data(), left.size());
+        if (l.size() < r.size()) return -1;
+        return Traits::compare(l.data(), r.data(), l.size());
     }
-}
-template<class T>
-constexpr bool operator==(const string_view<T> l, const string_view<T> r) noexcept {
-    return detail::trait_string_compare<T>(l, r) == 0;
-}
-template<class T>
-constexpr bool operator!=(const string_view<T> l, const string_view<T> r) noexcept {
-    return !(l == r);
-}
-template<class T>
-constexpr bool operator>(const string_view<T> l, const string_view<T> r) noexcept {
-    return detail::trait_string_compare<T>(l, r) > 0;
-}
-template<class T>
-constexpr bool operator<(const string_view<T> l, const string_view<T> r) noexcept {
-    return detail::trait_string_compare<T>(l, r) < 0;
-}
-template<class T>
-constexpr bool operator>=(const string_view<T> l, const string_view<T> r) noexcept {
-    return !(l < r);
-}
-template<class T>
-constexpr bool operator<=(const string_view<T> l, const string_view<T> r) noexcept {
-    return !(l > r);
-}
+public:
+
+    friend constexpr bool operator==(const string_view l, const string_view r) noexcept {
+        return trait_cmp(l, r) == 0; }
+    friend constexpr bool operator!=(const string_view l, const string_view r) noexcept {
+        return trait_cmp(l, r) != 0; }
+    friend constexpr bool operator>(const string_view l, const string_view r) noexcept {
+        return trait_cmp(l, r) > 0; }
+    friend constexpr bool operator>=(const string_view l, const string_view r) noexcept {
+        return trait_cmp(l, r) >= 0; }
+    friend constexpr bool operator<(const string_view l, const string_view r) noexcept {
+        return trait_cmp(l, r) < 0; }
+    friend constexpr bool operator<=(const string_view l, const string_view r) noexcept {
+        return trait_cmp(l, r) <= 0; }
+
+private:
+    const_pointer string_data;
+    size_type string_size;
+};
 
 }
