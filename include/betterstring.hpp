@@ -71,8 +71,8 @@ public:
 
     constexpr string_view(const string_view&) noexcept = default;
 
-    constexpr const_iterator begin() const noexcept { return string_data; }
-    constexpr const_iterator end() const noexcept { return string_data + string_size; }
+    constexpr const_iterator begin() const noexcept { return data(); }
+    constexpr const_iterator end() const noexcept { return data() + size(); }
     constexpr const_iterator cbegin() const noexcept { return begin(); }
     constexpr const_iterator cend() const noexcept { return end(); }
 
@@ -84,6 +84,22 @@ public:
     }
     constexpr const_reverse_iterator crbegin() const noexcept { return rbegin(); }
     constexpr const_reverse_iterator crend() const noexcept { return rend(); }
+
+    constexpr const_reference operator[](const size_type index) const noexcept {
+        return data()[index];
+    }
+
+    constexpr const_reference front() const noexcept { return data()[0]; }
+    constexpr const_reference back() const noexcept { return data()[size() - 1]; }
+
+    constexpr const_pointer data() const noexcept { return string_data; }
+
+    constexpr size_type size() const noexcept { return string_size; }
+    constexpr size_type length() const noexcept { return size(); }
+
+    constexpr size_type max_size() const noexcept { return static_cast<size_type>(-1); }
+
+    [[nodiscard]] constexpr empty() const noexcept { return size() == 0; }
 
 private:
     const_pointer string_data;
