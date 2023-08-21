@@ -71,6 +71,20 @@ public:
 
     constexpr string_view(const string_view&) noexcept = default;
 
+    constexpr const_iterator begin() const noexcept { return string_data; }
+    constexpr const_iterator end() const noexcept { return string_data + string_size; }
+    constexpr const_iterator cbegin() const noexcept { return begin(); }
+    constexpr const_iterator cend() const noexcept { return end(); }
+
+    constexpr const_reverse_iterator rbegin() const noexcept {
+        return std::reverse_iterator(begin());
+    }
+    constexpr const_reverse_iterator rend() const noexcept {
+        return std::reverse_iterator(end());
+    }
+    constexpr const_reverse_iterator crbegin() const noexcept { return rbegin(); }
+    constexpr const_reverse_iterator crend() const noexcept { return rend(); }
+
 private:
     const_pointer string_data;
     const_pointer string_size;
