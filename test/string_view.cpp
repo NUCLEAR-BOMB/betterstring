@@ -43,4 +43,9 @@ TEST_F(string_view, subscript) {
     EXPECT_EQ(str[10], 'g');
 }
 
+TEST_F(string_view, front_back) {
+    EXPECT_EQ(str.front(), 't');
+    EXPECT_EQ(str.back(), 'g');
+}
+
 }
