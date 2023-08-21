@@ -73,4 +73,9 @@ TEST_F(string_view, remove_prefix) {
     EXPECT_EQ(str, " string");
 }
 
+TEST_F(string_view, remove_suffix) {
+    str.remove_suffix(3);
+    EXPECT_EQ(str, "test str");
+}
+
 }
