@@ -86,4 +86,9 @@ TEST_F(string_view, slice) {
     EXPECT_EQ(str(5, 11).size(), 6);
 }
 
+TEST_F(string_view, substr) {
+    EXPECT_EQ(str.substr(6), "tring");
+    EXPECT_EQ(str.substr(4, 3), " st");
+}
+
 }
