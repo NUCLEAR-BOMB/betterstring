@@ -59,4 +59,8 @@ TEST_F(string_view, size_length) {
     EXPECT_EQ(str.length(), str.size());
 }
 
+TEST_F(string_view, max_size) {
+    (void)str.max_size();
+}
+
 }
