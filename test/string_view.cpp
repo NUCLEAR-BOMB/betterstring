@@ -68,4 +68,9 @@ TEST_F(string_view, empty) {
     EXPECT_TRUE(bs::string_view("").empty());
 }
 
+TEST_F(string_view, remove_prefix) {
+    str.remove_prefix(4);
+    EXPECT_EQ(str, " string");
+}
+
 }
