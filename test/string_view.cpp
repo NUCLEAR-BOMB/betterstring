@@ -48,4 +48,10 @@ TEST_F(string_view, front_back) {
     EXPECT_EQ(str.back(), 'g');
 }
 
+TEST_F(string_view, data) {
+    const auto cstring = "hello world";
+    bs::string_view strview(cstring);
+    EXPECT_EQ(strview.data(), cstring);
+}
+
 }
