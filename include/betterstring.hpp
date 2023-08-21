@@ -120,7 +120,25 @@ public:
         return (*this)(position, position + count);
     }
 
+    constexpr bool starts_with(const string_view str) const noexcept {
+        if (size() < str.size()) return false;
+        return traits_type::compare(data(), str.data(), str.size()) == 0;
+    }
+    constexpr bool starts_with(const value_type ch) const noexcept {
+        return !empty() && traits_type::eq(front(), ch);
+    }
+
+    constexpr bool ends_with(const string_view str) const noexcept {
+        if (size() < str.size()) return false;
+        return traits_type::compare(data() + (size() - str.size()), str.data(), str.size()) == 0;
+    }
+    constexpr bool ends_with(const value_type ch) const noexcept {
+        return !empty() && traits_type::eq(back(), ch);
+    }
+
+
 private:
+
     const_pointer string_data;
     const_pointer string_size;
 };
