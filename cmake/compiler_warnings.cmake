@@ -13,6 +13,8 @@ function(target_add_warnings target)
         /wd4514 # 'function' : unreferenced inline function has been removed
         /wd5246 # 'member': the initialization of a subobject should be wrapped in braces
         /wd5045 # Compiler will insert Spectre mitigation for memory load if /Qspectre switch specified
+        /wd4710 # 'function' : function not inlined
+        /wd4711 # function 'function' selected for inline expansion
         )
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
         target_compile_options(${target} PRIVATE
