@@ -21,5 +21,8 @@ FetchContent_MakeAvailable(googletest)
 
 target_link_libraries(betterstring-test PRIVATE GTest::gtest)
 
+include(GoogleTest)
+gtest_discover_tests(betterstring-test)
+
 set_target_properties(betterstring-test PROPERTIES EXPORT_COMPILE_COMMANDS TRUE)
 add_clang_tidy_target(tidy)
