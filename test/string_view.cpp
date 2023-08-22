@@ -10,21 +10,21 @@ struct string_view : ::testing::Test {
 };
 
 TEST_F(string_view, constructor) {
-    bs::string_view<> empty_str;
+    const bs::string_view<> empty_str;
     EXPECT_EQ(empty_str.size(), 0);
     EXPECT_EQ(empty_str.data(), nullptr);
 
-    bs::string_view<> copy_str(str);
+    const bs::string_view<> copy_str(str);
     EXPECT_EQ(copy_str, str);
 
-    bs::string_view<> cut_str("test string", 4);
+    const bs::string_view<> cut_str("test string", 4);
     EXPECT_EQ(cut_str, "test");
 
-    bs::string_view<> cstr_view("test str");
+    const bs::string_view<> cstr_view("test str");
     EXPECT_EQ(cstr_view, "test str");
 
     constexpr auto cstring = "123456789";
-    bs::string_view<> range_str(cstring + 1, cstring + 7);
+    const bs::string_view<> range_str(cstring + 1, cstring + 7);
     EXPECT_EQ(range_str, "234567");
 }
 
@@ -175,6 +175,35 @@ TEST_F(string_view, find) {
     EXPECT_EQ(str.find('g', 11), str.size());
 
     EXPECT_EQ(str.find('r', 5, 8), 7);
+}
+
+TEST_F(string_view, split) {
+    unsigned index = 0;
+    for (auto sub : str.split(" ")) {
+        if (index == 0) EXPECT_EQ(sub, "test");
+        if (index == 1) EXPECT_EQ(sub, "string");
+        if (index == 2) ADD_FAILURE();
+        ++index;
+    }
+    index = 0; // "test string"
+    for (auto sub : str.split("t")) {
+        if (index == 0) EXPECT_EQ(sub, "");
+        if (index == 1) EXPECT_EQ(sub, "es");
+        if (index == 2) EXPECT_EQ(sub, " s");
+        if (index == 3) EXPECT_EQ(sub, "ring");
+        if (index == 4) ADD_FAILURE();
+        ++index;
+    }
+    index = 0;
+    for (auto sub : bs::string_view("aaaa").split(" ")) {
+        if (index == 0) EXPECT_EQ(sub, "aaaa");
+        if (index == 1) ADD_FAILURE();
+        ++index;
+    }
+
+    EXPECT_EQ(str.split(" ")[0], "test");
+    EXPECT_EQ(str.split(" ")[1], "string");
+    EXPECT_EQ(bs::string_view("  ").split(" ")[1], "");
 }
 
 }
