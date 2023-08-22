@@ -1,5 +1,6 @@
 
 include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
+include("${PROJECT_SOURCE_DIR}/cmake/clang_tidy.cmake")
 
 add_executable(betterstring-test main.cpp string_view.cpp)
 target_add_warnings(betterstring-test)
@@ -13,9 +14,12 @@ FetchContent_Declare(
     FIND_PACKAGE_ARGS NAMES GTest
 )
 
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-set(BUILD_GMOCK NO CACHE BOOL "" FORCE)
-set(INSTALL_GTEST NO CACHE BOOL "" FORCE)
+set(gtest_force_shared_crt TRUE CACHE BOOL "" FORCE)
+set(BUILD_GMOCK FALSE CACHE BOOL "" FORCE)
+set(INSTALL_GTEST FALSE CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 target_link_libraries(betterstring-test PRIVATE GTest::gtest)
+
+set_target_properties(betterstring-test PROPERTIES EXPORT_COMPILE_COMMANDS TRUE)
+add_clang_tidy_target(tidy)

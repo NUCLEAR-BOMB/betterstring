@@ -3,6 +3,7 @@
 !.gitignore
 !.gitattributes
 !.editorconfig
+!.clang-tidy
 !CMakeLists.txt
 !CMakePresets.json
 !include/
