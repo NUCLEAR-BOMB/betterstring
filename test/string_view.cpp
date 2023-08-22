@@ -56,7 +56,7 @@ TEST_F(string_view, front_back) {
 
 TEST_F(string_view, data) {
     const auto cstring = "hello world";
-    bs::string_view strview(cstring);
+    const bs::string_view strview(cstring);
     EXPECT_EQ(strview.data(), cstring);
 }
 
