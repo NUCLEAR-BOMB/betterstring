@@ -154,10 +154,15 @@ TEST_F(string_view, find) {
     EXPECT_EQ(str.find("", 3), 3);
     EXPECT_EQ(str.find("string", 8), str.size());
 
+    EXPECT_EQ(str.find("str", 0, 4), 4);
+    EXPECT_EQ(str.find("string", 5, 11), 5);
+
     EXPECT_EQ(str.find('t'), 0);
     EXPECT_EQ(str.find('g'), 10);
     EXPECT_EQ(str.find('x'), str.size());
     EXPECT_EQ(str.find('g', 11), str.size());
+
+    EXPECT_EQ(str.find('r', 5, 8), 7);
 }
 
 }

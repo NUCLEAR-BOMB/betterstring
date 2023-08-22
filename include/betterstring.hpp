@@ -200,23 +200,32 @@ public:
     }
 
     constexpr size_type find(const string_view str, const size_type start = 0) const noexcept {
-        if (str.size() + start > size()) return size();
+        return this->find(str, start, size());
+    }
+    constexpr size_type find(const string_view str, const size_type start, const size_type end) const noexcept {
+        BS_VERIFY(end <= size(), "end is out of range");
+        if (str.size() + start > end) return end;
         if (str.empty()) return start;
 
-        const auto match_max = data() + (size() - str.size()) + 1;
+        const auto match_max = data() + (end - str.size()) + 1;
         for (auto* match_try = data() + start;; ++match_try) {
             match_try = traits_type::find(match_try, static_cast<size_type>(match_max - match_try), str[0]);
-            if (match_try == nullptr) return size();
+            if (match_try == nullptr) return end;
             if (traits_type::compare(match_try, str.data(), str.size()) == 0) {
                 return static_cast<size_type>(match_try - data());
             }
         }
         BS_ASSUME(false);
     }
+
     constexpr size_type find(const value_type ch, const size_type start = 0) const noexcept {
-        if (start >= size()) return size();
-        const auto match_result = traits_type::find(data() + start, size(), ch);
-        return match_result == nullptr ? size() : static_cast<size_type>(match_result - data());
+        return this->find(ch, start, size());
+    }
+    constexpr size_type find(const value_type ch, const size_type start, const size_type end) const noexcept {
+        BS_VERIFY(end <= size(), "end is out of range");
+        if (start >= end) return end;
+        const auto match_result = traits_type::find(data() + start, end - start, ch);
+        return match_result == nullptr ? end : static_cast<size_type>(match_result - data());
     }
 
 
