@@ -139,6 +139,20 @@ public:
         return !empty() && traits_type::eq(back(), ch);
     }
 
+    constexpr size_type find(const string_view str, const size_type start = 0) const noexcept {
+        if (str.size() + start > size()) return size();
+        if (str.empty()) return start;
+
+        const auto match_max = data() + (size() - str.size()) + 1;
+        for (auto* match_try = data() + start;; ++match_try) {
+            match_try = traits_type::find(match_try, static_cast<size_type>(match_max - match_try), str[0]);
+            if (match_try == nullptr) return size();
+            if (traits_type::compare(match_try, str.data(), str.size()) == 0) {
+                return static_cast<size_type>(match_try - data());
+            }
+        }
+    }
+
 private:
     static constexpr int trait_cmp(const string_view l, const string_view r) noexcept {
         if (l.size() > r.size()) return 1;
