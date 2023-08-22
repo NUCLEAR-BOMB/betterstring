@@ -1,5 +1,8 @@
 
+include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
+
 add_executable(betterstring-test main.cpp string_view.cpp)
+target_add_warnings(betterstring-test)
 target_link_libraries(betterstring-test PRIVATE betterstring)
 
 include(FetchContent)
