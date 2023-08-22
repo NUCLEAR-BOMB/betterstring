@@ -152,6 +152,12 @@ public:
             }
         }
     }
+    constexpr size_type find(const value_type ch, const size_type start = 0) const noexcept {
+        if (start >= size()) return size();
+        const auto match_result = traits_type::find(data() + start, size(), ch);
+        return match_result == nullptr ? size() : static_cast<size_type>(match_result - data());
+    }
+
 
 private:
     static constexpr int trait_cmp(const string_view l, const string_view r) noexcept {

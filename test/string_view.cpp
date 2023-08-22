@@ -147,6 +147,17 @@ TEST_F(string_view, find) {
     EXPECT_EQ(str.find("string"), 5);
     EXPECT_EQ(str.find("e"), 1);
     EXPECT_EQ(str.find("s", 3), 5);
+
+    EXPECT_EQ(str.find("test string!!!"), str.size());
+    EXPECT_EQ(str.find("hello"), str.size());
+    EXPECT_EQ(str.find(""), 0);
+    EXPECT_EQ(str.find("", 3), 3);
+    EXPECT_EQ(str.find("string", 8), str.size());
+
+    EXPECT_EQ(str.find('t'), 0);
+    EXPECT_EQ(str.find('g'), 10);
+    EXPECT_EQ(str.find('x'), str.size());
+    EXPECT_EQ(str.find('g', 11), str.size());
 }
 
 }
