@@ -1,0 +1,15 @@
+name: CI
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Configure CMake
+      uses: cmake --preset=clang-make -B build
+
+    - name: Build
+      uses: cmake --build build

@@ -9,3 +9,4 @@
 !include/
 !test/
 !cmake/
+!.github
