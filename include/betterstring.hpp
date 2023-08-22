@@ -5,6 +5,53 @@
 #include <type_traits>
 #include <memory>
 
+#ifdef __has_builtin
+    #define BS_HAS_BUILTIN(x) __has_builtin(x)
+#else
+    #define BS_HAS_BUILTIN(x) 0
+#endif
+
+#if BS_HAS_BUILTIN(__builtin_debugtrap)
+    #define BS_DEBUG_BREAK __builtin_debugtrap()
+#elif defined(__GNUC__) || defined(__GNUG__)
+    #define BS_DEBUG_BREAK __builtin_trap()
+#elif defined(_MSC_VER)
+    #define BS_DEBUG_BREAK __debugbreak()
+#else
+    #include <csignal>
+    #if defined(SIGTRAP)
+        #define BS_DEBUG_BREAK std::raise(SIGTRAP)
+    #else
+        #define BS_DEBUG_BREAK std::raise(SIGABRT)
+    #endif
+#endif
+
+#define BS_ABORT(expression, message) \
+    ((void)std::fprintf(stderr, "%s:%d: assertion '%s' failed: %s\n", __FILE__, __LINE__, #expression, message), (void)BS_DEBUG_BREAK)
+
+#if BS_HAS_BUILTIN(__builtin_assume)
+    #define BS_ASSUME(expression) __builtin_assume(expression)
+#elif defined(__GNUC__) || defined(__GNUG__)
+    #define BS_ASSUME(expression) \
+        ((expression) ? (void)0 : (void)__builtin_unreachable())
+#elif defined(_MSC_VER)
+    #define BS_ASSUME(expression) __assume(expression)
+#else
+    #define BS_ASSUME(expression) ((void)0)
+#endif
+
+#ifndef NDEBUG
+    #if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+        #define BS_VERIFY(expression, message) \
+            (__builtin_expect((expression), 1) ? (void)0 : BS_ABORT(expression, message))
+    #else
+        #define BS_VERIFY(expression, message) \
+            ((expression) ? (void)0 : BS_ABORT(expression, message))
+    #endif
+#else
+    #define BS_VERIFY(expression, message) BS_ASSUME(expression)
+#endif
+
 namespace bs
 {
 
@@ -58,7 +105,9 @@ public:
     constexpr string_view(const string_view&) noexcept = default;
 
     constexpr string_view(const const_pointer str, const size_type count)
-        : string_data(str), string_size(count) {}
+        : string_data(str), string_size(count) {
+        BS_VERIFY(count == 0 || str != nullptr, "null pointer with non-zero size");
+    }
 
     constexpr string_view(const const_pointer ntstr) noexcept
         : string_data(ntstr), string_size(traits_type::length(ntstr)) {}
@@ -89,11 +138,18 @@ public:
     constexpr const_reverse_iterator crend() const noexcept { return rend(); }
 
     constexpr const_reference operator[](const size_type index) const noexcept {
+        BS_VERIFY(index < size(), "out of range");
         return data()[index];
     }
 
-    constexpr const_reference front() const noexcept { return data()[0]; }
-    constexpr const_reference back() const noexcept { return data()[size() - 1]; }
+    constexpr const_reference front() const noexcept {
+        BS_VERIFY(!empty(), "cannot access the first element from an empty string");
+        return data()[0];
+    }
+    constexpr const_reference back() const noexcept {
+        BS_VERIFY(!empty(), "cannot access the last element from an empty string");
+        return data()[size() - 1];
+    }
 
     constexpr const_pointer data() const noexcept { return string_data; }
 
@@ -105,10 +161,12 @@ public:
     [[nodiscard]] constexpr bool empty() const noexcept { return size() == 0; }
 
     constexpr void remove_prefix(const size_type count) noexcept {
+        BS_VERIFY(count <= size(), "the number of characters to be removed from the start of the string exceeds the length of the string");
         string_data += count;
         string_size -= count;
     }
     constexpr void remove_suffix(const size_type count) noexcept {
+        BS_VERIFY(count <= size(), "the number of characters to be removed from the end of the string exceeds the length of the string");
         string_size -= count;
     }
 
@@ -117,9 +175,11 @@ public:
     }
 
     constexpr string_view substr(const size_type position) const noexcept {
+        BS_VERIFY(position <= size(), "the start position of the substring exceeds the length of the string");
         return (*this)(position, size());
     }
     constexpr string_view substr(const size_type position, const size_type count) const noexcept {
+        BS_VERIFY(position <= size(), "the start position of the substring exceeds the length of the string");
         return (*this)(position, position + count);
     }
 
@@ -151,6 +211,7 @@ public:
                 return static_cast<size_type>(match_try - data());
             }
         }
+        BS_ASSUME(false);
     }
     constexpr size_type find(const value_type ch, const size_type start = 0) const noexcept {
         if (start >= size()) return size();
