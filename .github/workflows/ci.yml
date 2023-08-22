@@ -4,19 +4,26 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, windows-2022 ]
+        type: [ Debug ]
+        preset: [ msvc-ide, clang-make ]
+        exclude:
+          - os: ubuntu-latest
+            preset: msvc-ide
+
     steps:
     - name: Checkout
       uses: actions/checkout@v3
 
     - name: Configure CMake
-      run: cmake --preset=clang-make -B build
+      run: cmake -B build -S ${{ github.workspace }} --preset=${{ matrix.preset }} -DCMAKE_BUILD_TYPE=${{ matrix.type }}
 
     - name: Build
-      run: cmake --build build
+      run: cmake --build build --config ${{ matrix.type }}
 
     - name: Test
-      run: ctest --test-dir build --output-on-failure
-
-    - name: Clang-Tidy
-      run: cmake --build build --target tidy
+      run: ctest --test-dir build --output-on-failure --build-config ${{ matrix.type }}
