@@ -6,10 +6,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v3
 
     - name: Configure CMake
-      uses: cmake --preset=clang-make -B build
+      run: cmake --preset=clang-make -B build
 
     - name: Build
-      uses: cmake --build build
+      run: cmake --build build
