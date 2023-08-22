@@ -41,6 +41,12 @@ TEST_F(string_view, begin_end) {
 TEST_F(string_view, subscript) {
     EXPECT_EQ(str[0], 't');
     EXPECT_EQ(str[10], 'g');
+
+    EXPECT_EQ(str[1u], 'e');
+    EXPECT_EQ(str[2u], 's');
+
+    EXPECT_EQ(str[-1], 'g');
+    EXPECT_EQ(str[-11], 't');
 }
 
 TEST_F(string_view, front_back) {

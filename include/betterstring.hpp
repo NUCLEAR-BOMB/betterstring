@@ -137,9 +137,16 @@ public:
     constexpr const_reverse_iterator crbegin() const noexcept { return rbegin(); }
     constexpr const_reverse_iterator crend() const noexcept { return rend(); }
 
-    constexpr const_reference operator[](const size_type index) const noexcept {
+    template<class T, std::enable_if_t<std::is_unsigned_v<T>, int> = 0>
+    constexpr const_reference operator[](const T index) const noexcept {
         BS_VERIFY(index < size(), "out of range");
         return data()[index];
+    }
+    template<class T, std::enable_if_t<std::is_signed_v<T>, int> = 0>
+    constexpr const_reference operator[](const T index) const noexcept {
+        const T signed_size = static_cast<T>(size());
+        BS_VERIFY(index < signed_size && index >= -signed_size, "out of range");
+        return data()[index < 0 ? index + signed_size : index];
     }
 
     constexpr const_reference front() const noexcept {
