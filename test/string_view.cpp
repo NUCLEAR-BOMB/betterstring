@@ -90,6 +90,12 @@ TEST_F(string_view, slice) {
 
     EXPECT_EQ(str(5, 11), "string");
     EXPECT_EQ(str(5, 11).size(), 6);
+
+    EXPECT_EQ(str(0, -5), "test s");
+    EXPECT_EQ(str(-5, {}), "tring");
+
+    EXPECT_EQ(str(5u, {}), "string");
+    EXPECT_EQ(str(5, -2), "stri");
 }
 
 TEST_F(string_view, substr) {

@@ -76,6 +76,12 @@ namespace detail {
             return to_address(fancy_ptr.operator->());
         }
     }
+
+    template<class T>
+    struct type_identity { using type = T; };
+
+    template<class T>
+    using type_identity_t = typename type_identity<T>::type;
 }
 
 template<class T>
@@ -137,6 +143,13 @@ public:
     constexpr const_reverse_iterator crbegin() const noexcept { return rbegin(); }
     constexpr const_reverse_iterator crend() const noexcept { return rend(); }
 
+private:
+    template<class T>
+    constexpr size_type to_index(const T integer) const noexcept {
+        return static_cast<size_type>(integer < T(0) ? integer + static_cast<T>(size()) : integer);
+    }
+public:
+
     template<class T, std::enable_if_t<std::is_unsigned_v<T>, int> = 0>
     constexpr const_reference operator[](const T index) const noexcept {
         BS_VERIFY(index < size(), "out of range");
@@ -144,9 +157,9 @@ public:
     }
     template<class T, std::enable_if_t<std::is_signed_v<T>, int> = 0>
     constexpr const_reference operator[](const T index) const noexcept {
-        const T signed_size = static_cast<T>(size());
-        BS_VERIFY(index < signed_size && index >= -signed_size, "out of range");
-        return data()[index < 0 ? index + signed_size : index];
+        const T ssize = static_cast<T>(size());
+        BS_VERIFY(index < ssize && index >= -ssize, "out of range");
+        return data()[to_index(index)];
     }
 
     constexpr const_reference front() const noexcept {
@@ -177,8 +190,31 @@ public:
         string_size -= count;
     }
 
-    constexpr string_view operator()(const size_type start, const size_type finish) const noexcept {
+private:
+    struct slice_end_t {
+        constexpr slice_end_t() noexcept = default;
+    };
+
+    template<class T1, class T>
+    constexpr T1 unwrap_slice_finish(const T finish) const noexcept {
+        if constexpr (std::is_same_v<T, slice_end_t>) { return static_cast<T1>(size()); }
+        else { return static_cast<T1>(finish); }
+    }
+public:
+
+    template<class T1, class T2 = slice_end_t, std::enable_if_t<std::is_unsigned_v<T1>, int> = 0>
+    constexpr string_view operator()(const T1 start, const T2 raw_finish) const noexcept {
+        const auto finish = unwrap_slice_finish<T1>(raw_finish);
+        BS_VERIFY(start < size() && finish <= size(), "slice out of range");
         return string_view(data() + start, finish - start);
+    }
+    template<class T1, class T2 = slice_end_t, std::enable_if_t<std::is_signed_v<T1>, int> = 0>
+    constexpr string_view operator()(const T1 start, const T2 raw_finish) const noexcept {
+        const auto finish = unwrap_slice_finish<T1>(raw_finish);
+        const T1 ssize = static_cast<T1>(size());
+        BS_VERIFY(start < ssize && start >= -ssize && finish <= ssize && finish > -ssize,
+            "slice out of range");
+        return string_view(data() + to_index(start), to_index(finish) - to_index(start));
     }
 
     constexpr string_view substr(const size_type position) const noexcept {
