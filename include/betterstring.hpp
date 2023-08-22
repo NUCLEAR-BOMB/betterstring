@@ -93,6 +93,18 @@ struct char_traits : std::char_traits<T> {
 template<class>
 struct splited_string;
 
+struct slice {
+    using index_type = std::ptrdiff_t;
+
+    constexpr slice(const index_type stop) noexcept
+        : start(0), stop(stop) {}
+    constexpr slice(const index_type start, const index_type stop) noexcept
+        : start(start), stop(stop) {}
+
+    index_type start;
+    index_type stop;
+};
+
 template<class Traits = char_traits<char>>
 class string_view {
 public:
@@ -218,6 +230,13 @@ public:
         BS_VERIFY(start < ssize && start >= -ssize && finish <= ssize && finish > -ssize,
             "slice out of range");
         return string_view(data() + to_index(start), to_index(finish) - to_index(start));
+    }
+
+    constexpr string_view operator[](const slice sl) const noexcept {
+        const auto ssize = static_cast<typename slice::index_type>(size());
+        BS_VERIFY(sl.start < ssize && sl.start >= -ssize && sl.stop <= ssize && sl.stop > -ssize,
+            "slice out of range");
+        return string_view(data() + to_index(sl.start), to_index(sl.stop) - to_index(sl.start));
     }
 
     constexpr string_view substr(const size_type position) const noexcept {

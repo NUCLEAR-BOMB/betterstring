@@ -96,6 +96,11 @@ TEST_F(string_view, slice) {
 
     EXPECT_EQ(str(5u, {}), "string");
     EXPECT_EQ(str(5, -2), "stri");
+
+    EXPECT_EQ(str[bs::slice(2)], "te");
+    EXPECT_EQ(str[bs::slice(0, 5)], "test ");
+    EXPECT_EQ(str[bs::slice(5, 5)], "");
+    EXPECT_EQ(str[bs::slice(5, 11)], "string");
 }
 
 TEST_F(string_view, substr) {
