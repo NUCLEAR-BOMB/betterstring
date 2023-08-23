@@ -1,4 +1,6 @@
 
+option(USE_SANITIZERS "" TRUE)
+
 include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
 include("${PROJECT_SOURCE_DIR}/cmake/clang_tidy.cmake")
 include("${PROJECT_SOURCE_DIR}/cmake/sanitizers.cmake")
@@ -21,7 +23,9 @@ set(INSTALL_GTEST FALSE CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 target_link_libraries(betterstring-test PRIVATE GTest::gtest)
-target_add_sanitizer(betterstring-test gtest)
+if (USE_SANITIZERS)
+    target_add_sanitizer(betterstring-test gtest)
+endif()
 
 include(GoogleTest)
 gtest_discover_tests(betterstring-test)
