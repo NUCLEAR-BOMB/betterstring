@@ -1,3 +1,4 @@
+include_guard(GLOBAL)
 
 function(target_add_warnings target)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")

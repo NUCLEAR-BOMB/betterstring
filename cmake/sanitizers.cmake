@@ -1,3 +1,4 @@
+include_guard(GLOBAL)
 
 function(target_add_sanitizer target)
     set(libraries ${ARGN})

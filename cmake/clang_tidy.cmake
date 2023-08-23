@@ -1,3 +1,4 @@
+include_guard(GLOBAL)
 
 function(add_clang_tidy_target name)
     if (NOT CMAKE_GENERATOR MATCHES "Unix Makefiles|Ninja")
