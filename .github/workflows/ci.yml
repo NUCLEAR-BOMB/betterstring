@@ -18,6 +18,11 @@ jobs:
 
           - os: windows-2022
             preset: clang-make
+            type: Debug
+            options: -DUSE_SANITIZERS=FALSE
+
+          - os: windows-2022
+            preset: clang-make
             type: Release
 
         exclude:
