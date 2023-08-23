@@ -12,3 +12,5 @@ target_compile_options(betterstring INTERFACE $<$<CXX_COMPILER_ID:MSVC>:
 
 enable_testing()
 add_subdirectory(test)
+
+add_subdirectory(benchmark)
