@@ -33,11 +33,22 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    - name: Cache LLVM
+      if: runner.os == 'Windows' && matrix.preset == 'clang-make'
+      id: cache-llvm
+      uses: actions/cache@v3
+      with:
+        path: |
+          C:/Program Files/LLVM
+          ./llvm
+        key: llvm-16
+
     - name: Install Clang
-      if: runner.os == 'Windows'
+      if: runner.os == 'Windows' && matrix.preset == 'clang-make'
       uses: KyleMayes/install-llvm-action@v1
       with:
-        version: "16.0"
+        version: "16"
+        cached: ${{ steps.cache-llvm.outputs.cache-hit }}
 
     - name: Configure CMake
       run: cmake -B build --preset=${{ matrix.preset }} -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.options }}
