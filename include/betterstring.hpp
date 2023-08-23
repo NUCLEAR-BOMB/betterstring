@@ -343,8 +343,7 @@ public:
         if (str.size() + end > start) return end;
         if (str.empty()) return start;
         for (auto* match_try = data() + (start - str.size());; --match_try) {
-            if (traits_type::eq(match_try[0], str[0])
-                && traits_type::compare(match_try, str.data(), str.size()) == 0) {
+            if (traits_type::compare(match_try, str.data(), str.size()) == 0) {
                 return static_cast<size_type>(match_try - data());
             }
             if (match_try == data() + end) return end;
