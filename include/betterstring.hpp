@@ -90,6 +90,25 @@ namespace detail {
 
     template<class T>
     using type_identity_t = typename type_identity<T>::type;
+
+    template<class T>
+    class char_bitmap {
+    public:
+        constexpr bool mark(const T* first, const T* const last) noexcept {
+            for (; first != last; ++first) {
+                const auto ch = static_cast<unsigned char>(*first);
+                if constexpr (sizeof(T) != 1) if (ch >= 256) return false;
+                matches[ch] = true;
+            }
+            return true;
+        }
+        constexpr bool match(const T ch) const noexcept {
+            return matches[static_cast<unsigned char>(ch)];
+        }
+
+    private:
+        bool matches[256] = {};
+    };
 }
 
 template<class T>
@@ -337,6 +356,44 @@ public:
         return splited_string<traits_type>(*this, separator);
     }
 
+private:
+    template<class Fn>
+    constexpr string_view strip_impl(Fn match_fn) const noexcept {
+        const auto* left_it = data();
+        for (;; ++left_it) {
+            if (!match_fn(*left_it) || left_it == data() + size()) break;
+        }
+        const auto* right_it = data() + size() - 1;
+        if (left_it != data() + size()) {
+            for (;; --right_it) {
+                if (!match_fn(*right_it) || right_it == left_it) break;
+            }
+        }
+        return string_view(left_it, right_it + 1);
+    }
+public:
+
+    constexpr string_view strip(const value_type strip_ch) const noexcept {
+        return strip_impl([&](auto ch) { return ch == strip_ch; });
+    }
+
+    constexpr string_view strip(const string_view chs) const noexcept {
+        detail::char_bitmap<value_type> bitmap;
+        if (!bitmap.mark(chs.data(), chs.data() + chs.size())) {
+            return strip_impl([&](auto ch) {
+                for (const auto match_ch : chs) {
+                    if (ch != match_ch) return true;
+                }
+                return false;
+            });
+        }
+
+        return strip_impl([&](auto ch) { return bitmap.match(ch); });
+    }
+
+    constexpr string_view strip() const noexcept {
+        return this->strip("\t\n\v\f\r ");
+    }
 
 private:
     static constexpr int trait_cmp(const string_view l, const string_view r) noexcept {

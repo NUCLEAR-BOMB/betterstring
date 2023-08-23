@@ -228,4 +228,17 @@ TEST_F(string_view, split) {
     EXPECT_EQ(bs::string_view("  ").split(" ")[1], "");
 }
 
+TEST_F(string_view, strip) {
+    const bs::string_view<> test_strings[]{" hello ", "hello ", " hello", "  hello", "hello  ", "  hello  "};
+    for (const auto s : test_strings) {
+        EXPECT_EQ(s.strip(' '), "hello");
+    }
+    EXPECT_EQ(str.strip("test"), " string");
+    EXPECT_EQ(str.strip("tes"), " string");
+    EXPECT_EQ(bs::string_view(" \thellow\n ").strip(" \t\n"), "hellow");
+    EXPECT_EQ(bs::string_view("aaaaa").strip("a"), "");
+
+    EXPECT_EQ(str.strip(), "test string");
+}
+
 }
