@@ -14,6 +14,8 @@ FetchContent_Declare(
 )
 
 set(BENCHMARK_ENABLE_TESTING FALSE)
+set(BENCHMARK_ENABLE_WERROR FALSE)
+set(BENCHMARK_FORCE_WERROR FALSE)
 FetchContent_MakeAvailable(googlebenchmark)
 
 target_link_libraries(betterstring-benchmark PRIVATE benchmark::benchmark benchmark::benchmark_main)
