@@ -19,7 +19,6 @@ jobs:
           - os: windows-2022
             preset: clang-make
             type: Release
-            options: -DRUN_HAVE_STD_REGEX=0 -DRUN_HAVE_POSIX_REGEX=0
 
         exclude:
           - os: ubuntu-latest
@@ -28,6 +27,11 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+
+    - name: Add Clang to $PATH
+      shell: bash
+      if: runner.os == 'Windows'
+      run: echo "PATH=$PATH:C:\msys64\mingw64\bin" >> $GITHUB_ENV
 
     - name: Configure CMake
       run: cmake -B build -S ${{ github.workspace }} --preset=${{ matrix.preset }} -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.options }}
