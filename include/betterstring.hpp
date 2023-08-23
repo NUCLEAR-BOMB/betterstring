@@ -301,6 +301,38 @@ public:
         return match_result == nullptr ? end : static_cast<size_type>(match_result - data());
     }
 
+    constexpr size_type rfind(const value_type ch) const noexcept {
+        return this->rfind(ch, size(), 0);
+    }
+    constexpr size_type rfind(const value_type ch, const size_type start, const size_type end = 0) const noexcept {
+        BS_VERIFY(start <= size(), "start is out of range");
+        if (start <= end) return end;
+        for (const auto* it = data() + start - 1;; --it) {
+            if (traits_type::eq(*it, ch)) {
+                return static_cast<size_type>(it - data());
+            }
+            if (it == data() + end) return end;
+        }
+        BS_ASSUME(false);
+    }
+
+    constexpr size_type rfind(const string_view str) const noexcept {
+        return this->rfind(str, size(), 0);
+    }
+    constexpr size_type rfind(const string_view str, const size_type start, const size_type end = 0) const noexcept {
+        BS_VERIFY(start <= size(), "start is out of range");
+        if (str.size() + end > start) return end;
+        if (str.empty()) return start;
+        for (auto* match_try = data() + (start - str.size());; --match_try) {
+            if (traits_type::eq(match_try[0], str[0])
+                && traits_type::compare(match_try, str.data(), str.size()) == 0) {
+                return static_cast<size_type>(match_try - data());
+            }
+            if (match_try == data() + end) return end;
+        }
+        BS_ASSUME(false);
+    }
+
     constexpr splited_string<traits_type> split(const string_view separator) const noexcept {
         return splited_string<traits_type>(*this, separator);
     }

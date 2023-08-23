@@ -182,6 +182,23 @@ TEST_F(string_view, find) {
     EXPECT_EQ(str.find('r', 5, 8), 7);
 }
 
+TEST_F(string_view, rfind) {
+    EXPECT_EQ(str.rfind(' '), 4);
+    EXPECT_EQ(str.rfind('t'), 6);
+    EXPECT_EQ(bs::string_view("hello").rfind('h'), 0);
+    EXPECT_EQ(str.rfind('g'), 10);
+    EXPECT_EQ(str.rfind('t', 3), 0);
+    EXPECT_EQ(str.rfind('t', 11, 7), 7);
+    EXPECT_EQ(str.rfind(' ', 7, 1), 4);
+
+    EXPECT_EQ(str.rfind("test"), 0);
+    EXPECT_EQ(str.rfind("string"), 5);
+    EXPECT_EQ(str.rfind(" "), 4);
+    EXPECT_EQ(str.rfind("test", 8), 0);
+    EXPECT_EQ(str.rfind("string", 10), 0);
+    EXPECT_EQ(str.rfind("st", str.size(), 4), 5);
+}
+
 TEST_F(string_view, split) {
     unsigned index = 0;
     for (auto sub : str.split(" ")) {
