@@ -1,6 +1,7 @@
 
 include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
 include("${PROJECT_SOURCE_DIR}/cmake/clang_tidy.cmake")
+include("${PROJECT_SOURCE_DIR}/cmake/sanitizers.cmake")
 
 add_executable(betterstring-test main.cpp string_view.cpp)
 target_add_warnings(betterstring-test)
@@ -20,6 +21,7 @@ set(INSTALL_GTEST FALSE CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 target_link_libraries(betterstring-test PRIVATE GTest::gtest)
+target_add_sanitizer(betterstring-test gtest)
 
 include(GoogleTest)
 gtest_discover_tests(betterstring-test)
