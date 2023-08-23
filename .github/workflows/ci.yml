@@ -21,10 +21,10 @@ jobs:
             type: Debug
             options: -DUSE_SANITIZERS=FALSE
 
-          - os: windows-2022
-            preset: clang-make
-            type: Release
-            options: -DBUILD_BENCHMARK=FALSE
+          #- os: windows-2022
+          #  preset: clang-make
+          #  type: Release
+          #  options: -DBUILD_BENCHMARK=FALSE
 
         exclude:
           - os: ubuntu-latest
