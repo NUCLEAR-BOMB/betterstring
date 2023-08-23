@@ -40,6 +40,14 @@
     #define BS_ASSUME(expression) ((void)0)
 #endif
 
+#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+    #define BS_CONST_FN [[gnu::const]]
+#elif defined(_MSC_VER)
+    #define BS_CONST_FN __declspec(noalias)
+#else
+    #define BS_CONST_FN
+#endif
+
 #ifndef NDEBUG
     #if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
         #define BS_VERIFY(expression, message) \
@@ -186,14 +194,14 @@ public:
         return data()[size() - 1];
     }
 
-    constexpr const_pointer data() const noexcept { return string_data; }
+    BS_CONST_FN constexpr const_pointer data() const noexcept { return string_data; }
 
-    constexpr size_type size() const noexcept { return string_size; }
-    constexpr size_type length() const noexcept { return size(); }
+    BS_CONST_FN constexpr size_type size() const noexcept { return string_size; }
+    BS_CONST_FN constexpr size_type length() const noexcept { return size(); }
 
-    constexpr size_type max_size() const noexcept { return static_cast<size_type>(-1); }
+    BS_CONST_FN constexpr size_type max_size() const noexcept { return static_cast<size_type>(-1); }
 
-    [[nodiscard]] constexpr bool empty() const noexcept { return size() == 0; }
+    [[nodiscard]] BS_CONST_FN constexpr bool empty() const noexcept { return size() == 0; }
 
     constexpr void remove_prefix(const size_type count) noexcept {
         BS_VERIFY(count <= size(), "the number of characters to be removed from the start of the string exceeds the length of the string");
