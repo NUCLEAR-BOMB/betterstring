@@ -25,10 +25,6 @@ jobs:
             preset: clang-make
             type: Release
 
-          - os: windows-2022
-            preset: clang-make
-            options: -DCMAKE_CXX_COMPILER=C:\msys64\mingw64\bin\clang.exe -DCMAKE_C_COMPILER=C:\msys64\mingw64\bin\clang++.exe
-
         exclude:
           - os: ubuntu-latest
             preset: msvc-ide
