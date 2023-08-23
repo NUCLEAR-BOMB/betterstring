@@ -1,5 +1,5 @@
 
-#include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
+include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
 
 add_executable(betterstring-benchmark string_view.cpp fixture.hpp)
 target_add_warnings(betterstring-benchmark)

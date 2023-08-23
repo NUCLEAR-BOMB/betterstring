@@ -1,9 +1,5 @@
 
-option(USE_SANITIZERS "" TRUE)
-
 include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
-include("${PROJECT_SOURCE_DIR}/cmake/clang_tidy.cmake")
-include("${PROJECT_SOURCE_DIR}/cmake/sanitizers.cmake")
 
 add_executable(betterstring-test main.cpp string_view.cpp)
 target_add_warnings(betterstring-test)
@@ -24,11 +20,15 @@ FetchContent_MakeAvailable(googletest)
 
 target_link_libraries(betterstring-test PRIVATE GTest::gtest)
 if (USE_SANITIZERS)
+    include("${PROJECT_SOURCE_DIR}/cmake/sanitizers.cmake")
     target_add_sanitizer(betterstring-test gtest)
 endif()
 
 include(GoogleTest)
 gtest_discover_tests(betterstring-test)
 
-set_target_properties(betterstring-test PROPERTIES EXPORT_COMPILE_COMMANDS TRUE)
-add_clang_tidy_target(tidy)
+if (USE_CLANG_TIDY)
+    include("${PROJECT_SOURCE_DIR}/cmake/clang_tidy.cmake")
+    set_target_properties(betterstring-test PROPERTIES EXPORT_COMPILE_COMMANDS TRUE)
+    add_clang_tidy_target(tidy)
+endif()
