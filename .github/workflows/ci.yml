@@ -89,7 +89,7 @@ jobs:
         cached: ${{ steps.cache-llvm.outputs.cache-hit }}
 
     - name: Configure CMake
-      run: cmake -B build --preset=${{ matrix.preset }} -DBUILD_TEST=FALSE -DBUILD_BENCHMARK=FALSE
+      run: cmake -B build --preset=${{ matrix.preset }} -DBUILD_BENCHMARK=FALSE
 
     - name: Analyze Code
       run: cmake --build build --target tidy
