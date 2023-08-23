@@ -24,6 +24,7 @@ jobs:
           - os: windows-2022
             preset: clang-make
             type: Release
+            options: -DBUILD_BENCHMARK=FALSE
 
         exclude:
           - os: ubuntu-latest
