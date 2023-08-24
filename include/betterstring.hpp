@@ -380,10 +380,7 @@ public:
         detail::char_bitmap<value_type> bitmap;
         if (!bitmap.mark(chs.data(), chs.data() + chs.size())) {
             return strip_impl([&](auto ch) {
-                for (const auto match_ch : chs) {
-                    if (ch != match_ch) return true;
-                }
-                return false;
+                return traits_type::find(chs.data(), chs.size(), ch);
             });
         }
 
