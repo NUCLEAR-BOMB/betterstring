@@ -162,6 +162,39 @@ constexpr void strcopy(T* const dest, const std::size_t dest_size, const T* cons
     bs::strcopy(dest, src, detail::min(dest_size, count));
 }
 
+template<class T>
+constexpr int strcomp(const T* const left, const T* const right, const std::size_t count) noexcept {
+#if BS_HAS_BUILTIN(__builtin_wmemcmp) || defined(_MSC_VER)
+    if constexpr (std::is_same_v<T, wchar_t>) {
+        return __builtin_wmemcmp(left, right, count);
+    } else
+#endif
+#if (BS_HAS_BUILTIN(__builtin_memcmp) || defined(_MSC_VER)) && false
+    return __builtin_memcmp(left, right, count * sizeof(T));
+#else
+    if (detail::is_constant_evaluated()) {
+        for (std::size_t i = 0; i < count; ++i) {
+            if (left[i] < right[i]) return -1;
+            if (left[i] > right[i]) return 1;
+        }
+        return 0;
+    } else {
+        if constexpr (std::is_same_v<T, wchar_t>) {
+            return std::wmemcmp(left, right, count);
+        } else {
+            return std::memcmp(left, right, count * sizeof(T));
+        }
+    }
+#endif
+}
+
+template<class T>
+constexpr int strcomp(const T* const left, const std::size_t left_len, const T* const right, const std::size_t right_len) noexcept {
+    if (left_len > right_len) return 1;
+    if (left_len < right_len) return -1;
+    return bs::strcomp(left, right, left_len);
+}
+
 namespace detail {
     template<class T, class = void>
     inline constexpr bool has_pointer_traits_to_address = false;
@@ -640,6 +673,16 @@ constexpr std::size_t strlen(const string_view<Traits> str) noexcept {
 template<class Traits>
 constexpr void strcopy(typename Traits::char_type* const dest, const string_view<Traits> src) noexcept {
     bs::strcopy(dest, src.data(), src.size());
+}
+
+template<class Traits>
+constexpr void strcopy(typename Traits::char_type* const dest, const std::size_t dest_size, const string_view<Traits> src) noexcept {
+    bs::strcopy(dest, dest_size, src.data(), src.size());
+}
+
+template<class Traits>
+constexpr int strcomp(const string_view<Traits> left, const string_view<Traits> right) noexcept {
+    return bs::strcomp(left.data(), left.size(), right.data(), right.size());
 }
 
 }

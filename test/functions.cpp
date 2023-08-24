@@ -17,14 +17,19 @@ TEST_F(functions, strlen) {
     EXPECT_EQ(bs::strlen(cwstr), 11);
     EXPECT_EQ(bs::strlen(str_view), 11);
 
+    EXPECT_EQ(bs::strlen("hello"), 5);
+
     static_assert(bs::strlen(cstr) == 11);
     static_assert(bs::strlen(cwstr) == 11);
     static_assert(bs::strlen(str_view) == 11);
 }
 
-TEST_F(functions, strcpy) {
+TEST_F(functions, strcopy) {
     std::string tmp_str(11, ' ');
     bs::strcopy(tmp_str.data(), cstr, tmp_str.size());
+    EXPECT_EQ(tmp_str, "test string");
+
+    bs::strcopy(tmp_str.data(), str_view);
     EXPECT_EQ(tmp_str, "test string");
 
     std::wstring tmp_wstr(11, L' ');
@@ -32,6 +37,15 @@ TEST_F(functions, strcpy) {
     EXPECT_EQ(tmp_wstr, L"test string");
 }
 
+TEST_F(functions, strcomp) {
+    EXPECT_EQ(bs::strcomp(cstr, cstr, bs::strlen(cstr)), 0);
+    EXPECT_EQ(bs::strcomp("test strind", cstr, 11), -1);
+
+    EXPECT_EQ(bs::strcomp(cstr, bs::strlen(cstr), "test strina", 11), 1);
+    EXPECT_EQ(bs::strcomp(str_view, str_view), 0);
+    EXPECT_EQ(bs::strcomp(str_view, str_view(0, -1)), 1);
+    EXPECT_EQ(bs::strcomp(str_view(1, {}), str_view), -1);
+}
 
 
 }
