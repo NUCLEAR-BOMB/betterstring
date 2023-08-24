@@ -1,5 +1,8 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <gtest/gtest.h>
 #include <betterstring.hpp>
+#include <string>
 
 namespace {
 
@@ -17,6 +20,16 @@ TEST_F(functions, strlen) {
     static_assert(bs::strlen(cstr) == 11);
     static_assert(bs::strlen(cwstr) == 11);
     static_assert(bs::strlen(str_view) == 11);
+}
+
+TEST_F(functions, strcpy) {
+    std::string tmp_str(11, ' ');
+    bs::strcpy(tmp_str.data(), cstr);
+    EXPECT_EQ(tmp_str, "test string");
+
+    std::wstring tmp_wstr(11, L' ');
+    bs::strcpy(tmp_wstr.data(), cwstr);
+    EXPECT_EQ(tmp_wstr, L"test string");
 }
 
 }

@@ -123,6 +123,36 @@ constexpr std::size_t strlen(const T* const str) noexcept {
     }
 }
 
+template<class T>
+constexpr T* strcpy(T* const dest, const T* src) noexcept {
+#if BS_HAS_BUILTIN(__builtin_strcpy)
+    if constexpr (std::is_same_v<T, char>) {
+        return __builtin_strcpy(dest, src);
+    } else
+#endif
+#if BS_HAS_BUILTIN(__builtin_wcscpy)
+    if constexpr (std::is_same_v<T, wchar_t>) {
+        return __builtin_wcscpy(dest, src);
+    } else
+#endif
+    {
+    if (!detail::is_constant_evaluated()) {
+        if constexpr (std::is_same_v<T, char>) {
+            return std::strcpy(dest, src);
+        } else if constexpr (std::is_same_v<T, wchar_t>) {
+            return std::wcscpy(dest, src);
+        }
+    }
+    for (auto* it = dest; *it != T(); ++it, ++src) {
+        *it = *src;
+    }
+    return dest;
+    }
+}
+
+template<class T>
+constexpr const T* strcpy(const T* const, const T* const) noexcept = delete;
+
 namespace detail {
     template<class T, class = void>
     inline constexpr bool has_pointer_traits_to_address = false;
