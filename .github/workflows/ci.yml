@@ -57,7 +57,7 @@ jobs:
       run: cmake --build build --config ${{ matrix.type }}
 
     - name: Test
-      run: ctest --test-dir build --output-on-failure --build-config ${{ matrix.type }}
+      run: ctest --test-dir build --output-on-failure --build-config ${{ matrix.type }} -j 2
 
   clang-tidy:
     runs-on: ${{ matrix.os }}
