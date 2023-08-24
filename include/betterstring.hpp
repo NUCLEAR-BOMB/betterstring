@@ -48,6 +48,14 @@
     #define BS_CONST_FN
 #endif
 
+#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+    #define BS_UNREACHABLE() __builtin_unreachable()
+#elif defined(_MSC_VER)
+    #define BS_UNREACHABLE() __assume(false)
+#else
+    #define BS_UNREACHABLE()
+#endif
+
 #ifndef NDEBUG
     #if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
         #define BS_VERIFY(expression, message) \
@@ -94,7 +102,7 @@ namespace detail {
     template<class T>
     class char_bitmap {
     public:
-        BS_CONST_FN constexpr bool mark(const T* first, const T* const last) noexcept {
+        constexpr bool mark(const T* first, const T* const last) noexcept {
             for (; first != last; ++first) {
                 const auto ch = static_cast<unsigned char>(*first);
                 if constexpr (sizeof(T) != 1) if (ch >= 256) return false;
@@ -102,7 +110,7 @@ namespace detail {
             }
             return true;
         }
-        BS_CONST_FN constexpr bool match(const T ch) const noexcept {
+        constexpr bool match(const T ch) const noexcept {
             return matches[static_cast<unsigned char>(ch)];
         }
 
@@ -307,7 +315,7 @@ public:
                 return static_cast<size_type>(match_try - data());
             }
         }
-        BS_ASSUME(false);
+        BS_UNREACHABLE();
     }
 
     constexpr size_type find(const value_type ch, const size_type start = 0) const noexcept {
@@ -332,7 +340,7 @@ public:
             }
             if (it == data() + end) return end;
         }
-        BS_ASSUME(false);
+        BS_UNREACHABLE();
     }
 
     constexpr size_type rfind(const string_view str) const noexcept {
@@ -348,7 +356,7 @@ public:
             }
             if (match_try == data() + end) return end;
         }
-        BS_ASSUME(false);
+        BS_UNREACHABLE();
     }
 
     constexpr splited_string<traits_type> split(const string_view separator) const noexcept {
@@ -377,7 +385,7 @@ private:
                 return string_view(it, data() + size());
             }
         }
-        BS_ASSUME(false);
+        BS_UNREACHABLE();
     }
     template<class Fn>
     constexpr string_view rstrip_impl(Fn match_fn) const noexcept {
@@ -386,7 +394,7 @@ private:
                 return string_view(data(), it + 1);
             }
         }
-        BS_ASSUME(false);
+        BS_UNREACHABLE();
     }
 
     template<class StripFn>
@@ -396,19 +404,26 @@ private:
     template<class StripFn>
     constexpr string_view strip_impl2(StripFn strip_fn, const string_view chs) const noexcept {
         detail::char_bitmap<value_type> bitmap;
+        bitmap.mark(chs.data(), chs.data() + chs.size());
         if (!bitmap.mark(chs.data(), chs.data() + chs.size())) {
             return strip_fn([&](auto ch) {
                 return traits_type::find(chs.data(), chs.size(), ch);
             });
         }
 
-        return strip_fn([&](auto ch) { return bitmap.match(ch); });
+        return strip_fn([&](auto ch) {
+            return bitmap.match(ch);
+        });
     }
     template<class StripFn>
     constexpr string_view strip_impl2(StripFn strip_fn) const noexcept {
         constexpr string_view strip_chs = "\t\n\v\f\r ";
         detail::char_bitmap<value_type> bitmap;
-        BS_VERIFY(bitmap.mark(strip_chs.data(), strip_chs.data() + strip_chs.size()), "");
+
+        if (!bitmap.mark(strip_chs.data(), strip_chs.data() + strip_chs.size())) {
+            BS_UNREACHABLE();
+        }
+
         return strip_fn([&](auto ch) { return bitmap.match(ch); });
     }
 
