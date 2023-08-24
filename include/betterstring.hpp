@@ -195,6 +195,11 @@ constexpr int strcomp(const T* const left, const std::size_t left_len, const T* 
     return bs::strcomp(left, right, left_len);
 }
 
+template<class T>
+[[nodiscard]] constexpr bool empty(const T* const str) noexcept {
+    return str[0] == '\0';
+}
+
 namespace detail {
     template<class T, class = void>
     inline constexpr bool has_pointer_traits_to_address = false;
@@ -683,6 +688,11 @@ constexpr void strcopy(typename Traits::char_type* const dest, const std::size_t
 template<class Traits>
 constexpr int strcomp(const string_view<Traits> left, const string_view<Traits> right) noexcept {
     return bs::strcomp(left.data(), left.size(), right.data(), right.size());
+}
+
+template<class Traits>
+[[nodiscard]] constexpr bool empty(const string_view<Traits> str) noexcept {
+    return str.empty();
 }
 
 }

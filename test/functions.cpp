@@ -47,5 +47,13 @@ TEST_F(functions, strcomp) {
     EXPECT_EQ(bs::strcomp(str_view(1, {}), str_view), -1);
 }
 
+TEST_F(functions, empty) {
+    EXPECT_TRUE(bs::empty(""));
+    EXPECT_FALSE(bs::empty("a"));
+    EXPECT_TRUE(bs::empty(bs::string_view("")));
+    EXPECT_FALSE(bs::empty(str_view));
+    EXPECT_FALSE(bs::empty(cwstr));
+}
+
 
 }
