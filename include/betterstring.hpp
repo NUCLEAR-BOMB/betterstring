@@ -365,7 +365,7 @@ private:
         const auto* right_it = data() + size() - 1;
         if (left_it != data() + size()) {
             for (;; --right_it) {
-                if (right_it == left_it || !match_fn(*right_it)) break;
+                if (!match_fn(*right_it) || right_it == left_it) break;
             }
         }
         return string_view(left_it, right_it + 1);
@@ -375,6 +375,15 @@ private:
         for (const auto* it = data();; ++it) {
             if (it == data() + size() || !match_fn(*it)) {
                 return string_view(it, data() + size());
+            }
+        }
+        BS_ASSUME(false);
+    }
+    template<class Fn>
+    constexpr string_view rstrip_impl(Fn match_fn) const noexcept {
+        for (const auto* it = data() + size() - 1;; --it) {
+            if (!match_fn(*it) || it == data()) {
+                return string_view(data(), it + 1);
             }
         }
         BS_ASSUME(false);
@@ -424,6 +433,16 @@ public:
     }
     constexpr string_view lstrip() const noexcept {
         return strip_impl2([&](auto f) { return lstrip_impl(f); });
+    }
+
+    constexpr string_view rstrip(const value_type strip_ch) const noexcept {
+        return strip_impl2([&](auto f) { return rstrip_impl(f); }, strip_ch);
+    }
+    constexpr string_view rstrip(const string_view chs) const noexcept {
+        return strip_impl2([&](auto f) { return rstrip_impl(f); }, chs);
+    }
+    constexpr string_view rstrip() const noexcept {
+        return strip_impl2([&](auto f) { return rstrip_impl(f); });
     }
 
     

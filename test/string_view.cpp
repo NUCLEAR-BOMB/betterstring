@@ -243,11 +243,12 @@ TEST_F(string_view, strip) {
 }
 
 TEST_F(string_view, lstrip) {
-    EXPECT_EQ(bs::string_view(" hello").lstrip(' '), "hello");
-    EXPECT_EQ(bs::string_view("  hello").lstrip(' '), "hello");
-    EXPECT_EQ(bs::string_view("hello ").lstrip(' '), "hello ");
-    EXPECT_EQ(bs::string_view("hello  ").lstrip(' '), "hello  ");
-    EXPECT_EQ(bs::string_view(" hello ").lstrip(' '), "hello ");
+    using strv = bs::string_view<>;
+    EXPECT_EQ(strv(" hello").lstrip(' '), "hello");
+    EXPECT_EQ(strv("  hello").lstrip(' '), "hello");
+    EXPECT_EQ(strv("hello ").lstrip(' '), "hello ");
+    EXPECT_EQ(strv("hello  ").lstrip(' '), "hello  ");
+    EXPECT_EQ(strv(" hello ").lstrip(' '), "hello ");
 
     EXPECT_EQ(str.lstrip("test"), " string");
     EXPECT_EQ(str.lstrip("tes"), " string");
@@ -256,7 +257,23 @@ TEST_F(string_view, lstrip) {
     EXPECT_EQ(str.lstrip("string"), "est string");
 
     EXPECT_EQ(str.lstrip(), "test string");
-    EXPECT_EQ(bs::string_view(" \t \ntest").lstrip(), "test");
+    EXPECT_EQ(strv(" \t \ntest").lstrip(), "test");
+}
+
+TEST_F(string_view, rstrip) {
+    using strv = bs::string_view<>;
+    EXPECT_EQ(strv("hello ").rstrip(' '), "hello");
+    EXPECT_EQ(strv("hello  ").rstrip(' '), "hello");
+    EXPECT_EQ(strv(" hello").rstrip(' '), " hello");
+    EXPECT_EQ(strv(" hello ").rstrip(' '), " hello");
+
+    EXPECT_EQ(str.rstrip("test"), "test string");
+    EXPECT_EQ(str.rstrip("string"), "test ");
+    EXPECT_EQ(str.rstrip("g"), "test strin");
+    EXPECT_EQ(str.rstrip("t"), "test string");
+
+    EXPECT_EQ(str.rstrip(), "test string");
+    EXPECT_EQ(strv(" test \n \v").rstrip(), " test");
 }
 
 }
