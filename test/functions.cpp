@@ -1,5 +1,3 @@
-#define _CRT_SECURE_NO_WARNINGS
-
 #include <gtest/gtest.h>
 #include <betterstring.hpp>
 #include <string>
