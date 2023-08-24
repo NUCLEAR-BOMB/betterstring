@@ -239,6 +239,11 @@ constexpr T* strfind(T(&str)[N], const detail::type_identity_t<T> ch) noexcept {
     return bs::strfind(str, N - 1, ch);
 }
 
+template<class T>
+constexpr T* cstr(T* const str) noexcept {
+    return str;
+}
+
 namespace detail {
     template<class T, class = void>
     inline constexpr bool has_pointer_traits_to_address = false;
@@ -733,6 +738,12 @@ template<class Traits>
     const string_view<Traits> str, const typename Traits::char_type ch
 ) noexcept -> const typename Traits::char_type* {
     return bs::strfind(str.data(), str.size(), ch);
+}
+
+template<class Traits>
+constexpr auto cstr(const string_view<Traits> str) noexcept
+    -> const typename Traits::char_type* {
+    return str.data();
 }
 
 }

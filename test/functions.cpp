@@ -62,5 +62,10 @@ TEST_F(functions, strfind) {
     static_assert(bs::strfind(cstr, 11, 'g') == &cstr[10]);
 }
 
+TEST_F(functions, cstr) {
+    EXPECT_EQ(bs::cstr(cstr), cstr);
+    EXPECT_EQ(bs::cstr(str_view), str_view.data());
+}
+
 
 }
