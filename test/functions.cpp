@@ -37,12 +37,12 @@ TEST_F(functions, strcopy) {
 
 TEST_F(functions, strcomp) {
     EXPECT_EQ(bs::strcomp(cstr, cstr, bs::strlen(cstr)), 0);
-    EXPECT_EQ(bs::strcomp("test strind", cstr, 11), -1);
+    EXPECT_LT(bs::strcomp("test strind", cstr, 11), 0);
 
-    EXPECT_EQ(bs::strcomp(cstr, bs::strlen(cstr), "test strina", 11), 1);
+    EXPECT_GT(bs::strcomp(cstr, bs::strlen(cstr), "test strina", 11), 0);
     EXPECT_EQ(bs::strcomp(str_view, str_view), 0);
-    EXPECT_EQ(bs::strcomp(str_view, str_view(0, -1)), 1);
-    EXPECT_EQ(bs::strcomp(str_view(1, {}), str_view), -1);
+    EXPECT_GT(bs::strcomp(str_view, str_view(0, -1)), 0);
+    EXPECT_LT(bs::strcomp(str_view(1, {}), str_view), 0);
 }
 
 TEST_F(functions, empty) {
