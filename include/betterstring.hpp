@@ -169,7 +169,7 @@ constexpr int strcomp(const T* const left, const T* const right, const std::size
         return __builtin_wmemcmp(left, right, count);
     } else
 #endif
-#if (BS_HAS_BUILTIN(__builtin_memcmp) || defined(_MSC_VER)) && false
+#if BS_HAS_BUILTIN(__builtin_memcmp) || defined(_MSC_VER)
     return __builtin_memcmp(left, right, count * sizeof(T));
 #else
     if (detail::is_constant_evaluated()) {
