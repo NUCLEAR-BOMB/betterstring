@@ -276,6 +276,25 @@ constexpr T* strfind(T* const haystack, const std::size_t count, const detail::t
 }
 
 template<class T>
+constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::type_identity_t<T>* const needle, const std::size_t needle_len) noexcept {
+    if (needle_len > count) return nullptr;
+    if (needle_len == 0) return haystack;
+
+    for (auto match_try = haystack + (count - needle_len);; --match_try) {
+        if (bs::strcomp(match_try, needle, needle_len) == 0) {
+            return match_try;
+        }
+        if (match_try == haystack) return nullptr;
+    }
+    BS_UNREACHABLE();
+}
+
+template<class T, std::size_t N>
+constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::type_identity_t<T>(&needle)[N]) noexcept {
+    return bs::strrfind(haystack, count, needle, N - 1);
+}
+
+template<class T>
 constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_identity_t<T> ch) noexcept {
     static_assert(is_character<T>);
     BS_VERIFY(str != nullptr, "str is null pointer");
@@ -809,6 +828,12 @@ template<class Traits>
 constexpr auto strfind(const string_view<Traits> haystack, const string_view<detail::type_identity_t<Traits>> needle) noexcept
     -> const typename Traits::char_type* {
     return bs::strfind(haystack.data(), haystack.size(), needle.data(), needle.size());
+}
+
+template<class Traits>
+constexpr auto strrfind(const string_view<Traits> haystack, const string_view<detail::type_identity_t<Traits>> needle) noexcept
+    -> const typename Traits::char_type* {
+    return bs::strrfind(haystack.data(), haystack.size(), needle.data(), needle.size());
 }
 
 }

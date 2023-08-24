@@ -84,6 +84,16 @@ TEST_F(functions, strfind_string) {
     EXPECT_EQ(bs::strfind(str_view, "str"), &str_view[5]);
 }
 
+TEST_F(functions, strrfind_string) {
+    EXPECT_EQ(bs::strrfind(cstr, 11, "t"), &cstr[6]);
+    EXPECT_EQ(bs::strrfind(cstr, 11, "test"), &cstr[0]);
+    EXPECT_EQ(bs::strrfind(cstr, 3, "helloworld"), nullptr);
+    EXPECT_EQ(bs::strrfind(cstr, 11, "string"), &cstr[5]);
+    EXPECT_EQ(bs::strrfind(cstr, 0, "123"), nullptr);
+    EXPECT_EQ(bs::strrfind(str_view, "st"), &str_view[5]);
+    EXPECT_EQ(bs::strrfind(str_view, " "), &str_view[4]);
+}
+
 
 
 }
