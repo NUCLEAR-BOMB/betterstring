@@ -53,5 +53,14 @@ TEST_F(functions, empty) {
     EXPECT_FALSE(bs::empty(cwstr));
 }
 
+TEST_F(functions, strfind) {
+    EXPECT_EQ(bs::strfind(cstr, 11, 't'), cstr);
+    EXPECT_EQ(bs::strfind("test", 'g'), nullptr);
+    EXPECT_EQ(bs::strfind(str_view, ' '), &str_view[4]);
+
+    static_assert(bs::strfind(str_view, 's') == &str_view[2]);
+    static_assert(bs::strfind(cstr, 11, 'g') == &cstr[10]);
+}
+
 
 }

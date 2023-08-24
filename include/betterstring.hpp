@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <memory>
 #include <cstring>
+#include <algorithm>
 
 #ifdef __has_builtin
     #define BS_HAS_BUILTIN(x) __has_builtin(x)
@@ -84,9 +85,10 @@ namespace detail {
     }
 
     template<class T>
-    constexpr const T& min(const T& x, const T& y) noexcept {
-        return y < x ? y : x;
-    }
+    struct type_identity { using type = T; };
+
+    template<class T>
+    using type_identity_t = typename type_identity<T>::type;
 
     template<class T>
     struct is_character_impl : std::false_type {};
@@ -159,7 +161,7 @@ constexpr void strcopy(const T* const, const T* const, const std::size_t) noexce
 
 template<class T>
 constexpr void strcopy(T* const dest, const std::size_t dest_size, const T* const src, const std::size_t count) noexcept {
-    bs::strcopy(dest, src, detail::min(dest_size, count));
+    bs::strcopy(dest, src, std::min(dest_size, count));
 }
 
 template<class T>
@@ -200,6 +202,42 @@ template<class T>
     return str[0] == '\0';
 }
 
+template<class T>
+[[nodiscard]] constexpr T* strfind(
+    T* const str, const std::size_t count, const detail::type_identity_t<T> ch
+) noexcept {
+#if BS_HAS_BUILTIN(__builtin_char_memchr) || defined(_MSC_VER)
+    if constexpr (std::is_same_v<T, char>) {
+        return const_cast<T*>(__builtin_char_memchr(str, static_cast<unsigned char>(ch), count));
+    } else
+#endif
+#if BS_HAS_BUILTIN(__builtin_wmemchr) || defined(_MSC_VER)
+    if constexpr (std::is_same_v<T, wchar_t>) {
+        return const_cast<T*>(__builtin_wmemchr(str, ch, count));
+    } else
+#endif
+    if (detail::is_constant_evaluated()) {
+        for (std::size_t i = 0; i < count; ++i) {
+            if (str[i] == ch) return str + i;
+        }
+        return nullptr;
+    } else {
+        if constexpr (std::is_same_v<T, char>) {
+            return std::memchr(str, static_cast<unsigned char>(ch), count);
+        } else if constexpr (std::is_same_v<T, wchar_t>) {
+            return std::wmemchr(str, ch, count);
+        } else {
+            T* const result = std::find(str, str + count, ch);
+            return result == str + count ? nullptr : result;
+        }
+    }
+}
+
+template<class T, std::size_t N>
+constexpr T* strfind(T(&str)[N], const detail::type_identity_t<T> ch) noexcept {
+    return bs::strfind(str, N - 1, ch);
+}
+
 namespace detail {
     template<class T, class = void>
     inline constexpr bool has_pointer_traits_to_address = false;
@@ -221,12 +259,6 @@ namespace detail {
             return to_address(fancy_ptr.operator->());
         }
     }
-
-    template<class T>
-    struct type_identity { using type = T; };
-
-    template<class T>
-    using type_identity_t = typename type_identity<T>::type;
 
     template<class T>
     class char_bitmap {
@@ -693,6 +725,13 @@ constexpr int strcomp(const string_view<Traits> left, const string_view<Traits> 
 template<class Traits>
 [[nodiscard]] constexpr bool empty(const string_view<Traits> str) noexcept {
     return str.empty();
+}
+
+template<class Traits>
+[[nodiscard]] constexpr auto strfind(
+    const string_view<Traits> str, const typename Traits::char_type ch
+) noexcept -> const typename Traits::char_type* {
+    return bs::strfind(str.data(), str.size(), ch);
 }
 
 }
