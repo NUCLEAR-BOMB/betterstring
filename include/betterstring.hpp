@@ -93,11 +93,16 @@ namespace detail {
     template<class T>
     struct is_character_impl : std::false_type {};
     template<> struct is_character_impl<char> : std::true_type {};
+    template<> struct is_character_impl<const char> : std::true_type {};
     template<> struct is_character_impl<wchar_t> : std::true_type {};
+    template<> struct is_character_impl<const wchar_t> : std::true_type {};
     template<> struct is_character_impl<char16_t> : std::true_type {};
+    template<> struct is_character_impl<const char16_t> : std::true_type {};
     template<> struct is_character_impl<char32_t> : std::true_type {};
+    template<> struct is_character_impl<const char32_t> : std::true_type {};
 #if __cplusplus >= 202002L
     template<> struct is_character_impl<char8_t> : std::true_type {};
+    template<> struct is_character_impl<const char8_t> : std::true_type {};
 #endif
 }
 
@@ -107,6 +112,7 @@ inline constexpr bool is_character = detail::is_character_impl<T>();
 template<class T>
 constexpr std::size_t strlen(const T* const str) noexcept {
     static_assert(is_character<T>);
+    BS_VERIFY(str != nullptr, "str is null pointer");
     if constexpr (std::is_same_v<T, char>) {
 #if BS_HAS_BUILTIN(__builtin_strlen) || defined(_MSC_VER)
         return __builtin_strlen(str);
@@ -134,6 +140,7 @@ constexpr std::size_t strlen(const T* const str) noexcept {
 template<class T>
 constexpr void strcopy(T* const dest, const T* const src, const std::size_t count) noexcept {
     static_assert(is_character<T>);
+    BS_VERIFY(dest != nullptr && src != nullptr, "dest or src is null pointer");
 #if BS_HAS_BUILTIN(__builtin_wmemcpy)
     if constexpr (std::is_same_v<T, wchar_t>) {
         __builtin_wmemcpy(dest, src, count);
@@ -166,6 +173,8 @@ constexpr void strcopy(T* const dest, const std::size_t dest_size, const T* cons
 
 template<class T>
 constexpr int strcomp(const T* const left, const T* const right, const std::size_t count) noexcept {
+    static_assert(is_character<T>);
+    BS_VERIFY(left != nullptr && right != nullptr, "left or right is null pointer");
 #if BS_HAS_BUILTIN(__builtin_wmemcmp) || defined(_MSC_VER)
     if constexpr (std::is_same_v<T, wchar_t>) {
         return __builtin_wmemcmp(left, right, count);
@@ -193,6 +202,7 @@ constexpr int strcomp(const T* const left, const T* const right, const std::size
 
 template<class T>
 constexpr int strcomp(const T* const left, const std::size_t left_len, const T* const right, const std::size_t right_len) noexcept {
+    BS_VERIFY(left != nullptr && right != nullptr, "left or right is null pointer");
     if (left_len > right_len) return 1;
     if (left_len < right_len) return -1;
     return bs::strcomp(left, right, left_len);
@@ -207,6 +217,7 @@ template<class T>
 [[nodiscard]] constexpr T* strfind(
     T* const str, const std::size_t count, const detail::type_identity_t<T> ch
 ) noexcept {
+    BS_VERIFY(str != nullptr, "str is null pointer");
 #if BS_HAS_BUILTIN(__builtin_char_memchr) || defined(_MSC_VER)
     if constexpr (std::is_same_v<T, char>) {
         return const_cast<T*>(__builtin_char_memchr(str, static_cast<unsigned char>(ch), count));
@@ -235,12 +246,28 @@ template<class T>
 }
 
 template<class T, std::size_t N>
-constexpr T* strfind(T(&str)[N], const detail::type_identity_t<T> ch) noexcept {
+constexpr T* strfind(T (&str)[N], const detail::type_identity_t<T> ch) noexcept {
     return bs::strfind(str, N - 1, ch);
 }
 
 template<class T>
+constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_identity_t<T> ch) noexcept {
+    static_assert(is_character<T>);
+    BS_VERIFY(str != nullptr, "str is null pointer");
+    for (std::size_t i = count; i > 0; --i) {
+        if (str[i - 1] == ch) return str + i - 1;
+    }
+    return nullptr;
+}
+
+template<class T, std::size_t N>
+constexpr T* strrfind(T (&str)[N], const detail::type_identity_t<T> ch) noexcept {
+    return bs::strrfind(str, N - 1, ch);
+}
+
+template<class T>
 constexpr T* cstr(T* const str) noexcept {
+    static_assert(is_character<T>);
     return str;
 }
 
@@ -738,6 +765,13 @@ template<class Traits>
     const string_view<Traits> str, const typename Traits::char_type ch
 ) noexcept -> const typename Traits::char_type* {
     return bs::strfind(str.data(), str.size(), ch);
+}
+
+template<class Traits>
+constexpr auto strrfind(
+    const string_view<Traits> str, const typename Traits::char_type ch
+) noexcept -> const typename Traits::char_type* {
+    return bs::strrfind(str.data(), str.size(), ch);
 }
 
 template<class Traits>
