@@ -81,10 +81,24 @@ namespace detail {
         return false;
 #endif
     }
+
+    template<class T>
+    struct is_character_impl : std::false_type {};
+    template<> struct is_character_impl<char> : std::true_type {};
+    template<> struct is_character_impl<wchar_t> : std::true_type {};
+    template<> struct is_character_impl<char16_t> : std::true_type {};
+    template<> struct is_character_impl<char32_t> : std::true_type {};
+#if __cplusplus >= 202002L
+    template<> struct is_character_impl<char8_t> : std::true_type {};
+#endif
 }
 
 template<class T>
+inline constexpr bool is_character = detail::is_character_impl<T>();
+
+template<class T>
 constexpr std::size_t strlen(const T* const str) noexcept {
+    static_assert(is_character<T>);
     if constexpr (std::is_same_v<T, char>) {
 #if BS_HAS_BUILTIN(__builtin_strlen) || defined(_MSC_VER)
         return __builtin_strlen(str);
@@ -108,7 +122,6 @@ constexpr std::size_t strlen(const T* const str) noexcept {
     return i;
     }
 }
-
 
 namespace detail {
     template<class T, class = void>
