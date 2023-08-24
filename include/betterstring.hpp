@@ -4,6 +4,7 @@
 #include <iterator>
 #include <type_traits>
 #include <memory>
+#include <cstring>
 
 #ifdef __has_builtin
     #define BS_HAS_BUILTIN(x) __has_builtin(x)
@@ -83,6 +84,11 @@ namespace detail {
     }
 
     template<class T>
+    constexpr const T& min(const T& x, const T& y) noexcept {
+        return y < x ? y : x;
+    }
+
+    template<class T>
     struct is_character_impl : std::false_type {};
     template<> struct is_character_impl<char> : std::true_type {};
     template<> struct is_character_impl<wchar_t> : std::true_type {};
@@ -124,34 +130,37 @@ constexpr std::size_t strlen(const T* const str) noexcept {
 }
 
 template<class T>
-constexpr T* strcpy(T* const dest, const T* src) noexcept {
-#if BS_HAS_BUILTIN(__builtin_strcpy)
-    if constexpr (std::is_same_v<T, char>) {
-        return __builtin_strcpy(dest, src);
-    } else
-#endif
-#if BS_HAS_BUILTIN(__builtin_wcscpy)
+constexpr void strcopy(T* const dest, const T* const src, const std::size_t count) noexcept {
+    static_assert(is_character<T>);
+#if BS_HAS_BUILTIN(__builtin_wmemcpy)
     if constexpr (std::is_same_v<T, wchar_t>) {
-        return __builtin_wcscpy(dest, src);
+        __builtin_wmemcpy(dest, src, count);
     } else
 #endif
-    {
-    if (!detail::is_constant_evaluated()) {
-        if constexpr (std::is_same_v<T, char>) {
-            return std::strcpy(dest, src);
-        } else if constexpr (std::is_same_v<T, wchar_t>) {
-            return std::wcscpy(dest, src);
+#if BS_HAS_BUILTIN(__builtin_memcpy)
+    __builtin_memcpy(dest, src, count * sizeof(T));
+#else
+    if (detail::is_constant_evaluated()) {
+        for (std::size_t i = 0; i < count; ++i) {
+            dest[i] = src[i];
+        }
+    } else {
+        if constexpr (std::is_same_v<T, wchar_t>) {
+            std::wmemcpy(dest, src, count);
+        } else {
+            std::memcpy(dest, src, count * sizeof(T));
         }
     }
-    for (auto* it = dest; *it != T(); ++it, ++src) {
-        *it = *src;
-    }
-    return dest;
-    }
+#endif
 }
 
 template<class T>
-constexpr const T* strcpy(const T* const, const T* const) noexcept = delete;
+constexpr void strcopy(const T* const, const T* const, const std::size_t) noexcept = delete;
+
+template<class T>
+constexpr void strcopy(T* const dest, const std::size_t dest_size, const T* const src, const std::size_t count) noexcept {
+    bs::strcopy(dest, src, detail::min(dest_size, count));
+}
 
 namespace detail {
     template<class T, class = void>
@@ -626,6 +635,11 @@ private:
 template<class Traits>
 constexpr std::size_t strlen(const string_view<Traits> str) noexcept {
     return str.size();
+}
+
+template<class Traits>
+constexpr void strcopy(typename Traits::char_type* const dest, const string_view<Traits> src) noexcept {
+    bs::strcopy(dest, src.data(), src.size());
 }
 
 }

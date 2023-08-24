@@ -24,12 +24,14 @@ TEST_F(functions, strlen) {
 
 TEST_F(functions, strcpy) {
     std::string tmp_str(11, ' ');
-    bs::strcpy(tmp_str.data(), cstr);
+    bs::strcopy(tmp_str.data(), cstr, tmp_str.size());
     EXPECT_EQ(tmp_str, "test string");
 
     std::wstring tmp_wstr(11, L' ');
-    bs::strcpy(tmp_wstr.data(), cwstr);
+    bs::strcopy(tmp_wstr.data(), cwstr, tmp_str.size());
     EXPECT_EQ(tmp_wstr, L"test string");
 }
+
+
 
 }
