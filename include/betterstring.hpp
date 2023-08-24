@@ -166,28 +166,29 @@ constexpr void strcopy(T* const dest, const std::size_t dest_size, const T* cons
 
 template<class T>
 constexpr int strcomp(const T* const left, const T* const right, const std::size_t count) noexcept {
-//#if BS_HAS_BUILTIN(__builtin_wmemcmp) || defined(_MSC_VER)
-//    if constexpr (std::is_same_v<T, wchar_t>) {
-//        return __builtin_wmemcmp(left, right, count);
-//    } else
-//#endif
-//#if BS_HAS_BUILTIN(__builtin_memcmp) || defined(_MSC_VER)
-//    return __builtin_memcmp(left, right, count * sizeof(T));
-//#else
-//    if (detail::is_constant_evaluated()) {
-        for (std::size_t i = 0; i < count; ++i) {
-            if (left[i] < right[i]) return -1;
-            if (left[i] > right[i]) return 1;
+#if BS_HAS_BUILTIN(__builtin_wmemcmp) || defined(_MSC_VER)
+    if constexpr (std::is_same_v<T, wchar_t>) {
+        return __builtin_wmemcmp(left, right, count);
+    } else
+#endif
+#if BS_HAS_BUILTIN(__builtin_memcmp) || defined(_MSC_VER)
+    return __builtin_memcmp(left, right, count * sizeof(T));
+#else
+    {
+    if (!detail::is_constant_evaluated()) {
+        if constexpr (std::is_same_v<T, wchar_t>) {
+            return std::wmemcmp(left, right, count);
+        } else if constexpr (std::is_same_v<T, char>) {
+            return std::memcmp(left, right, count);
         }
-        return 0;
-//    } else {
-//        if constexpr (std::is_same_v<T, wchar_t>) {
-//            return std::wmemcmp(left, right, count);
-//        } else {
-//            return std::memcmp(left, right, count * sizeof(T));
-//        }
-//    }
-//#endif
+    }
+    for (std::size_t i = 0; i < count; ++i) {
+        if (left[i] < right[i]) return -1;
+        if (left[i] > right[i]) return 1;
+    }
+    return 0;
+    }
+#endif
 }
 
 template<class T>
