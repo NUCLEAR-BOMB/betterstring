@@ -94,7 +94,7 @@ namespace detail {
     template<class T>
     class char_bitmap {
     public:
-        constexpr bool mark(const T* first, const T* const last) noexcept {
+        BS_CONST_FN constexpr bool mark(const T* first, const T* const last) noexcept {
             for (; first != last; ++first) {
                 const auto ch = static_cast<unsigned char>(*first);
                 if constexpr (sizeof(T) != 1) if (ch >= 256) return false;
@@ -102,7 +102,7 @@ namespace detail {
             }
             return true;
         }
-        constexpr bool match(const T ch) const noexcept {
+        BS_CONST_FN constexpr bool match(const T ch) const noexcept {
             return matches[static_cast<unsigned char>(ch)];
         }
 
