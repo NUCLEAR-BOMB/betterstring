@@ -38,15 +38,17 @@ BENCHMARK_REGISTER_F(string_fixture, strrchr)->Apply(printable_chars_args);
 
 
 static void strings_args(benchmark::internal::Benchmark* const b) {
-    for (std::int64_t i = 1; i <= 20; ++i) {
-        b->Arg(i * 5653206889367LL);
+    std::int64_t num = 4611686018427387847LL;
+    for (std::size_t i = 0; i < 20; ++i) {
+        num = num * 1103515245 + 12345;
+        b->Arg(num);
     }
 }
 
 // MSVC:
-// mean 141.5 ns
-// max 	851 ns
-// min  139 ns
+// mean 151.5 ns
+// max 	846 ns
+// min  145 ns
 BENCHMARK_DEFINE_F(string_fixture, strfind_string)(benchmark::State& state) {
     const int64_t integer = state.range();
     const char* const needle = reinterpret_cast<const char*>(&integer);
@@ -61,9 +63,9 @@ BENCHMARK_DEFINE_F(string_fixture, strfind_string)(benchmark::State& state) {
 BENCHMARK_REGISTER_F(string_fixture, strfind_string)->Apply(strings_args);
 
 // MSVC:
-// mean 506.5 ns
-// max  600 ns
-// min  501 ns
+// mean 511 ns
+// max  584 ns
+// min  500 ns
 BENCHMARK_DEFINE_F(string_fixture, strstr)(benchmark::State& state) {
     const int64_t integer[2] = { state.range(), '\0' };
     const char* const needle = reinterpret_cast<const char*>(&integer);
