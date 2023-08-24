@@ -6,6 +6,7 @@
 #include <memory>
 #include <cstring>
 #include <algorithm>
+#include <cwchar>
 
 #ifdef __has_builtin
     #define BS_HAS_BUILTIN(x) __has_builtin(x)
@@ -313,6 +314,33 @@ template<class T>
 constexpr T* cstr(T* const str) noexcept {
     static_assert(is_character<T>);
     return str;
+}
+
+template<class T>
+constexpr void strfill(T* const dest, const std::size_t count, const detail::type_identity_t<T> ch) noexcept {
+#if BS_HAS_BUILTIN(__builtin_wmemset)
+    if constexpr (std::is_same_v<T, wchar_t>) {
+        __builtin_wmemset(dest, ch, count);
+    } else
+#endif
+#if BS_HAS_BUILTIN(__builtin_memset)
+    if constexpr (std::is_same_v<T, char>) {
+        __builtin_memset(dest, static_cast<unsigned char>(ch), count);
+    } else
+#endif
+    if (detail::is_constant_evaluated()) {
+        for (std::size_t i = 0; i < count; ++i) {
+            dest[i] = ch;
+        }
+    } else {
+        if constexpr (std::is_same_v<T, char>) {
+            std::memset(dest, static_cast<unsigned char>(ch), count);
+        } else if constexpr (std::is_same_v<T, wchar_t>) {
+            std::wmemset(dest, ch, count);
+        } else {
+            std::fill_n(dest, count, ch);
+        }
+    }
 }
 
 namespace detail {

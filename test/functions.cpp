@@ -94,6 +94,20 @@ TEST_F(functions, strrfind_string) {
     EXPECT_EQ(bs::strrfind(str_view, " "), &str_view[4]);
 }
 
+TEST_F(functions, strfill) {
+    auto* const new_str = new char[10]{};
+    bs::strfill(new_str, 9, 'a');
+    EXPECT_STREQ(new_str, "aaaaaaaaa");
+    delete[] new_str;
+
+    char stack_str[20]{};
+    bs::strfill(stack_str, 10, 'b');
+    EXPECT_STREQ(stack_str, "bbbbbbbbbb");
+
+    std::string string(20, 'j');
+    bs::strfill(string.data(), string.size(), 'k');
+    EXPECT_EQ(string, std::string_view("kkkkkkkkkkkkkkkkkkkk"));
+}
 
 
 }
