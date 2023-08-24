@@ -72,6 +72,45 @@ namespace bs
 {
 
 namespace detail {
+    constexpr bool is_constant_evaluated() noexcept {
+#ifdef __cpp_lib_is_constant_evaluated
+        return std::is_constant_evaluated();
+#elif defined(__clang__) || defined(__GNUC__) || defined(__GNUG__) || defined(_MSC_VER)
+        return __builtin_is_constant_evaluated();
+#else
+        return false;
+#endif
+    }
+}
+
+template<class T>
+constexpr std::size_t strlen(const T* const str) noexcept {
+    if constexpr (std::is_same_v<T, char>) {
+#if BS_HAS_BUILTIN(__builtin_strlen) || defined(_MSC_VER)
+        return __builtin_strlen(str);
+#endif
+    } else
+#if BS_HAS_BUILTIN(__builtin_wcslen) || defined(_MSC_VER)
+    if constexpr (std::is_same_v<T, wchar_t>) {
+        return __builtin_wcslen(str);
+    } else
+#endif
+    {
+    if (!detail::is_constant_evaluated()) {
+        if constexpr (std::is_same_v<T, char>) {
+            return std::strlen(str);
+        } else if constexpr (std::is_same_v<T, wchar_t>) {
+            return std::wcslen(str);
+        }
+    }
+    std::size_t i = 0;
+    while (str[i] != T()) ++i;
+    return i;
+    }
+}
+
+
+namespace detail {
     template<class T, class = void>
     inline constexpr bool has_pointer_traits_to_address = false;
     template<class T>
@@ -540,5 +579,10 @@ private:
     const string_type string;
     const separator_type separator;
 };
+
+template<class Traits>
+constexpr std::size_t strlen(const string_view<Traits> str) noexcept {
+    return str.size();
+}
 
 }
