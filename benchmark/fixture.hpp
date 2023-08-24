@@ -8,4 +8,7 @@ public:
     const char* get_string() const noexcept {
         return BIG_STRING;
     }
+    std::size_t get_string_size() const noexcept {
+        return 10000;
+    }
 };

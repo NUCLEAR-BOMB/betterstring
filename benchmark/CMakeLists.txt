@@ -1,8 +1,12 @@
 
 include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
 
-add_executable(betterstring-benchmark string_view.cpp fixture.hpp)
+add_executable(betterstring-benchmark string_view.cpp functions.cpp fixture.hpp)
 target_add_warnings(betterstring-benchmark)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(betterstring-benchmark PRIVATE /wd4266)
+endif()
+
 target_link_libraries(betterstring-benchmark PRIVATE betterstring)
 
 include(FetchContent)
