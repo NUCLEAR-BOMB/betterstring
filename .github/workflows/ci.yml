@@ -46,10 +46,6 @@ jobs:
         version: "16"
         cached: ${{ steps.cache-llvm.outputs.cache-hit }}
 
-    - name: Install Linux Clang
-      if: runner.os == 'Linux'
-      run: sudo apt-get update && sudo apt-get install llvm clang
-
     - name: Configure CMake
       run: cmake -B build --preset=${{ matrix.preset }} -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.options }}
 
