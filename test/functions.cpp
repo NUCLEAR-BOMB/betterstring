@@ -53,7 +53,7 @@ TEST_F(functions, empty) {
     EXPECT_FALSE(bs::empty(cwstr));
 }
 
-TEST_F(functions, strfind) {
+TEST_F(functions, strfind_char) {
     EXPECT_EQ(bs::strfind(cstr, 11, 't'), cstr);
     EXPECT_EQ(bs::strfind("test", 'g'), nullptr);
     EXPECT_EQ(bs::strfind(str_view, ' '), &str_view[4]);
@@ -73,6 +73,15 @@ TEST_F(functions, strrfind) {
 TEST_F(functions, cstr) {
     EXPECT_EQ(bs::cstr(cstr), cstr);
     EXPECT_EQ(bs::cstr(str_view), str_view.data());
+}
+
+TEST_F(functions, strfind_string) {
+    EXPECT_EQ(bs::strfind(cstr, 11, "string"), &cstr[5]);
+    EXPECT_EQ(bs::strfind(cstr, 3, "hello"), nullptr);
+    EXPECT_EQ(bs::strfind(cstr, 11, nullptr, 0), cstr);
+    EXPECT_EQ(bs::strfind(cstr, 11, "test"), &cstr[0]);
+    EXPECT_EQ(bs::strfind(cstr, 0, "abc"), nullptr);
+    EXPECT_EQ(bs::strfind(str_view, "str"), &str_view[5]);
 }
 
 
