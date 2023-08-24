@@ -360,36 +360,73 @@ private:
     constexpr string_view strip_impl(Fn match_fn) const noexcept {
         const auto* left_it = data();
         for (;; ++left_it) {
-            if (!match_fn(*left_it) || left_it == data() + size()) break;
+            if (left_it == data() + size() || !match_fn(*left_it)) break;
         }
         const auto* right_it = data() + size() - 1;
         if (left_it != data() + size()) {
             for (;; --right_it) {
-                if (!match_fn(*right_it) || right_it == left_it) break;
+                if (right_it == left_it || !match_fn(*right_it)) break;
             }
         }
         return string_view(left_it, right_it + 1);
     }
-public:
-
-    constexpr string_view strip(const value_type strip_ch) const noexcept {
-        return strip_impl([&](auto ch) { return ch == strip_ch; });
+    template<class Fn>
+    constexpr string_view lstrip_impl(Fn match_fn) const noexcept {
+        for (const auto* it = data();; ++it) {
+            if (it == data() + size() || !match_fn(*it)) {
+                return string_view(it, data() + size());
+            }
+        }
+        BS_ASSUME(false);
     }
 
-    constexpr string_view strip(const string_view chs) const noexcept {
+    template<class StripFn>
+    constexpr string_view strip_impl2(StripFn strip_fn, const value_type strip_ch) const noexcept {
+        return strip_fn([&](auto ch) { return ch == strip_ch; });
+    }
+    template<class StripFn>
+    constexpr string_view strip_impl2(StripFn strip_fn, const string_view chs) const noexcept {
         detail::char_bitmap<value_type> bitmap;
         if (!bitmap.mark(chs.data(), chs.data() + chs.size())) {
-            return strip_impl([&](auto ch) {
+            return strip_fn([&](auto ch) {
                 return traits_type::find(chs.data(), chs.size(), ch);
             });
         }
 
-        return strip_impl([&](auto ch) { return bitmap.match(ch); });
+        return strip_fn([&](auto ch) { return bitmap.match(ch); });
+    }
+    template<class StripFn>
+    constexpr string_view strip_impl2(StripFn strip_fn) const noexcept {
+        constexpr string_view strip_chs = "\t\n\v\f\r ";
+        detail::char_bitmap<value_type> bitmap;
+        BS_VERIFY(bitmap.mark(strip_chs.data(), strip_chs.data() + strip_chs.size()), "");
+        return strip_fn([&](auto ch) { return bitmap.match(ch); });
     }
 
-    constexpr string_view strip() const noexcept {
-        return this->strip("\t\n\v\f\r ");
+
+public:
+
+    constexpr string_view strip(const value_type strip_ch) const noexcept {
+        return strip_impl2([&](auto f) { return strip_impl(f); }, strip_ch);
     }
+    constexpr string_view strip(const string_view chs) const noexcept {
+        return strip_impl2([&](auto f) { return strip_impl(f); }, chs);
+    }
+    constexpr string_view strip() const noexcept {
+        return strip_impl2([&](auto f) { return strip_impl(f); });
+    }
+
+    constexpr string_view lstrip(const value_type strip_ch) const noexcept {
+        return strip_impl2([&](auto f) { return lstrip_impl(f); }, strip_ch);
+    }
+    constexpr string_view lstrip(const string_view chs) const noexcept {
+        return strip_impl2([&](auto f) { return lstrip_impl(f); }, chs);
+    }
+    constexpr string_view lstrip() const noexcept {
+        return strip_impl2([&](auto f) { return lstrip_impl(f); });
+    }
+
+    
 
 private:
     static constexpr int trait_cmp(const string_view l, const string_view r) noexcept {

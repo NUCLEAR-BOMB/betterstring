@@ -233,12 +233,30 @@ TEST_F(string_view, strip) {
     for (const auto s : test_strings) {
         EXPECT_EQ(s.strip(' '), "hello");
     }
+
     EXPECT_EQ(str.strip("test"), " string");
     EXPECT_EQ(str.strip("tes"), " string");
     EXPECT_EQ(bs::string_view(" \thellow\n ").strip(" \t\n"), "hellow");
     EXPECT_EQ(bs::string_view("aaaaa").strip("a"), "");
 
     EXPECT_EQ(str.strip(), "test string");
+}
+
+TEST_F(string_view, lstrip) {
+    EXPECT_EQ(bs::string_view(" hello").lstrip(' '), "hello");
+    EXPECT_EQ(bs::string_view("  hello").lstrip(' '), "hello");
+    EXPECT_EQ(bs::string_view("hello ").lstrip(' '), "hello ");
+    EXPECT_EQ(bs::string_view("hello  ").lstrip(' '), "hello  ");
+    EXPECT_EQ(bs::string_view(" hello ").lstrip(' '), "hello ");
+
+    EXPECT_EQ(str.lstrip("test"), " string");
+    EXPECT_EQ(str.lstrip("tes"), " string");
+    EXPECT_EQ(str.lstrip("t"), "est string");
+    EXPECT_EQ(str.lstrip("g"), "test string");
+    EXPECT_EQ(str.lstrip("string"), "est string");
+
+    EXPECT_EQ(str.lstrip(), "test string");
+    EXPECT_EQ(bs::string_view(" \t \ntest").lstrip(), "test");
 }
 
 }
