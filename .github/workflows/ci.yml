@@ -9,7 +9,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, windows-2022 ]
-        type: [ Debug ]
+        type: [ Debug, Release ]
         preset: [ msvc-ide, clang-make ]
         include:
           - os: windows-2022
@@ -20,10 +20,6 @@ jobs:
             preset: clang-make
             type: Debug
             options: -DUSE_SANITIZERS=FALSE
-
-          - os: windows-2022
-            preset: clang-make
-            type: Release
 
         exclude:
           - os: ubuntu-latest
