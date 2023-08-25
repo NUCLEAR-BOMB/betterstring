@@ -344,6 +344,53 @@ constexpr void strfill(T* const dest, const std::size_t count, const detail::typ
 }
 
 namespace detail {
+    template<class T>
+    constexpr bool is_ranges_overlap(const T* const first, const T* const second, const std::size_t count) noexcept {
+        for (const auto* it = first; it != first + count; ++it) {
+            if (it == second) return true;
+        }
+        return false;
+    }
+}
+
+template<class T>
+constexpr void strmove(T* const dest, const T* const src, const std::size_t count) noexcept {
+#if BS_HAS_BUILTIN(__builtin_wmemmove) || defined(_MSC_VER)
+    if constexpr (std::is_same_v<T, wchar_t>) {
+        __builtin_wmemmove(dest, src, count);
+    } else
+#endif
+#if BS_HAS_BUILTIN(__builtin_memmove) && defined(_MSC_VER)
+    __builtin_memmove(dest, src, count * sizeof(T));
+#else
+    if (detail::is_constant_evaluated()) {
+        if (detail::is_ranges_overlap(dest, src, count)) {
+            for (std::size_t i = count; i > 0;) {
+                --i;
+                dest[i] = src[i];
+            }
+        } else {
+            bs::strcopy(dest, src, count);
+        }
+    } else {
+        if constexpr (std::is_same_v<T, wchar_t>) {
+            std::wmemmove(dest, src, count);
+        } else {
+            std::memmove(dest, src, count * sizeof(T));
+        }
+    }
+#endif
+}
+template<class T>
+constexpr void strmove(const T* const, const T* const, const std::size_t) noexcept = delete;
+
+template<class T>
+constexpr void strmove(T* const dest, const std::size_t dest_size, const T* const src, const std::size_t count) noexcept {
+    return bs::strmove(dest, src, std::min(dest_size, count));
+}
+
+
+namespace detail {
     template<class T, class = void>
     inline constexpr bool has_pointer_traits_to_address = false;
     template<class T>
@@ -386,9 +433,36 @@ namespace detail {
 }
 
 template<class T>
-struct char_traits : std::char_traits<T> {
+class char_traits : public std::char_traits<T> {
+    using base = std::char_traits<T>;
+public:
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
+    using char_type = typename base::char_type;
+    using int_type = typename base::int_type;
+    using off_type = typename base::off_type;
+    using pos_type = typename base::pos_type;
+    using state_type = typename base::state_type;
+
+    static constexpr void assign(char_type& dest, const char_type& src) noexcept {
+        dest = src;
+    }
+    static constexpr void assign(char_type* const dest, const size_type count, const char_type ch) noexcept {
+        bs::strfill(dest, count, ch);
+    }
+    static constexpr bool eq(const char_type l, const char_type r) noexcept {
+        return l == r;
+    }
+    static constexpr bool lt(const char_type l, const char_type r) noexcept {
+        return l < r;
+    }
+#if 0
+    static constexpr char_type* move(char_type* const dest, const char_type* const src, const std::size_t count) noexcept {
+        
+    }
+#endif
+    
+
 };
 
 template<class>
@@ -813,11 +887,6 @@ constexpr std::size_t strlen(const string_view<Traits> str) noexcept {
 }
 
 template<class Traits>
-constexpr void strcopy(typename Traits::char_type* const dest, const string_view<Traits> src) noexcept {
-    bs::strcopy(dest, src.data(), src.size());
-}
-
-template<class Traits>
 constexpr void strcopy(typename Traits::char_type* const dest, const std::size_t dest_size, const string_view<Traits> src) noexcept {
     bs::strcopy(dest, dest_size, src.data(), src.size());
 }
@@ -862,6 +931,11 @@ template<class Traits>
 constexpr auto strrfind(const string_view<Traits> haystack, const string_view<detail::type_identity_t<Traits>> needle) noexcept
     -> const typename Traits::char_type* {
     return bs::strrfind(haystack.data(), haystack.size(), needle.data(), needle.size());
+}
+
+template<class Traits>
+constexpr auto strmove(typename Traits::char_type* const dest, const std::size_t dest_size, const string_view<Traits> src) noexcept {
+    bs::strmove(dest, dest_size, src.data(), src.size());
 }
 
 }

@@ -27,7 +27,7 @@ TEST_F(functions, strcopy) {
     bs::strcopy(tmp_str.data(), cstr, tmp_str.size());
     EXPECT_EQ(tmp_str, "test string");
 
-    bs::strcopy(tmp_str.data(), str_view);
+    bs::strcopy(tmp_str.data(), tmp_str.size(), str_view);
     EXPECT_EQ(tmp_str, "test string");
 
     std::wstring tmp_wstr(11, L' ');
@@ -108,6 +108,5 @@ TEST_F(functions, strfill) {
     bs::strfill(string.data(), string.size(), 'k');
     EXPECT_EQ(string, std::string_view("kkkkkkkkkkkkkkkkkkkk"));
 }
-
 
 }
