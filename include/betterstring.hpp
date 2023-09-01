@@ -496,6 +496,9 @@ public:
     static constexpr const char_type* findstr(const char_type* const str, const std::size_t count, const char_type* const substr, const std::size_t substr_len) noexcept {
         return bs::strfind(str, count, substr, substr_len);
     }
+    static constexpr const char_type* rfind(const char_type* const str, const std::size_t count, const char_type ch) noexcept {
+        return bs::strrfind(str, count, ch);
+    }
 
     using base::to_char_type;
     using base::to_int_type;
@@ -704,13 +707,9 @@ public:
     constexpr size_type rfind(const value_type ch, const size_type start, const size_type end = 0) const noexcept {
         BS_VERIFY(start <= size(), "start is out of range");
         if (start <= end) return end;
-        for (const auto* it = data() + start - 1;; --it) {
-            if (traits_type::eq(*it, ch)) {
-                return static_cast<size_type>(it - data());
-            }
-            if (it == data() + end) return end;
-        }
-        BS_UNREACHABLE();
+
+        const auto match_result = traits_type::rfind(data() + end, start - end, ch);
+        return match_result == nullptr ? end : static_cast<size_type>(match_result - data());
     }
 
     constexpr size_type rfind(const string_view str) const noexcept {
