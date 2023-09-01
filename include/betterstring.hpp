@@ -172,6 +172,11 @@ constexpr void strcopy(T* const dest, const std::size_t dest_size, const T* cons
     bs::strcopy(dest, src, std::min(dest_size, count));
 }
 
+template<class T, std::size_t N>
+constexpr void strcopy(T* const dest, const std::size_t dest_size, const T(&src)[N]) noexcept {
+    bs::strcopy(dest, src, std::min(dest_size, N - 1));
+}
+
 template<class T>
 constexpr int strcomp(const T* const left, const T* const right, const std::size_t count) noexcept {
     static_assert(is_character<T>);

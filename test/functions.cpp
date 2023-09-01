@@ -30,6 +30,9 @@ TEST_F(functions, strcopy) {
     bs::strcopy(tmp_str.data(), tmp_str.size(), str_view);
     EXPECT_EQ(tmp_str, "test string");
 
+    bs::strcopy(tmp_str.data(), tmp_str.size(), "str");
+    EXPECT_EQ(tmp_str, "strt string");
+
     std::wstring tmp_wstr(11, L' ');
     bs::strcopy(tmp_wstr.data(), cwstr, tmp_str.size());
     EXPECT_EQ(tmp_wstr, L"test string");
