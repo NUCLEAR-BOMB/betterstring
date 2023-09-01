@@ -219,6 +219,19 @@ constexpr int strcomp(const T* const left, const std::size_t left_len, const T(&
 }
 
 template<class T>
+constexpr bool streq(const T* const left, const T* const right, const std::size_t count) noexcept {
+    return bs::strcomp(left, right, count) == 0;
+}
+template<class T>
+constexpr bool streq(const T* const left, const std::size_t left_len, const T* const right, const std::size_t right_len) noexcept {
+    return bs::strcomp(left, left_len, right, right_len) == 0;
+}
+template<class T, std::size_t N>
+constexpr bool streq(const T* const left, const std::size_t left_len, const T(&right)[N]) noexcept {
+    return bs::strcomp(left, left_len, right, N - 1) == 0;
+}
+
+template<class T>
 [[nodiscard]] constexpr bool empty(const T* const str) noexcept {
     return str[0] == '\0';
 }
