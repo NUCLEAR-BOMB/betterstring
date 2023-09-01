@@ -241,13 +241,14 @@ template<class T>
     T* const str, const std::size_t count, const detail::type_identity_t<T> ch
 ) noexcept {
     BS_VERIFY(str != nullptr, "str is null pointer");
+    using pure_T = std::remove_cv_t<T>;
 #if BS_HAS_BUILTIN(__builtin_char_memchr) || defined(_MSC_VER)
-    if constexpr (std::is_same_v<T, char>) {
+    if constexpr (std::is_same_v<pure_T, char>) {
         return const_cast<T*>(__builtin_char_memchr(str, static_cast<unsigned char>(ch), count));
     } else
 #endif
 #if BS_HAS_BUILTIN(__builtin_wmemchr) || defined(_MSC_VER)
-    if constexpr (std::is_same_v<T, wchar_t>) {
+    if constexpr (std::is_same_v<pure_T, wchar_t>) {
         return const_cast<T*>(__builtin_wmemchr(str, ch, count));
     } else
 #endif
@@ -257,9 +258,9 @@ template<class T>
         }
         return nullptr;
     } else {
-        if constexpr (std::is_same_v<T, char>) {
+        if constexpr (std::is_same_v<pure_T, char>) {
             return std::memchr(str, static_cast<unsigned char>(ch), count);
-        } else if constexpr (std::is_same_v<T, wchar_t>) {
+        } else if constexpr (std::is_same_v<pure_T, wchar_t>) {
             return std::wmemchr(str, ch, count);
         } else {
             T* const result = std::find(str, str + count, ch);
