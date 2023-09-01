@@ -685,8 +685,15 @@ public:
         if (str.size() + start > end) return end;
         if (str.empty()) return start;
 
-        const auto match_result = traits_type::findstr(data() + start, end, str.data(), str.size());
-        return match_result == nullptr ? end : static_cast<size_type>(match_result - data());
+        const auto match_max = data() + (end - str.size()) + 1;
+        for (auto* match_try = data() + start;; ++match_try) {
+            match_try = traits_type::find(match_try, static_cast<size_type>(match_max - match_try), str[0]);
+            if (match_try == nullptr) return end;
+            if (traits_type::compare(match_try, str.data(), str.size()) == 0) {
+                return static_cast<size_type>(match_try - data());
+            }
+        }
+        BS_UNREACHABLE();
     }
 
     constexpr size_type find(const value_type ch, const size_type start = 0) const noexcept {
