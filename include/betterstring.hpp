@@ -340,12 +340,12 @@ constexpr T* cstr(T* const str) noexcept {
 
 template<class T>
 constexpr void strfill(T* const dest, const std::size_t count, const detail::type_identity_t<T> ch) noexcept {
-#if BS_HAS_BUILTIN(__builtin_wmemset)
+#if BS_HAS_BUILTIN(__builtin_wmemset) && (defined(__GNUC__) || defined(__GNUG__))
     if constexpr (std::is_same_v<T, wchar_t>) {
         __builtin_wmemset(dest, ch, count);
     } else
 #endif
-#if BS_HAS_BUILTIN(__builtin_memset)
+#if BS_HAS_BUILTIN(__builtin_memset) && (defined(__GNUC__) || defined(__GNUG__))
     if constexpr (std::is_same_v<T, char>) {
         __builtin_memset(dest, static_cast<unsigned char>(ch), count);
     } else

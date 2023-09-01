@@ -5,5 +5,6 @@
   #pragma diag_suppress 2896
 #endif
 
-#define CONSTEXPR_EXPECT(lambda) \
-    EXPECT_EQ((::std::integral_constant<int, ([] lambda ())>::value), 0)
+#define CONSTEXPR_EXPECT(name, lambda) \
+    constexpr int name##_constexpr_result = [] lambda (); \
+    EXPECT_EQ( name##_constexpr_result , 0)
