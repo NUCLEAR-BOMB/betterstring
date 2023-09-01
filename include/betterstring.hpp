@@ -365,16 +365,6 @@ constexpr void strfill(T* const dest, const std::size_t count, const detail::typ
     }
 }
 
-namespace detail {
-    template<class T>
-    constexpr bool is_ranges_overlap(const T* const first, const T* const second, const std::size_t count) noexcept {
-        for (const auto* it = first; it != first + count; ++it) {
-            if (it == second) return true;
-        }
-        return false;
-    }
-}
-
 template<class T>
 constexpr void strmove(T* const dest, const T* const src, const std::size_t count) noexcept {
 #if BS_HAS_BUILTIN(__builtin_wmemmove) || defined(_MSC_VER)
@@ -386,13 +376,20 @@ constexpr void strmove(T* const dest, const T* const src, const std::size_t coun
     __builtin_memmove(dest, src, count * sizeof(T));
 #else
     if (detail::is_constant_evaluated()) {
-        if (detail::is_ranges_overlap(dest, src, count)) {
-            for (std::size_t i = count; i > 0;) {
-                --i;
-                dest[i] = src[i];
+        bool loop_forward = true;
+        for (const T* it = src; it != src + count; ++it) {
+            if (it == dest) {
+                loop_forward = false;
+                break;
             }
-        } else {
+        }
+
+        if (loop_forward) {
             bs::strcopy(dest, src, count);
+        } else {
+            for (std::size_t i = count; i > 0; --i) {
+                dest[i - 1] = src[i - 1];
+            }
         }
     } else {
         if constexpr (std::is_same_v<T, wchar_t>) {
