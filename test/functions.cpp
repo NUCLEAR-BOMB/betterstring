@@ -118,6 +118,10 @@ TEST_F(functions, strfind_string) {
     EXPECT_EQ(bs::strfind(cstr, 11, "test"), &cstr[0]);
     EXPECT_EQ(bs::strfind(cstr, 0, "abc"), nullptr);
     EXPECT_EQ(bs::strfind(str_view, "str"), &str_view[5]);
+    EXPECT_EQ(bs::strfind(str_view, "test string"), &str_view[0]);
+    EXPECT_EQ(bs::strfind(str_view, "test string   "), nullptr);
+    EXPECT_EQ(bs::strfind(str_view, ""), &str_view[0]);
+    EXPECT_EQ(bs::strfind(str_view, " "), &str_view[4]);
 
     CONSTEXPR_EXPECT(strfind_string, {
         if (!(bs::strfind(cstr, 11, "test") == &cstr[0])) return 1;

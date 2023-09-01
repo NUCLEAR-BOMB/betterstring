@@ -162,6 +162,8 @@ TEST_F(string_view, operators) {
 TEST_F(string_view, find) {
     EXPECT_EQ(str.find("test"), 0);
     EXPECT_EQ(str.find("string"), 5);
+    EXPECT_EQ(str.find("test string"), 0);
+    EXPECT_EQ(str.find(" "), 4);
     EXPECT_EQ(str.find("e"), 1);
     EXPECT_EQ(str.find("s", 3), 5);
 
