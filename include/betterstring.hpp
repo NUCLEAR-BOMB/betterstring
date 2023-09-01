@@ -452,7 +452,7 @@ namespace detail {
 }
 
 template<class T>
-class char_traits : public std::char_traits<T> {
+class char_traits : private std::char_traits<T> {
     using base = std::char_traits<T>;
 public:
     using size_type = std::size_t;
@@ -475,13 +475,28 @@ public:
     static constexpr bool lt(const char_type l, const char_type r) noexcept {
         return l < r;
     }
-#if 0
     static constexpr char_type* move(char_type* const dest, const char_type* const src, const std::size_t count) noexcept {
-        
+        bs::strmove(dest, src, count);
+        return dest;
     }
-#endif
-    
-
+    static constexpr char_type* copy(char_type* const dest, const char_type* const src, const std::size_t count) noexcept {
+        bs::strcopy(dest, src, count);
+        return dest;
+    }
+    static constexpr int compare(const char_type* const left, const char_type* const right, const std::size_t count) noexcept {
+        return bs::strcomp(left, right, count);
+    }
+    static constexpr std::size_t length(const char_type* const str) noexcept {
+        return bs::strlen(str);
+    }
+    static constexpr const char_type* find(const char_type* const str, const std::size_t count, const char_type& ch) noexcept {
+        return bs::strfind(str, count, ch);
+    }
+    using base::to_char_type;
+    using base::to_int_type;
+    using base::eq_int_type;
+    using base::eof;
+    using base::not_eof;
 };
 
 template<class>
@@ -953,7 +968,7 @@ constexpr auto strrfind(const string_view<Traits> haystack, const string_view<de
 }
 
 template<class Traits>
-constexpr auto strmove(typename Traits::char_type* const dest, const std::size_t dest_size, const string_view<Traits> src) noexcept {
+constexpr void strmove(typename Traits::char_type* const dest, const std::size_t dest_size, const string_view<Traits> src) noexcept {
     bs::strmove(dest, dest_size, src.data(), src.size());
 }
 
