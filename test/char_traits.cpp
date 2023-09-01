@@ -23,7 +23,7 @@ TEST_F(char_traits, std_string) {
 TEST_F(char_traits, std_string_view) {
     using string_view = std::basic_string_view<char, bs::char_traits<char>>;
 
-    string_view str("test test test");
+    const string_view str("test test test");
     EXPECT_EQ(str[0], 't');
     EXPECT_EQ(str[13], 't');
     EXPECT_EQ(str.size(), 14);
