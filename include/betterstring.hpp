@@ -213,6 +213,10 @@ constexpr int strcomp(const T* const left, const std::size_t left_len, const T* 
     if (left_len < right_len) return -1;
     return bs::strcomp(left, right, left_len);
 }
+template<class T, std::size_t N>
+constexpr int strcomp(const T* const left, const std::size_t left_len, const T(&right)[N]) noexcept {
+    return bs::strcomp(left, left_len, right, N - 1);
+}
 
 template<class T>
 [[nodiscard]] constexpr bool empty(const T* const str) noexcept {

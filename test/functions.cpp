@@ -112,4 +112,18 @@ TEST_F(functions, strfill) {
     EXPECT_EQ(string, std::string_view("kkkkkkkkkkkkkkkkkkkk"));
 }
 
+TEST_F(functions, strmove) {
+    auto* const str1 = new char[10]{};
+    bs::strcopy(str1, 10, "hello");
+    EXPECT_STREQ(str1, "hello");
+    bs::strmove(str1 + 5, str1, 5);
+    EXPECT_EQ(bs::strcomp(str1, 10, "hellohello"), 0);
+    bs::strmove(str1 + 1, str1, 5);
+    EXPECT_EQ(bs::strcomp(str1, 10, "hhelloello"), 0);
+    bs::strmove(str1, str1 + 2, 5);
+    EXPECT_EQ(bs::strcomp(str1, 10, "elloeoello"), 0);
+
+    delete[] str1;
+}
+
 }
