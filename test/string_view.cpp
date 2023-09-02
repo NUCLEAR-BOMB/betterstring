@@ -320,4 +320,11 @@ TEST_F(string_view, count) {
     EXPECT_EQ(str.count(""), str.size() + 1);
 }
 
+TEST_F(string_view, literals) {
+    using namespace bs::literals;
+    EXPECT_EQ(str, "test string"_sv);
+    EXPECT_EQ("123"_sv.count('1'), 1);
+    EXPECT_EQ(" "_sv.find('j'), 1);
+}
+
 }

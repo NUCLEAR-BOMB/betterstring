@@ -992,4 +992,10 @@ constexpr void strmove(typename Traits::char_type* const dest, const std::size_t
     bs::strmove(dest, dest_size, src.data(), src.size());
 }
 
+inline namespace literals {
+    constexpr bs::string_view<> operator ""_sv(const char* const str, const std::size_t len) noexcept {
+        return bs::string_view(str, len);
+    }
+}
+
 }
