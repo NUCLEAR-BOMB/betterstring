@@ -747,6 +747,8 @@ public:
         BS_UNREACHABLE();
     }
     constexpr size_type count(const string_view str) const noexcept {
+        if (str.empty()) return this->size() + 1;
+
         size_type result = 0;
         const auto match_end = data() + size();
         for (auto match_try = data();; ++match_try) {
