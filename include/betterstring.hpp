@@ -141,7 +141,8 @@ constexpr std::size_t strlen(const T* const str) noexcept {
 template<class T>
 constexpr void strcopy(T* const dest, const T* const src, const std::size_t count) noexcept {
     static_assert(is_character<T>);
-    BS_VERIFY(dest != nullptr && src != nullptr, "dest or src is null pointer");
+    BS_VERIFY(dest != nullptr, "dest or src is null pointer");
+    BS_VERIFY(src != nullptr, "src is null pointer");
 #if BS_HAS_BUILTIN(__builtin_wmemcpy)
     if constexpr (std::is_same_v<T, wchar_t>) {
         __builtin_wmemcpy(dest, src, count);
@@ -339,6 +340,7 @@ constexpr T* cstr(T* const str) noexcept {
 
 template<class T>
 constexpr void strfill(T* const dest, const std::size_t count, const detail::type_identity_t<T> ch) noexcept {
+    BS_VERIFY(dest != nullptr, "dest is null pointer");
 #if BS_HAS_BUILTIN(__builtin_wmemset) && (defined(__GNUC__) || defined(__GNUG__)) && !defined(__clang__)
     if constexpr (std::is_same_v<T, wchar_t>) {
         __builtin_wmemset(dest, ch, count);
@@ -366,6 +368,8 @@ constexpr void strfill(T* const dest, const std::size_t count, const detail::typ
 
 template<class T>
 constexpr void strmove(T* const dest, const T* const src, const std::size_t count) noexcept {
+    BS_VERIFY(dest != nullptr, "dest is null pointer");
+    BS_VERIFY(src != nullptr, "src is null pointer");
 #if BS_HAS_BUILTIN(__builtin_wmemmove) || defined(_MSC_VER)
     if constexpr (std::is_same_v<T, wchar_t>) {
         __builtin_wmemmove(dest, src, count);
@@ -434,6 +438,7 @@ namespace detail {
     class char_bitmap {
     public:
         constexpr bool mark(const T* first, const T* const last) noexcept {
+            BS_VERIFY(first != nullptr && last != nullptr, "first or last is null pointer")
             for (; first != last; ++first) {
                 const auto ch = static_cast<unsigned char>(*first);
                 if constexpr (sizeof(T) != 1) if (ch >= 256) return false;
