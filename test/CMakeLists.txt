@@ -6,6 +6,7 @@ add_executable(betterstring-test
 )
 target_add_warnings(betterstring-test)
 target_link_libraries(betterstring-test PRIVATE betterstring)
+target_compile_definitions(betterstring-test PRIVATE BS_DONT_INCLUDE_STRING)
 
 include(FetchContent)
 FetchContent_Declare(

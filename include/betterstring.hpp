@@ -1,12 +1,15 @@
 #pragma once
 
-#include <string>
 #include <iterator>
 #include <type_traits>
 #include <memory>
 #include <cstring>
 #include <algorithm>
 #include <cwchar>
+
+#ifndef BS_DONT_INCLUDE_STRING
+#include <string>
+#endif
 
 #ifdef __has_builtin
     #define BS_HAS_BUILTIN(x) __has_builtin(x)
@@ -456,16 +459,30 @@ namespace detail {
 }
 
 template<class T>
-class char_traits : private std::char_traits<T> {
-    using base = std::char_traits<T>;
+class char_traits
+#ifndef BS_DONT_INCLUDE_STRING
+    : private std::char_traits<T>
+#endif
+{
 public:
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
-    using char_type = typename base::char_type;
+    using char_type = T;
+#ifndef BS_DONT_INCLUDE_STRING
+private:
+    using base = std::char_traits<T>;
+public:
     using int_type = typename base::int_type;
     using off_type = typename base::off_type;
     using pos_type = typename base::pos_type;
     using state_type = typename base::state_type;
+
+    using base::to_char_type;
+    using base::to_int_type;
+    using base::eq_int_type;
+    using base::eof;
+    using base::not_eof;
+#endif
 
     static constexpr void assign(char_type& dest, const char_type& src) noexcept {
         dest = src;
@@ -505,12 +522,6 @@ public:
     static constexpr const char_type* rfindstr(const char_type* const str, const std::size_t count, const char_type* const substr, const std::size_t substr_len) noexcept {
         return bs::strrfind(str, count, substr, substr_len);
     }
-
-    using base::to_char_type;
-    using base::to_int_type;
-    using base::eq_int_type;
-    using base::eof;
-    using base::not_eof;
 };
 
 template<class>
