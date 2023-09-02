@@ -325,6 +325,10 @@ TEST_F(string_view, literals) {
     EXPECT_EQ(str, "test string"_sv);
     EXPECT_EQ("123"_sv.count('1'), 1);
     EXPECT_EQ(" "_sv.find('j'), 1);
+
+    (void)L"1"_sv;
+    (void)u"2"_sv;
+    (void)U"3"_sv;
 }
 
 }

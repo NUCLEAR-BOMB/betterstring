@@ -1024,6 +1024,20 @@ inline namespace literals {
     constexpr bs::string_view<> operator ""_sv(const char* const str, const std::size_t len) noexcept {
         return bs::string_view(str, len);
     }
+    constexpr bs::wstring_view operator ""_sv(const wchar_t* const str, const std::size_t len) noexcept {
+        return bs::wstring_view(str, len);
+    }
+    constexpr bs::u16string_view operator ""_sv(const char16_t* const str, const std::size_t len) noexcept {
+        return bs::u16string_view(str, len);
+    }
+    constexpr bs::u32string_view operator ""_sv(const char32_t* const str, const std::size_t len) noexcept {
+        return bs::u32string_view(str, len);
+    }
+#if __cplusplus >= 202002L
+    constexpr bs::u8string_view operator ""_sv(const char8_t* const str, const std::size_t len) noexcept {
+        return bs::u8string_view(str, len);
+    }
+#endif
 }
 
 }
