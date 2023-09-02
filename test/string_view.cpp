@@ -1,12 +1,13 @@
 #include <gtest/gtest.h>
 
 #include <betterstring.hpp>
+#include "tools.hpp"
 
 namespace {
 
 struct string_view : ::testing::Test {
     bs::string_view<> str{"test string"};
-    const bs::string_view<> const_str{"test string"};
+    static constexpr bs::string_view<> const_str{"test string"};
 };
 
 TEST_F(string_view, constructor) {
@@ -276,6 +277,32 @@ TEST_F(string_view, rstrip) {
 
     EXPECT_EQ(str.rstrip(), "test string");
     EXPECT_EQ(strv(" test \n \v").rstrip(), " test");
+}
+
+TEST_F(string_view, contains) {
+    EXPECT_TRUE(str.contains('t'));
+    EXPECT_TRUE(str.contains(' '));
+    EXPECT_TRUE(str.contains('g'));
+    EXPECT_FALSE(str.contains('h'));
+    EXPECT_FALSE(str.contains('o'));
+
+    EXPECT_TRUE(str.contains("t"));
+    EXPECT_TRUE(str.contains("g"));
+    EXPECT_TRUE(str.contains("test"));
+    EXPECT_TRUE(str.contains("test string"));
+    EXPECT_TRUE(str.contains("string"));
+    EXPECT_FALSE(str.contains("123"));
+    EXPECT_FALSE(str.contains("tes?"));
+    EXPECT_FALSE(str.contains("l"));
+
+    CONSTEXPR_EXPECT(contains, {
+        if (!const_str.contains('t')) return 1;
+        if (!const_str.contains('g')) return 2;
+        if (!const_str.contains("test")) return 3;
+        if (const_str.contains("1233332222222222222")) return 4;
+        if (!const_str.contains("")) return 5;
+        return 0;
+    });
 }
 
 }

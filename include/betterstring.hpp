@@ -725,6 +725,13 @@ public:
         return match_result == nullptr ? end : static_cast<size_type>(match_result - data());
     }
 
+    constexpr bool contains(const value_type ch) const noexcept {
+        return traits_type::find(data(), size(), ch) != nullptr;
+    }
+    constexpr bool contains(const string_view str) const noexcept {
+        return traits_type::findstr(data(), size(), str.data(), str.size()) != nullptr;
+    }
+
     constexpr splited_string<traits_type> split(const string_view separator) const noexcept {
         return splited_string<traits_type>(*this, separator);
     }
@@ -825,8 +832,6 @@ public:
     constexpr string_view rstrip() const noexcept {
         return strip_impl2([&](auto f) { return rstrip_impl(f); });
     }
-
-    
 
 private:
     static constexpr int trait_cmp(const string_view l, const string_view r) noexcept {
