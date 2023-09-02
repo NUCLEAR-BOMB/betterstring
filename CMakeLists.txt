@@ -5,6 +5,7 @@ project(betterstring LANGUAGES CXX)
 option(BUILD_TEST "" TRUE)
 option(USE_CLANG_TIDY "" TRUE)
 option(BUILD_BENCHMARK "" TRUE)
+option(BUILD_FUZZING "" TRUE)
 option(USE_SANITIZERS "" TRUE)
 
 add_library(betterstring INTERFACE "include/betterstring.hpp")
@@ -22,4 +23,8 @@ endif()
 
 if (BUILD_BENCHMARK)
     add_subdirectory(benchmark)
+endif()
+
+if (BUILD_FUZZING)
+    add_subdirectory(fuzzing)
 endif()
