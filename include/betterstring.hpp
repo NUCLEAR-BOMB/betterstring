@@ -438,7 +438,7 @@ namespace detail {
     class char_bitmap {
     public:
         constexpr bool mark(const T* first, const T* const last) noexcept {
-            BS_VERIFY(first != nullptr && last != nullptr, "first or last is null pointer")
+            BS_VERIFY(first != nullptr && last != nullptr, "first or last is null pointer");
             for (; first != last; ++first) {
                 const auto ch = static_cast<unsigned char>(*first);
                 if constexpr (sizeof(T) != 1) if (ch >= 256) return false;
