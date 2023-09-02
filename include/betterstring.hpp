@@ -746,6 +746,16 @@ public:
         }
         BS_UNREACHABLE();
     }
+    constexpr size_type count(const string_view str) const noexcept {
+        size_type result = 0;
+        const auto match_end = data() + size();
+        for (auto match_try = data();; ++match_try) {
+            match_try = traits_type::findstr(match_try, static_cast<size_type>(match_end - match_try), str.data(), str.size());
+            if (match_try == nullptr) return result;
+            ++result;
+        }
+        BS_UNREACHABLE();
+    }
 
 private:
     template<class Fn>
