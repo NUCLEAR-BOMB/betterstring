@@ -891,6 +891,12 @@ public:
     friend constexpr bool operator<=(const string_view l, const string_view r) noexcept {
         return trait_cmp(l, r) <= 0; }
 
+#ifndef BS_DONT_INCLUDE_STRING
+    constexpr operator std::basic_string_view<value_type, traits_type>() const noexcept {
+        return std::basic_string_view<value_type, traits_type>(data(), size());
+    }
+#endif
+
 private:
     const_pointer string_data;
     size_type string_size;
