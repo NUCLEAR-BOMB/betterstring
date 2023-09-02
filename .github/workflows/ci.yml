@@ -50,13 +50,13 @@ jobs:
       run: cmake -B build --preset=${{ matrix.preset }} -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.options }}
 
     - name: Build
-      run: cmake --build build --config ${{ matrix.type }}
+      run: cmake --build build/ --config ${{ matrix.type }}
 
     - name: Test
-      run: ctest --test-dir build --output-on-failure --build-config ${{ matrix.type }} -j 2
+      run: ctest --test-dir build/ --output-on-failure --build-config ${{ matrix.type }} -j 2
 
     - name: Fuzzing
-      run: cmake --build . --target fuzzing
+      run: cmake --build build/ --target fuzzing
 
   clang-tidy:
     runs-on: ${{ matrix.os }}
