@@ -305,4 +305,11 @@ TEST_F(string_view, contains) {
     });
 }
 
+TEST_F(string_view, count) {
+    EXPECT_EQ(str.count('t'), 3);
+    EXPECT_EQ(str.count(' '), 1);
+    EXPECT_EQ(str.count('j'), 0);
+    EXPECT_EQ(str.count('g'), 1);
+}
+
 }
