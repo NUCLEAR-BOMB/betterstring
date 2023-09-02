@@ -240,7 +240,6 @@ template<class T>
 [[nodiscard]] constexpr T* strfind(
     T* const str, const std::size_t count, const detail::type_identity_t<T> ch
 ) noexcept {
-    BS_VERIFY(str != nullptr, "str is null pointer");
     using pure_T = std::remove_cv_t<T>;
 #if BS_HAS_BUILTIN(__builtin_char_memchr) || defined(_MSC_VER)
     if constexpr (std::is_same_v<pure_T, char>) {
@@ -321,7 +320,6 @@ constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::
 template<class T>
 constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_identity_t<T> ch) noexcept {
     static_assert(is_character<T>);
-    BS_VERIFY(str != nullptr, "str is null pointer");
     for (std::size_t i = count; i > 0; --i) {
         if (str[i - 1] == ch) return str + i - 1;
     }
@@ -881,6 +879,14 @@ private:
     const_pointer string_data;
     size_type string_size;
 };
+
+using wstring_view = string_view<char_traits<wchar_t>>;
+using u16string_view = string_view<char_traits<char16_t>>;
+using u32string_view = string_view<char_traits<char32_t>>;
+
+#if __cplusplus >= 202002L
+using u8string_view = string_view<char_traits<char8_t>>;
+#endif
 
 template<class Traits>
 struct splited_string {
