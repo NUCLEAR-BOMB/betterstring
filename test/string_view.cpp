@@ -356,4 +356,28 @@ TEST_F(string_view, find_first_of) {
     EXPECT_EQ(str.find_first_of("l"), str.size());
 }
 
+TEST_F(string_view, strip_first) {
+    EXPECT_EQ(str.strip_first('t'), "est string");
+    EXPECT_EQ(str.strip_first('e'), "test string");
+    EXPECT_EQ(str.strip_first('g'), "test string");
+
+    EXPECT_EQ(str.strip_first("t"), "est string");
+    EXPECT_EQ(str.strip_first("test"), " string");
+    EXPECT_EQ(str.strip_first("string"), "test string");
+    EXPECT_EQ(str.strip_first("test string"), "");
+    EXPECT_EQ(str.strip_first("test string!"), "test string");
+}
+
+TEST_F(string_view, strip_last) {
+    EXPECT_EQ(str.strip_last('g'), "test strin");
+    EXPECT_EQ(str.strip_last('t'), "test string");
+    EXPECT_EQ(str.strip_last('n'), "test string");
+
+    EXPECT_EQ(str.strip_last("g"), "test strin");
+    EXPECT_EQ(str.strip_last("string"), "test ");
+    EXPECT_EQ(str.strip_last("test string"), "");
+    EXPECT_EQ(str.strip_last("!test string"), "test string");
+    EXPECT_EQ(str.strip_last("test"), "test string");
+}
+
 }

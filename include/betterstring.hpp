@@ -941,6 +941,24 @@ public:
         return strip_impl2([&](auto f) { return rstrip_impl(f); });
     }
 
+    constexpr string_view strip_first(const value_type ch) const noexcept {
+        if (!starts_with(ch)) return *this;
+        return string_view(data() + 1, size() - 1);
+    }
+    constexpr string_view strip_first(const string_view str) const noexcept {
+        if (!starts_with(str)) return *this;
+        return string_view(data() + str.size(), size() - str.size());
+    }
+
+    constexpr string_view strip_last(const value_type ch) const noexcept {
+        if (!ends_with(ch)) return *this;
+        return string_view(data(), size() - 1);
+    }
+    constexpr string_view strip_last(const string_view str) const noexcept {
+        if (!ends_with(str)) return *this;
+        return string_view(data(), size() - str.size());
+    }
+
 private:
     static constexpr int trait_cmp(const string_view l, const string_view r) noexcept {
         if (l.size() > r.size()) return 1;
