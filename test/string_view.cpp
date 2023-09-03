@@ -331,4 +331,16 @@ TEST_F(string_view, literals) {
     (void)U"3"_sv;
 }
 
+TEST_F(string_view, find_first_of) {
+    EXPECT_EQ(str.find_first_of('t'), 0);
+    EXPECT_EQ(str.find_first_of('g'), 10);
+    EXPECT_EQ(str.find_first_of(' '), 4);
+
+    EXPECT_EQ(str.find_first_of("t"), 0);
+    EXPECT_EQ(str.find_first_of("g"), 10);
+    EXPECT_EQ(str.find_first_of("s ing"), 2);
+    EXPECT_EQ(str.find_first_of(""), str.size());
+    EXPECT_EQ(str.find_first_of("l"), str.size());
+}
+
 }

@@ -739,6 +739,26 @@ public:
         return match_result == nullptr ? end : static_cast<size_type>(match_result - data());
     }
 
+    constexpr size_type find_first_of(const value_type ch) const noexcept {
+        return this->find(ch);
+    }
+    constexpr size_type find_first_of(const string_view str) const noexcept {
+        detail::char_bitmap<value_type> bitmap;
+        if (!bitmap.mark(str.data(), str.data() + str.size())) {
+            const auto match_end = data() + size();
+            for (auto match_try = data(); match_try < match_end; ++match_try) {
+                if (traits_type::find(str.data(), str.size(), *match_try)) {
+                    return static_cast<size_type>(match_try - data());
+                }
+            }
+            return size();
+        }
+        for (size_type i = 0; i < size(); ++i) {
+            if (bitmap.match(data()[i])) return i;
+        }
+        return size();
+    }
+
     constexpr bool contains(const value_type ch) const noexcept {
         return traits_type::find(data(), size(), ch) != nullptr;
     }
