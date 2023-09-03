@@ -352,8 +352,20 @@ TEST_F(string_view, find_first_of) {
     EXPECT_EQ(str.find_first_of("t"), 0);
     EXPECT_EQ(str.find_first_of("g"), 10);
     EXPECT_EQ(str.find_first_of("s ing"), 2);
-    EXPECT_EQ(str.find_first_of(""), str.size());
-    EXPECT_EQ(str.find_first_of("l"), str.size());
+    EXPECT_FALSE(str.find_first_of("").found());
+    EXPECT_FALSE(str.find_first_of("l").found());
+}
+
+TEST_F(string_view, find_last_of) {
+    EXPECT_EQ(str.find_last_of('t').index(), 6);
+    EXPECT_EQ(str.find_last_of('g').index(), 10);
+    EXPECT_EQ(str.find_last_of(' ').index(), 4);
+
+    EXPECT_EQ(str.find_last_of("t"), 6);
+    EXPECT_EQ(str.find_last_of("g"), 10);
+    EXPECT_EQ(str.find_last_of("hei"), 8);
+    EXPECT_EQ(str.find_last_of("").ptr_or_null(), nullptr);
+    EXPECT_EQ(str.find_last_of("a").ptr_or_end(), str.data() + str.size());
 }
 
 TEST_F(string_view, strip_first) {

@@ -796,9 +796,8 @@ public:
     constexpr this_find_result find_first_of(const string_view str) const noexcept {
         detail::char_bitmap<value_type> bitmap;
         if (!bitmap.mark(str.data(), str.data() + str.size())) {
-            const auto match_end = data() + size();
-            for (auto match_try = data(); match_try < match_end; ++match_try) {
-                if (traits_type::find(str.data(), str.size(), *match_try)) {
+            for (auto match_try = data(); match_try != data() + size(); ++match_try) {
+                if (traits_type::find(str.data(), str.size(), *match_try) != nullptr) {
                     return make_find_r(match_try);
                 }
             }
@@ -806,6 +805,25 @@ public:
         }
         for (size_type i = 0; i < size(); ++i) {
             if (bitmap.match(data()[i])) return make_find_r(i);
+        }
+        return make_find_r(nullptr);
+    }
+
+    constexpr this_find_result find_last_of(const value_type ch) const noexcept {
+        return this->rfind(ch);
+    }
+    constexpr this_find_result find_last_of(const string_view str) const noexcept {
+        detail::char_bitmap<value_type> bitmap;
+        if (!bitmap.mark(str.data(), str.data() + str.size())) {
+            for (auto match_try = data() + size() - 1; match_try != data() - 1; --match_try) {
+                if (traits_type::find(str.data(), str.size(), *match_try) != nullptr) {
+                    return make_find_r(match_try);
+                }
+            }
+            return make_find_r(nullptr);
+        }
+        for (size_type i = size(); i != 0; --i) {
+            if (bitmap.match(data()[i - 1])) return make_find_r(i - 1);
         }
         return make_find_r(nullptr);
     }
