@@ -181,8 +181,21 @@ TEST_F(string_view, find) {
     EXPECT_EQ(str.find('g'), 10);
     EXPECT_EQ(str.find('x'), str.size());
     EXPECT_EQ(str.find('g', 11), str.size());
-
     EXPECT_EQ(str.find('r', 5, 8), 7);
+
+    EXPECT_EQ(str.find('t').index(), 0);
+    EXPECT_EQ(str.find('g').index(), 10);
+    EXPECT_EQ(str.find('i').index_or_end(), 8);
+    EXPECT_EQ(str.find('k').index_or_end(), str.size());
+    EXPECT_EQ(str.find(' ').index_or_npos(), 4);
+    EXPECT_EQ(str.find('a').index_or_npos(), static_cast<std::size_t>(-1));
+
+    EXPECT_EQ(str.find('t').ptr(), &str[0]);
+    EXPECT_EQ(str.find('o').ptr_or_end(), str.data() + str.size());
+    EXPECT_EQ(str.find('q').ptr_or_null(), nullptr);
+
+    EXPECT_TRUE(str.find('e').found());
+    EXPECT_FALSE(str.find('p').found());
 }
 
 TEST_F(string_view, rfind) {
