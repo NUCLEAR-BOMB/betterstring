@@ -93,6 +93,13 @@ TEST_F(functions, strfind_char) {
     });
 }
 
+static const char* simple_strrfind(const char* const str, const std::size_t count, const char ch) noexcept {
+    for (std::size_t i = count; i != 0; --i) {
+        if (str[i - 1] == ch) return &str[i - 1];
+    }
+    return nullptr;
+}
+
 TEST_F(functions, strrfind_char) {
     EXPECT_EQ(bs::strrfind(cstr, 5, 'i'), nullptr);
     EXPECT_EQ(bs::strrfind(cstr, 11, 'g'), &cstr[10]);
@@ -102,6 +109,19 @@ TEST_F(functions, strrfind_char) {
 
     EXPECT_EQ(bs::strrfind(static_cast<char*>(nullptr), 0, 'k'), nullptr);
     EXPECT_EQ(bs::strrfind(static_cast<const char*>(nullptr), 0, 'a'), nullptr);
+
+    const char bad_string1[] = "**\x08\xd6\x08\xd6\x00\x00)\xd1\x08\x00\x00\x00\x00\xa5\xa5\xa5\xfd\x08\x00";
+    const auto bad_string1_match1 = bs::strrfind(&bad_string1[1], std::size(bad_string1) - 2, bad_string1[0]);
+    const auto bad_string1_match2 = simple_strrfind(&bad_string1[1], std::size(bad_string1) - 2, bad_string1[0]);
+    EXPECT_EQ(bad_string1_match1, bad_string1_match2);
+
+    const char bad_string2[] = "77777777\x91ll\x08\xff\x00\x00\x00\xff\x0077S\xff\x01\xff\xff\xf4hhhhhhhhhhhhhhhhhh\x09\xff!\xff\xf4hhhl777\x00\x00\x00\x00\x00l\x0b\x00\x00\x00\x00\x00";
+    const auto bad_string2_match1 = bs::strrfind(&bad_string2[1], std::size(bad_string2) - 2, bad_string2[0]);
+    const auto bad_string2_match2 = simple_strrfind(&bad_string2[1], std::size(bad_string2) - 2, bad_string2[0]);
+    EXPECT_EQ(bad_string2_match1, bad_string2_match2);
+
+    //const char bad_string3[] = "L\xf9L\xf9L\xf9\xf9\xfdL\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00[\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00L\x0a\x0a\x00\x00";
+    //EXPECT_EQ(bs::strrfind(&bad_string3[1], std::size(bad_string3) - 2, bad_string3[0]), &bad_string3[61]);
 
     CONSTEXPR_EXPECT(strrfind_char, {
         if (!(bs::strrfind(cstr, 11, 'e') == &cstr[1])) return 1;

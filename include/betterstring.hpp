@@ -333,33 +333,62 @@ constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::
     return bs::strrfind(haystack, count, needle, N - 1);
 }
 
-namespace detail {
 #if BS_USE_AVX2
+namespace detail {
+    template<class T, std::enable_if_t<std::is_unsigned_v<T>, int> = 0>
+    unsigned int lzcnt(const T x) noexcept {
+#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+        if constexpr (sizeof(T) <= sizeof(unsigned int)) {
+            return unsigned(__builtin_clz(x));
+        } else if constexpr (sizeof(T) <= sizeof(unsigned long)) {
+            return unsigned(__builtin_clzl(x));
+        } else {
+            return unsigned(__builtin_clzll(x));
+        }
+#else
+        if constexpr (sizeof(T) <= sizeof(unsigned int)) {
+            return _lzcnt_u32(x);
+        } else {
+            return _lzcnt_u64(x);
+        }
+#endif
+    }
+    template<class T, std::enable_if_t<std::is_signed_v<T>, int> = 0>
+    unsigned int lzcnt(const T x) noexcept {
+        std::make_unsigned_t<T> y;
+        std::memcpy(&y, &x, sizeof(T));
+        return lzcnt(y);
+    }
+
+
     template<class T>
     const T* avx2_strrfind(const T* const string, std::size_t count, const T search_character) {
         const T* char_ptr = string + count - 1;
         // align
-        for (; count > 0 && ((reinterpret_cast<std::uintptr_t>(char_ptr) & (sizeof(__m256i) - 1)) != 0)
-            ; --count, --char_ptr) {
+        for (; count > 0; --count, --char_ptr) {
             if (*char_ptr == search_character) return char_ptr;
-        }
-        const __m256i search_char8 = _mm256_set1_epi8(search_character);
-        for (; count >= sizeof(__m256i); count -= sizeof(__m256i)) {
-            char_ptr -= sizeof(__m256i);
-            const __m256i char8 = _mm256_load_si256(reinterpret_cast<const __m256i*>(char_ptr));
-            const __m256i cmpeq_result = _mm256_cmpeq_epi8(char8, search_char8);
-            const std::int32_t cmp_mask = _mm256_movemask_epi8(cmpeq_result);
-            if (cmp_mask != 0) {
-                return &char_ptr[_tzcnt_u32(static_cast<unsigned int>(cmp_mask))];
+            if ((reinterpret_cast<std::uintptr_t>(char_ptr) & (sizeof(__m256) - 1)) == 0) {
+                --count;
+                break;
             }
         }
-        for (; count != 0; --count, --char_ptr) {
-            if (*char_ptr == search_character) return char_ptr;
+        const __m256i search_char32 = _mm256_set1_epi8(search_character);
+        for (; count >= sizeof(__m256); count -= sizeof(__m256)) {
+            char_ptr -= sizeof(__m256);
+            const __m256i char32 = _mm256_load_si256(reinterpret_cast<const __m256i*>(char_ptr));
+            const __m256i cmpeq_result = _mm256_cmpeq_epi8(char32, search_char32);
+            const std::int32_t cmp_mask = _mm256_movemask_epi8(cmpeq_result);
+            if (cmp_mask != 0) {
+                return &char_ptr[sizeof(__m256) - detail::lzcnt(cmp_mask) - 1];
+            }
+        }
+        for (; count != 0; --count) {
+            if (*--char_ptr == search_character) return char_ptr;
         }
         return nullptr;
     }
-#endif
 }
+#endif
 
 template<class T>
 constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_identity_t<T> ch) noexcept {
