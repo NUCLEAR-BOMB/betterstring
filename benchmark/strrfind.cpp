@@ -1,9 +1,7 @@
 #include <benchmark\benchmark.h>
 #include <betterstring.hpp>
 
-#ifndef __AVX2__
-#error Requires support for AVX2 processor instructions
-#endif
+#ifdef __AVX2__
 
 #include <immintrin.h>
 
@@ -66,3 +64,5 @@ void BM_simple_strrfind(benchmark::State& state) {
 BENCHMARK(BM_simple_strrfind);
 
 }
+
+#endif

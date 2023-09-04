@@ -1,13 +1,10 @@
 
 include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
+include("${PROJECT_SOURCE_DIR}/cmake/enable_avx2.cmake")
 
 add_executable(betterstring-benchmark strrfind.cpp)
 target_add_warnings(betterstring-benchmark)
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(betterstring-benchmark PRIVATE /arch:AVX2 /wd4266)
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    target_compile_options(betterstring-benchmark PRIVATE -mavx2)
-endif()
+target_enable_avx2(betterstring-benchmark)
 
 target_link_libraries(betterstring-benchmark PRIVATE betterstring)
 

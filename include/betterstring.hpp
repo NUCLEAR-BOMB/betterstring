@@ -11,6 +11,18 @@
 #include <string>
 #endif
 
+#ifdef BS_NO_AVX2
+    #define BS_USE_AVX2 0
+#elif defined(__AVX2__)
+    #define BS_USE_AVX2 1
+#else
+    #define BS_USE_AVX2 0
+#endif
+
+#if BS_USE_AVX2
+#include <immintrin.h>
+#endif
+
 #ifdef __has_builtin
     #define BS_HAS_BUILTIN(x) __has_builtin(x)
 #else
@@ -321,9 +333,42 @@ constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::
     return bs::strrfind(haystack, count, needle, N - 1);
 }
 
+namespace detail {
+#if BS_USE_AVX2
+    template<class T>
+    const T* avx2_strrfind(const T* const string, std::size_t count, const T search_character) {
+        const T* char_ptr = string + count - 1;
+        // align
+        for (; count > 0 && ((reinterpret_cast<std::uintptr_t>(char_ptr) & (sizeof(__m256i) - 1)) != 0)
+            ; --count, --char_ptr) {
+            if (*char_ptr == search_character) return char_ptr;
+        }
+        const __m256i search_char8 = _mm256_set1_epi8(search_character);
+        for (; count >= sizeof(__m256i); count -= sizeof(__m256i)) {
+            char_ptr -= sizeof(__m256i);
+            const __m256i char8 = _mm256_load_si256(reinterpret_cast<const __m256i*>(char_ptr));
+            const __m256i cmpeq_result = _mm256_cmpeq_epi8(char8, search_char8);
+            const std::int32_t cmp_mask = _mm256_movemask_epi8(cmpeq_result);
+            if (cmp_mask != 0) {
+                return &char_ptr[_tzcnt_u32(static_cast<unsigned int>(cmp_mask))];
+            }
+        }
+        for (; count != 0; --count, --char_ptr) {
+            if (*char_ptr == search_character) return char_ptr;
+        }
+        return nullptr;
+    }
+#endif
+}
+
 template<class T>
 constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_identity_t<T> ch) noexcept {
     static_assert(is_character<T>);
+#if BS_USE_AVX2
+    if (!detail::is_constant_evaluated()) {
+        return const_cast<T*>(detail::avx2_strrfind(str, count, ch));
+    }
+#endif
     for (std::size_t i = count; i > 0; --i) {
         if (str[i - 1] == ch) return str + i - 1;
     }
