@@ -56,7 +56,7 @@ jobs:
       run: ctest --test-dir build/ --output-on-failure --build-config ${{ matrix.type }} -j 2
 
     - name: Fuzzing
-      run: cmake --build build/ --target fuzzing
+      run: cmake --build build/ --target betterstring-fuzz
 
   clang-tidy:
     runs-on: ${{ matrix.os }}
