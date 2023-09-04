@@ -6,5 +6,5 @@ execute_process(
     RESULTS_VARIABLE result
 )
 if (NOT result STREQUAL 0)
-    message(FATAL_ERROR "Fuzzing '${executable}' failed")
+    message(FATAL_ERROR "Fuzzing '${executable}' failed with code ${result}")
 endif()
