@@ -2,7 +2,7 @@
 message(STATUS "Running '${executable}' fuzzing")
 
 execute_process(
-    COMMAND ${executable} -fork=${forks} -runs=${runs}
+    COMMAND ${executable} -fork=${forks} -max_total_time=${time} -print_final_stats=1 -print_pcs=1
     RESULTS_VARIABLE result
 )
 if (NOT result STREQUAL 0)
