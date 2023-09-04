@@ -93,7 +93,7 @@ TEST_F(functions, strfind_char) {
     });
 }
 
-static const char* simple_strrfind(const char* const str, const std::size_t count, const char ch) noexcept {
+const char* simple_strrfind(const char* const str, const std::size_t count, const char ch) noexcept {
     for (std::size_t i = count; i != 0; --i) {
         if (str[i - 1] == ch) return &str[i - 1];
     }
