@@ -1,4 +1,4 @@
-#include <benchmark\benchmark.h>
+#include <benchmark/benchmark.h>
 #include <betterstring.hpp>
 
 #ifdef __AVX2__
