@@ -25,7 +25,7 @@ foreach(fuzz_target IN LISTS fuzz_targets)
         -D forks=${cores_number}
         #-D runs=1000000
         -D time=15
-        -P "${PROJECT_SOURCE_DIR}/fuzzing/run_fuzzing.cmake"
+        -P "${PROJECT_SOURCE_DIR}/fuzz/run_fuzzing.cmake"
     )
 endforeach()
 
