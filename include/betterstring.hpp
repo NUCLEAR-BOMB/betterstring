@@ -314,25 +314,6 @@ constexpr T* strfind(T* const haystack, const std::size_t count, const detail::t
     return strfind(haystack, count, needle, N - 1);
 }
 
-template<class T>
-constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::type_identity_t<T>* const needle, const std::size_t needle_len) noexcept {
-    if (needle_len > count) return nullptr;
-    if (needle_len == 0) return haystack;
-
-    for (auto match_try = haystack + (count - needle_len);; --match_try) {
-        if (bs::strcomp(match_try, needle, needle_len) == 0) {
-            return match_try;
-        }
-        if (match_try == haystack) return nullptr;
-    }
-    BS_UNREACHABLE();
-}
-
-template<class T, std::size_t N>
-constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::type_identity_t<T>(&needle)[N]) noexcept {
-    return bs::strrfind(haystack, count, needle, N - 1);
-}
-
 #if BS_USE_AVX2
 namespace detail {
     template<class T, std::enable_if_t<std::is_unsigned_v<T>, int> = 0>
@@ -360,7 +341,79 @@ namespace detail {
         return lzcnt(y);
     }
 
+    template<class T>
+    const T* avx2_strrfind_string(const T* const str, std::size_t count, const T* const needle, const std::size_t needle_len) {
+        if (needle_len > count) return nullptr;
+        if (needle_len == 0) return str + count;
 
+        const T* char_ptr = str + (count - needle_len) + 1;
+        count -= needle_len;
+        for (;; --count) {
+            if ((reinterpret_cast<std::uintptr_t>(char_ptr) & (sizeof(__m256) - 1)) == 0) break;
+            --char_ptr;
+            for (std::size_t i = 0; char_ptr[i] == needle[i];) {
+                if (++i == needle_len) return char_ptr;
+            }
+            if (count == 0) return nullptr;
+        }
+
+        const __m256i first_ch = _mm256_set1_epi8(needle[0]);
+        while (count >= sizeof(__m256)) {
+            char_ptr -= sizeof(__m256);
+            count -= sizeof(__m256);
+            const __m256i loaded = _mm256_load_si256(reinterpret_cast<const __m256i*>(char_ptr));
+            const __m256i cmp = _mm256_cmpeq_epi8(loaded, first_ch);
+            std::uint32_t cmp_mask = static_cast<std::uint32_t>(_mm256_movemask_epi8(cmp));
+
+            for (const T* match_ptr = char_ptr + sizeof(__m256); cmp_mask != 0;) {
+                const unsigned lzcnt_result = bs::detail::lzcnt(cmp_mask) + 1;
+
+                cmp_mask = std::uint32_t(std::uint64_t(cmp_mask) << lzcnt_result);
+
+                match_ptr -= lzcnt_result;
+                for (std::size_t i = 1;; ++i) {
+                    if (i == needle_len) return match_ptr;
+                    if (match_ptr[i] != needle[i]) break;
+                }
+            }
+        }
+        for (; char_ptr != str;) {
+            --char_ptr;
+            for (std::size_t i = 0; char_ptr[i] == needle[i];) {
+                if (++i == needle_len) return char_ptr;
+            }
+        }
+        return nullptr;
+    }
+}
+#endif
+
+template<class T>
+constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::type_identity_t<T>* const needle, const std::size_t needle_len) noexcept {
+#if BS_USE_AVX2
+    if (!detail::is_constant_evaluated()) {
+        return const_cast<T*>(detail::avx2_strrfind_string(haystack, count, needle, needle_len));
+    }
+#endif
+    if (needle_len > count) return nullptr;
+    if (needle_len == 0) return haystack;
+
+    for (auto match_try = haystack + (count - needle_len);; --match_try) {
+        if (bs::strcomp(match_try, needle, needle_len) == 0) {
+            return match_try;
+        }
+        if (match_try == haystack) return nullptr;
+    }
+    BS_UNREACHABLE();
+}
+
+template<class T, std::size_t N>
+constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::type_identity_t<T>(&needle)[N]) noexcept {
+    return bs::strrfind(haystack, count, needle, N - 1);
+}
+
+#if BS_USE_AVX2
+namespace detail {
     template<class T>
     const T* avx2_strrfind(const T* const string, std::size_t count, const T search_character) {
         const T* char_ptr = string + count - 1;

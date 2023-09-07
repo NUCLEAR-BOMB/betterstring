@@ -12,7 +12,8 @@ macro(add_fuzzer target_name)
     list(APPEND fuzz_targets ${target_name})
 endmacro()
 
-add_fuzzer(strrfind_fuzz strrfind.cpp)
+add_fuzzer(strrfind_ch_fuzz strrfind_ch.cpp)
+add_fuzzer(strrfind_str_fuzz strrfind_str.cpp)
 
 include(ProcessorCount)
 ProcessorCount(cores_number)

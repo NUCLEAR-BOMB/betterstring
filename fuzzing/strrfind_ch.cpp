@@ -22,8 +22,20 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const std::size_t search_str_len = Size - 1;
 
     const char* result = bs::strrfind(search_str, search_str_len, search_for);
-    const char* true_result = simple_strrfind(search_str, search_str_len, search_for);
-    assert(result == true_result);
+
+    if (result == nullptr) {
+        for (std::size_t i = search_str_len; i != 0; --i) {
+            if (search_str[i - 1] == search_for) {
+                std::abort();
+            }
+        }
+    } else {
+        if (*result != search_for) std::abort();
+
+        for (auto it = search_str + search_str_len - 1; it != result; --it) {
+            if (*it == search_for) std::abort();
+        }
+    }
 
     return 0;
 }
