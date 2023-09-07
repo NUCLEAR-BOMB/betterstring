@@ -19,8 +19,9 @@ FetchContent_Declare(
 )
 
 set(gtest_force_shared_crt TRUE CACHE BOOL "" FORCE)
-set(BUILD_GMOCK FALSE CACHE BOOL "" FORCE)
-set(INSTALL_GTEST FALSE CACHE BOOL "" FORCE)
+
+set(BUILD_GMOCK FALSE)
+set(INSTALL_GTEST FALSE)
 FetchContent_MakeAvailable(googletest)
 
 target_link_libraries(betterstring-test PRIVATE GTest::gtest)

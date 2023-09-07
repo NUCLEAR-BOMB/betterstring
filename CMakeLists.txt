@@ -1,20 +1,24 @@
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
-project(betterstring LANGUAGES CXX)
+project(betterstring VERSION 0.1 LANGUAGES CXX)
 
-option(BUILD_TEST "" TRUE)
-option(USE_CLANG_TIDY "" TRUE)
-option(BUILD_BENCHMARK "" TRUE)
-option(BUILD_FUZZ "" TRUE)
-option(USE_SANITIZERS "" TRUE)
+option(BUILD_TEST "" ${PROJECT_IS_TOP_LEVEL})
+option(USE_CLANG_TIDY "" ${PROJECT_IS_TOP_LEVEL})
+option(BUILD_BENCHMARK "" ${PROJECT_IS_TOP_LEVEL})
+option(BUILD_FUZZ "" ${PROJECT_IS_TOP_LEVEL})
+option(USE_SANITIZERS "" ${PROJECT_IS_TOP_LEVEL})
+option(INSTALL_BETTERSTRING "" ${PROJECT_IS_TOP_LEVEL})
 
 add_library(betterstring INTERFACE "include/betterstring.hpp")
-target_include_directories(betterstring INTERFACE "include/")
+target_include_directories(betterstring INTERFACE
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+)
 target_compile_features(betterstring INTERFACE cxx_std_17)
 
-target_compile_options(betterstring INTERFACE $<$<CXX_COMPILER_ID:MSVC>:
-	/Zc:__cplusplus /Zc:inline /Zc:preprocessor>
-)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(betterstring INTERFACE /Zc:__cplusplus /Zc:inline /Zc:preprocessor)
+endif()
 
 if (BUILD_TEST)
     enable_testing()
@@ -27,4 +31,37 @@ endif()
 
 if (BUILD_FUZZ)
     add_subdirectory(fuzz)
+endif()
+
+if (INSTALL_BETTERSTRING)
+    include(CMakePackageConfigHelpers)
+
+    # Targets
+    install(TARGETS betterstring EXPORT "betterstringTargets")
+    install(EXPORT betterstringTargets
+        FILE betterstringTargets.cmake
+        DESTINATION "cmake/betterstring"
+    )
+    # Version
+    write_basic_package_version_file(
+        "${PROJECT_BINARY_DIR}/betterstringConfigVersion.cmake"
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY AnyNewerVersion
+        ARCH_INDEPENDENT
+    )
+    # Config
+    configure_package_config_file(
+        "${PROJECT_SOURCE_DIR}/cmake/betterstringConfig.cmake.in"
+        "${PROJECT_BINARY_DIR}/betterstringConfig.cmake"
+        INSTALL_DESTINATION "cmake/betterstring"
+    )
+    # Install version and config
+    install(FILES
+        "${PROJECT_BINARY_DIR}/betterstringConfig.cmake"
+        "${PROJECT_BINARY_DIR}/betterstringConfigVersion.cmake"
+        DESTINATION "cmake/betterstring"
+    )
+    # Install 'include/'
+    install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/" TYPE INCLUDE)
+
 endif()
