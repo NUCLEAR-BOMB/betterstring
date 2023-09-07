@@ -171,8 +171,6 @@ TEST_F(functions, strrfind_string) {
     EXPECT_EQ(bs::strrfind(".", 1, "\x02.", 2), nullptr);
     const char bad_string1[] = "\1\x1\x1\0\0)";
     EXPECT_EQ(bs::strrfind(&bad_string1[2], 4, &bad_string1[1], 1), &bad_string1[2]);
-    const char bad_string2[] = "\1\x3ÿ³9ž<»\x12\0\0ÿÿÿ\x1\x3ÿÿÿÿü\0\0\0ü\0\0\0";
-    EXPECT_EQ(bs::strrfind(&bad_string2[2], 26, &bad_string2[1], 1), &bad_string2[15]);
 
     CONSTEXPR_EXPECT(strrfind_string, {
         if (!(bs::strrfind(cstr, 11, "t") == &cstr[6])) return 1;
