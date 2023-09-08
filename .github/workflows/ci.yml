@@ -112,4 +112,5 @@ jobs:
 
       - name: Windows Install
         if: runner.os == 'Windows'
-        run: powershell.exe -command "Start-Process -Verb RunAs powershell.exe -Args '-executionpolicy bypass -command', \"Set-Location `\"$PWD`\"; cmake --install build""
+        shell: powershell
+        run: Start-Process -Verb RunAs powershell.exe -Args "-executionpolicy bypass -command Set-Location \`"$PWD\`"; cmake --install build"
