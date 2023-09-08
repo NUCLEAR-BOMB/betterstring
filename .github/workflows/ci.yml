@@ -106,5 +106,10 @@ jobs:
       - name: Configure CMake
         run: cmake -B build/
 
-      - name: Install
+      - name: Linux Install
+        if: runner.os == 'Linux'
         run: sudo cmake --install build/
+
+      - name: Windows Install
+        if: runner.os == 'Windows'
+        run: runas.exe /savecred /user:administrator "cmake --install build/"
