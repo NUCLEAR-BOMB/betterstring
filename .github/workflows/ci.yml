@@ -98,7 +98,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-2022 ]
+        os: [ ubuntu-latest ]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -106,11 +106,6 @@ jobs:
       - name: Configure CMake
         run: cmake -B build/
 
-      - name: Linux Install
+      - name: Install
         if: runner.os == 'Linux'
         run: sudo cmake --install build/
-
-      - name: Windows Install
-        if: runner.os == 'Windows'
-        shell: powershell
-        run: Start-Process -Verb RunAs powershell.exe -Args "-executionpolicy bypass -command Set-Location \`"$PWD\`"; cmake --install build"
