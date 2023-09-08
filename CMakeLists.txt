@@ -35,12 +35,17 @@ endif()
 
 if (INSTALL_BETTERSTRING)
     include(CMakePackageConfigHelpers)
+    include(GNUInstallDirs)
 
     # Targets
-    install(TARGETS betterstring EXPORT "betterstringTargets")
+    install(
+        TARGETS betterstring
+        EXPORT "betterstringTargets"
+        INCLUDES DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+    )
     install(EXPORT betterstringTargets
         FILE betterstringTargets.cmake
-        DESTINATION "cmake/betterstring"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/betterstring"
     )
     # Version
     write_basic_package_version_file(
@@ -53,15 +58,18 @@ if (INSTALL_BETTERSTRING)
     configure_package_config_file(
         "${PROJECT_SOURCE_DIR}/cmake/betterstringConfig.cmake.in"
         "${PROJECT_BINARY_DIR}/betterstringConfig.cmake"
-        INSTALL_DESTINATION "cmake/betterstring"
+        INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/betterstring"
     )
     # Install version and config
     install(FILES
         "${PROJECT_BINARY_DIR}/betterstringConfig.cmake"
         "${PROJECT_BINARY_DIR}/betterstringConfigVersion.cmake"
-        DESTINATION "cmake/betterstring"
+        DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/betterstring"
     )
     # Install 'include/'
-    install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/" TYPE INCLUDE)
+    install(
+        DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
+        DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+    )
 
 endif()
