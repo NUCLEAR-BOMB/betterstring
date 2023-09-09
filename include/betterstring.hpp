@@ -359,12 +359,11 @@ namespace detail {
             if (count == 0) return nullptr;
         }
 
-        const __m256i first_ch = _mm256_set1_epi8(needle[0]);
         while (count >= sizeof(__m256)) {
             char_ptr -= sizeof(__m256);
             count -= sizeof(__m256);
             const __m256i loaded = _mm256_load_si256(reinterpret_cast<const __m256i*>(char_ptr));
-            const __m256i cmp = _mm256_cmpeq_epi8(loaded, first_ch);
+            const __m256i cmp = _mm256_cmpeq_epi8(loaded, _mm256_set1_epi8(needle[0]));
             std::uint32_t cmp_mask = static_cast<std::uint32_t>(_mm256_movemask_epi8(cmp));
 
             for (const T* match_ptr = char_ptr + sizeof(__m256); cmp_mask != 0;) {
