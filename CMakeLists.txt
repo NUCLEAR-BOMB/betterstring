@@ -10,7 +10,12 @@ option(USE_SANITIZERS "" ${PROJECT_IS_TOP_LEVEL})
 option(INSTALL_BETTERSTRING "" ${PROJECT_IS_TOP_LEVEL})
 
 add_library(betterstring INTERFACE "include/betterstring.hpp")
-target_include_directories(betterstring INTERFACE
+
+if (NOT PROJECT_IS_TOP_LEVEL)
+    set(include_as_system "SYSTEM")
+endif()
+
+target_include_directories(betterstring ${include_as_system} INTERFACE
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
