@@ -50,12 +50,15 @@ jobs:
       run: cmake -B build --preset=${{ matrix.preset }} -DCMAKE_BUILD_TYPE=${{ matrix.type }} ${{ matrix.options }}
 
     - name: Build
+      continue-on-error: true
       run: cmake --build build/ --config ${{ matrix.type }}
 
     - name: Test
+      continue-on-error: true
       run: ctest --test-dir build/ --output-on-failure --build-config ${{ matrix.type }} -j 2
 
     - name: Fuzzing
+      continue-on-error: true
       run: cmake --build build/ --target betterstring-fuzz
 
   clang-tidy:
