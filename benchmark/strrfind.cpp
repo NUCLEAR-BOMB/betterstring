@@ -38,7 +38,7 @@ void BM_simple_strrfind(benchmark::State& state) {
 BENCHMARK(BM_simple_strrfind)->Name("simple_strrfind_character");
 
 constexpr const char* const SEARCH_STRING2 = "aaaaaaaaaaaaaa12345678aaaaaaaaaaaaaaaa1aaassdsaaaaaaaaaaaaaaaaa1aaaaaaeeeeeeeeeee1ahhhhjkkkkkkeeeeeeeeeeeeeeeee1eeeeeeee3eeeeeeeeeeeeeeeeeee4eeeeeeeeaa2aaaaaaaaaaaaaaaaaahhhh1hhhhhhhhhhhhhhhhhhhhhhh";
-constexpr std::size_t SEARCH_STRING2_SIZE = bs::strlen(SEARCH_STRING2);
+//constexpr std::size_t SEARCH_STRING2_SIZE = bs::strlen(SEARCH_STRING2);
 
 void BM_strrfind_string(benchmark::State& state) {
     for (auto _ : state) {
