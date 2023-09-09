@@ -342,26 +342,24 @@ namespace detail {
     }
 
     template<class T>
-    const T* avx2_strrfind_string(const T* const str, std::size_t count, const T* const needle, const std::size_t needle_len) {
+    const T* avx2_strrfind_string(const T* const str, const std::size_t count, const T* const needle, const std::size_t needle_len) {
         if (needle_len > count) return nullptr;
         if (needle_len == 0) return str + count;
 
         const T* char_ptr = str + (count - needle_len) + 1;
         if (count <= 55) goto skip_avx2;
-        count -= needle_len;
 
-        for (;; --count) {
-            if ((reinterpret_cast<std::uintptr_t>(char_ptr) & (sizeof(__m256) - 1)) == 0) break;
+        while ((reinterpret_cast<std::uintptr_t>(char_ptr) & (sizeof(__m256) - 1)) != 0) {
             --char_ptr;
             if (std::memcmp(char_ptr, needle, needle_len) == 0) {
                 return char_ptr;
             }
-            if (count == 0) return nullptr;
+            if (char_ptr == str) return nullptr;
         }
 
-        while (count >= sizeof(__m256)) {
+        while (char_ptr >= str + sizeof(__m256)) {
             char_ptr -= sizeof(__m256);
-            count -= sizeof(__m256);
+
             const __m256i loaded = _mm256_load_si256(reinterpret_cast<const __m256i*>(char_ptr));
             const __m256i cmp = _mm256_cmpeq_epi8(loaded, _mm256_set1_epi8(needle[0]));
             std::uint32_t cmp_mask = static_cast<std::uint32_t>(_mm256_movemask_epi8(cmp));
