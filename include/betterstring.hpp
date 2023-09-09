@@ -316,7 +316,7 @@ constexpr T* strfind(T* const haystack, const std::size_t count, const detail::t
 
 #if BS_USE_AVX2
 namespace detail {
-    template<class T, std::enable_if_t<std::is_unsigned_v<T>, int> = 0>
+    template<class T>
     unsigned int lzcnt(const T x) noexcept {
 #if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
         if constexpr (sizeof(T) <= sizeof(unsigned int)) {
@@ -333,12 +333,6 @@ namespace detail {
             return _lzcnt_u64(x);
         }
 #endif
-    }
-    template<class T, std::enable_if_t<std::is_signed_v<T>, int> = 0>
-    unsigned int lzcnt(const T x) noexcept {
-        std::make_unsigned_t<T> y;
-        std::memcpy(&y, &x, sizeof(T));
-        return lzcnt(y);
     }
 
     template<class T>
@@ -419,7 +413,7 @@ namespace detail {
             char_ptr -= sizeof(__m256);
             const __m256i char32 = _mm256_load_si256(reinterpret_cast<const __m256i*>(char_ptr));
             const __m256i cmpeq_result = _mm256_cmpeq_epi8(char32, search_char32);
-            const std::int32_t cmp_mask = _mm256_movemask_epi8(cmpeq_result);
+            const std::uint32_t cmp_mask = static_cast<std::uint32_t>(_mm256_movemask_epi8(cmpeq_result));
             if (cmp_mask != 0) {
                 return &char_ptr[sizeof(__m256) - detail::lzcnt(cmp_mask) - 1];
             }
