@@ -37,16 +37,18 @@ void BM_simple_strrfind(benchmark::State& state) {
 }
 BENCHMARK(BM_simple_strrfind)->Name("simple_strrfind_character");
 
-constexpr const char* const SEARCH_STRING2 = "aaaaaaaaaaaaaa12345678aaaaaaaaaaaaaaaaaaaassdsaaaaaaaaaaaaaaaaaaaaaaaaeeeeeeeeeee1ahhhhjkkkkkkeeeeeeeeeeeeeeeeeeeeeeeeee3eeeeeeeeeeeeeeeeeee4eeeeeeeeaa2aaaaaaaaaaaaaaaaaahhhh1hhhhhhhhhhhhhhhhhhhhhhh";
+constexpr const char* const SEARCH_STRING2 = "aaaaaaaaaaaaaa12345678aaaaaaaaaaaaaaaa1aaassdsaaaaaaaaaaaaaaaaa1aaaaaaeeeeeeeeeee1ahhhhjkkkkkkeeeeeeeeeeeeeeeee1eeeeeeee3eeeeeeeeeeeeeeeeeee4eeeeeeeeaa2aaaaaaaaaaaaaaaaaahhhh1hhhhhhhhhhhhhhhhhhhhhhh";
 constexpr std::size_t SEARCH_STRING2_SIZE = bs::strlen(SEARCH_STRING2);
 
 void BM_strrfind_string(benchmark::State& state) {
     for (auto _ : state) {
-        auto result = bs::strrfind(SEARCH_STRING2, SEARCH_STRING2_SIZE, "12345678", 8);
+        auto result = bs::strrfind(SEARCH_STRING2, std::size_t(state.range(0)), "12345678", 8);
         benchmark::DoNotOptimize(result);
     }
 }
-BENCHMARK(BM_strrfind_string)->Name("avx2_strrfind_string");
+BENCHMARK(BM_strrfind_string)
+    ->Name("avx2_strrfind_string")
+    ->DenseRange(/*start=*/20, /*stop=*/60, /*step=*/2);
 
 template<class T>
 const T* simple_strrfind_string(const T* const str, const std::size_t count, const T* const needle, const std::size_t needle_len) noexcept {
@@ -60,17 +62,23 @@ const T* simple_strrfind_string(const T* const str, const std::size_t count, con
     return nullptr;
 }
 
+#if 0
 void BM_simple_strrfind_string(benchmark::State& state) {
     for (auto _ : state) {
-        auto result = simple_strrfind_string(SEARCH_STRING2, SEARCH_STRING2_SIZE, "12345678", 8);
+        auto result = simple_strrfind_string(SEARCH_STRING2, std::size_t(state.range(0)), "12345678", 8);
         benchmark::DoNotOptimize(result);
     }
 }
-BENCHMARK(BM_simple_strrfind_string)->Name("simple_strrfind_string");
+BENCHMARK(BM_simple_strrfind_string)
+    ->Name("simple_strrfind_string")
+    ->DenseRange(25, SEARCH_STRING2_SIZE, 10);
+#endif
 
 template<class T>
-const T* simple_memcmp_strrfind_string(const T* const str, const std::size_t count, const T* const needle, const std::size_t needle_len) noexcept {
+const T* with_memcmp_strrfind_string(const T* const str, const std::size_t count, const T* const needle, const std::size_t needle_len) noexcept {
     if (needle_len > count) return nullptr;
+    if (needle_len == 0) return str;
+
     for (auto it = str + (count - needle_len);; --it) {
         if (std::memcmp(it, needle, needle_len) == 0) return it;
         if (it == str) break;
@@ -79,12 +87,41 @@ const T* simple_memcmp_strrfind_string(const T* const str, const std::size_t cou
 }
 void BM_simple_memcmp_strrfind_string(benchmark::State& state) {
     for (auto _ : state) {
-        auto result = simple_memcmp_strrfind_string(SEARCH_STRING2, SEARCH_STRING2_SIZE, "12345678", 8);
+        auto result = with_memcmp_strrfind_string(SEARCH_STRING2, std::size_t(state.range(0)), "12345678", 8);
         benchmark::DoNotOptimize(result);
     }
 }
-BENCHMARK(BM_simple_memcmp_strrfind_string)->Name("simple_memcmp_strrfind_string");
+BENCHMARK(BM_simple_memcmp_strrfind_string)
+    ->Name("with_memcmp_strrfind_string")
+    ->DenseRange(/*start=*/20, /*stop=*/60, /*step=*/2);
 
+#if 0
+template<class T>
+const T* with_strrfind_ch_strrfind_string(const T* const str, const std::size_t count, const T* const needle, const std::size_t needle_len) noexcept {
+    if (needle_len > count) return nullptr;
+    if (needle_len == 0) return str + count;
+
+    for (auto match_try = str + (count - needle_len);; --match_try) {
+        match_try = bs::strrfind(str, std::size_t(match_try - str) + 1, needle[0]);
+        if (match_try == nullptr) break;
+        if (std::memcmp(match_try, needle, needle_len) == 0) {
+            return match_try;
+        }
+    }
+    return nullptr;
+}
+
+void BM_with_strrfind_ch_strrfind_string(benchmark::State& state) {
+    for (auto _ : state) {
+        auto result = with_strrfind_ch_strrfind_string(SEARCH_STRING2, std::size_t(state.range(0)), "12345678", 8);
+        benchmark::DoNotOptimize(result);
+    }
+}
+BENCHMARK(BM_with_strrfind_ch_strrfind_string)
+    ->Name("with_strrfind_ch_strrfind_string")
+    ->DenseRange(/*start=*/25, /*stop=*/60, /*step=*/5);
+
+#endif
 }
 
 #endif

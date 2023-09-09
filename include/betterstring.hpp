@@ -347,12 +347,14 @@ namespace detail {
         if (needle_len == 0) return str + count;
 
         const T* char_ptr = str + (count - needle_len) + 1;
+        if (count <= 55) goto skip_avx2;
         count -= needle_len;
+
         for (;; --count) {
             if ((reinterpret_cast<std::uintptr_t>(char_ptr) & (sizeof(__m256) - 1)) == 0) break;
             --char_ptr;
-            for (std::size_t i = 0; char_ptr[i] == needle[i];) {
-                if (++i == needle_len) return char_ptr;
+            if (std::memcmp(char_ptr, needle, needle_len) == 0) {
+                return char_ptr;
             }
             if (count == 0) return nullptr;
         }
@@ -371,16 +373,16 @@ namespace detail {
                 cmp_mask = std::uint32_t(std::uint64_t(cmp_mask) << lzcnt_result);
 
                 match_ptr -= lzcnt_result;
-                for (std::size_t i = 1;; ++i) {
-                    if (i == needle_len) return match_ptr;
-                    if (match_ptr[i] != needle[i]) break;
+                if (std::memcmp(char_ptr, needle, needle_len) == 0) {
+                    return match_ptr;
                 }
             }
         }
+    skip_avx2:
         for (; char_ptr != str;) {
             --char_ptr;
-            for (std::size_t i = 0; char_ptr[i] == needle[i];) {
-                if (++i == needle_len) return char_ptr;
+            if (std::memcmp(char_ptr, needle, needle_len) == 0) {
+                return char_ptr;
             }
         }
         return nullptr;
@@ -396,7 +398,7 @@ constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::
     }
 #endif
     if (needle_len > count) return nullptr;
-    if (needle_len == 0) return haystack;
+    if (needle_len == 0) return haystack + count;
 
     for (auto match_try = haystack + (count - needle_len);; --match_try) {
         if (bs::strcomp(match_try, needle, needle_len) == 0) {
