@@ -59,6 +59,7 @@ jobs:
 
     - name: Fuzzing
       continue-on-error: true
+      timeout-minutes: 10
       run: cmake --build build/ --target betterstring-fuzz
 
   clang-tidy:
