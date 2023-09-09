@@ -31,6 +31,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
         }
         for (auto it = haystack + (haystack_size - needle_size); it != result; --it) {
             if (std::memcmp(it, needle, needle_size) == 0) {
+                bs::strrfind(haystack, haystack_size, needle, needle_size);
                 std::abort();
             }
         }

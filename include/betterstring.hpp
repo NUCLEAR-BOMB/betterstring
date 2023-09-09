@@ -372,7 +372,7 @@ namespace detail {
                 cmp_mask = std::uint32_t(std::uint64_t(cmp_mask) << lzcnt_result);
 
                 match_ptr -= lzcnt_result;
-                if (std::memcmp(char_ptr, needle, needle_len) == 0) {
+                if (std::memcmp(match_ptr, needle, needle_len) == 0) {
                     return match_ptr;
                 }
             }
