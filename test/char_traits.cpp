@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <betterstring.hpp>
+#include <betterstring/functions.hpp>
 #include <string>
 #include <string_view>
 

@@ -5,7 +5,7 @@
 #error Need AVX2
 #endif
 
-#include <betterstring.hpp>
+#include <betterstring/functions.hpp>
 
 static const char* simple_strrfind(const char* const s, const std::size_t count, const char ch) {
     for (std::size_t i = count; i != 0; --i) {

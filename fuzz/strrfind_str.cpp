@@ -5,7 +5,7 @@
 #error Need AVX2
 #endif
 
-#include <betterstring.hpp>
+#include <betterstring/functions.hpp>
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     if (Size < 1) return -1;

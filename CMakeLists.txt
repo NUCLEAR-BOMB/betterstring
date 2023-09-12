@@ -9,7 +9,10 @@ option(BUILD_FUZZ "" ${PROJECT_IS_TOP_LEVEL})
 option(USE_SANITIZERS "" ${PROJECT_IS_TOP_LEVEL})
 option(INSTALL_BETTERSTRING "" ${PROJECT_IS_TOP_LEVEL})
 
-add_library(betterstring INTERFACE "include/betterstring.hpp")
+add_library(betterstring INTERFACE
+    "include/betterstring/functions.hpp"
+    "include/betterstring/string_view.hpp"
+)
 
 if (NOT PROJECT_IS_TOP_LEVEL)
     set(include_as_system "SYSTEM")

@@ -1,5 +1,5 @@
 #include <benchmark/benchmark.h>
-#include <betterstring.hpp>
+#include <betterstring/functions.hpp>
 
 #ifdef __AVX2__
 
