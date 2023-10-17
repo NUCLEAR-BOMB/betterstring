@@ -60,6 +60,11 @@ TEST_F(string_view, data) {
     const bs::string_view strview(cstring);
     EXPECT_EQ(strview.data(), cstring);
 }
+TEST_F(string_view, dataend) {
+    const auto cstr = "hello";
+    const bs::string_view view(cstr);
+    EXPECT_EQ(view.dataend(), cstr + 5);
+}
 
 TEST_F(string_view, size_length) {
     EXPECT_EQ(str.size(), 11);
@@ -196,6 +201,9 @@ TEST_F(string_view, find) {
 
     EXPECT_TRUE(str.find('e').found());
     EXPECT_FALSE(str.find('p').found());
+
+    EXPECT_EQ(str.find('t', str.data() + 1).index(), 3);
+    EXPECT_EQ(str.find(" s", str.data() + 2).index(), 4);
 }
 
 TEST_F(string_view, rfind) {
@@ -390,6 +398,12 @@ TEST_F(string_view, strip_last) {
     EXPECT_EQ(str.strip_last("test string"), "");
     EXPECT_EQ(str.strip_last("!test string"), "test string");
     EXPECT_EQ(str.strip_last("test"), "test string");
+}
+
+TEST_F(string_view, idx) {
+    EXPECT_EQ(str.idx(str.data() + 2), 2);
+    EXPECT_EQ(str.idx(str.dataend()), str.size());
+    EXPECT_EQ(str.idx(str.data()), 0);
 }
 
 }

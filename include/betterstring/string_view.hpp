@@ -197,6 +197,7 @@ public:
     }
 
     BS_CONST_FN constexpr const_pointer data() const noexcept { return string_data; }
+    BS_CONST_FN constexpr const_pointer dataend() const noexcept { return data() + size(); }
 
     BS_CONST_FN constexpr size_type size() const noexcept { return string_size; }
     BS_CONST_FN constexpr size_type length() const noexcept { return size(); }
@@ -247,6 +248,10 @@ public:
         BS_VERIFY(sl.start < ssize && sl.start >= -ssize && sl.stop <= ssize && sl.stop > -ssize,
             "slice out of range");
         return string_view(data() + to_index(sl.start), to_index(sl.stop) - to_index(sl.start));
+    }
+
+    BS_CONST_FN constexpr size_type idx(const const_pointer ptr) const noexcept {
+        return static_cast<size_type>(ptr - data());
     }
 
     constexpr string_view substr(const size_type position) const noexcept {
@@ -301,6 +306,13 @@ public:
         BS_VERIFY(end <= size(), "end is out of range");
         if (start >= end) return make_find_r(nullptr, end);
         return make_find_r(traits_type::find(data() + start, end - start, ch), end);
+    }
+
+    constexpr this_find_result find(const string_view str, const const_pointer start) const noexcept {
+        return this->find(str, idx(start), size());
+    }
+    constexpr this_find_result find(const value_type ch, const const_pointer start) const noexcept {
+        return this->find(ch, idx(start), size());
     }
 
     constexpr this_find_result rfind(const value_type ch) const noexcept {
