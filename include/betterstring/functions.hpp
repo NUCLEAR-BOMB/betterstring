@@ -47,18 +47,57 @@ namespace detail {
     inline constexpr bool has_data_member = false;
     template<class T>
     inline constexpr bool has_data_member<T, std::void_t<decltype(std::declval<T&>().data())>>
-        = bs::is_character<std::remove_cv_t<std::remove_pointer_t<decltypedecltype(std::declval<T&>().data())>>>;
+        = bs::is_character<std::remove_cv_t<std::remove_pointer_t<decltype(std::declval<T&>().data())>>>;
+
+    template<class T, class = void> struct has_c_str_member : std::false_type {};
+    template<class T> struct has_c_str_member<T, std::void_t<decltype(std::declval<T&>().c_str())>> : std::true_type {};
 }
 
 template<class T>
-constexpr auto* cstr(const T& str) noexcept {
-    if constexpr (is_character<std::remove_cv_t<std::remove_pointer_t<T>>>
-                  || is_character<std::remove_cv_t<std::remove_extent_t<T>>>) {
+constexpr auto* cstr(T& str) noexcept {
+    if constexpr (is_character<std::remove_cv_t<std::remove_pointer_t<T>>>) {
+        return str;
+    } else if constexpr (detail::has_c_str_member<T>()) {
+        return str.c_str();
+    } else {
+        static_assert(detail::always_false<T>, "cannot get underlying string data");
+    }
+}
+template<class T, std::size_t N>
+constexpr auto* cstr(T(&array)[N]) noexcept {
+    return array;
+}
+
+template<class T>
+constexpr auto* data(T& str) noexcept {
+    if constexpr (is_character<std::remove_cv_t<std::remove_pointer_t<T>>>) {
         return str;
     } else if constexpr (detail::has_data_member<T>) {
         return str.data();
+    } else if constexpr (detail::has_c_str_member<T>()) {
+        return str.c_str();
     } else {
         static_assert(detail::always_false<T>, "cannot get underlying string data");
+    }
+}
+template<class T, std::size_t N>
+constexpr T* data(T(&array)[N]) noexcept {
+    return array;
+}
+
+namespace detail {
+    template<class T, class = void> struct has_size_method : std::false_type {};
+    template<class T> struct has_size_method<T, std::void_t<decltype(std::declval<T>().size())>>
+        : std::is_integral<decltype(std::declval<T>().size())> {};
+
+}
+
+template<class T>
+constexpr auto size(T& x) noexcept {
+    if constexpr (detail::has_size_method<T>()) {
+        return x.size();
+    } else {
+        static_assert(detail::always_false<T>, "cannot get underlying container size");
     }
 }
 
@@ -249,6 +288,17 @@ constexpr T* strfind(T* const haystack, const std::size_t count, const detail::t
 template<class T, std::size_t N>
 constexpr T* strfind(T* const haystack, const std::size_t count, const detail::type_identity_t<T>(&needle)[N]) noexcept {
     return strfind(haystack, count, needle, N - 1);
+}
+
+template<class Haystack, class Needle>
+constexpr auto strfind(Haystack& haystack, const Needle& needle) noexcept
+    -> decltype(bs::strfind(haystack.data(), haystack.size(), needle.data(), needle.size())) {
+    return bs::strfind(haystack.data(), haystack.size(), needle.data(), needle.size());
+}
+template<class Haystack, class Needle>
+constexpr auto strfind(Haystack& haystack, const Needle needle) noexcept
+    -> decltype(bs::strfind(haystack.data(), haystack.size(), needle)) {
+    return bs::strfind(haystack.data(), haystack.size(), needle);
 }
 
 #if BS_USE_AVX2
