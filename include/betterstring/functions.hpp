@@ -104,16 +104,11 @@ namespace detail {
     template<class T>
     struct is_character_impl : std::false_type {};
     template<> struct is_character_impl<char> : std::true_type {};
-    template<> struct is_character_impl<const char> : std::true_type {};
     template<> struct is_character_impl<wchar_t> : std::true_type {};
-    template<> struct is_character_impl<const wchar_t> : std::true_type {};
     template<> struct is_character_impl<char16_t> : std::true_type {};
-    template<> struct is_character_impl<const char16_t> : std::true_type {};
     template<> struct is_character_impl<char32_t> : std::true_type {};
-    template<> struct is_character_impl<const char32_t> : std::true_type {};
 #if __cplusplus >= 202002L
     template<> struct is_character_impl<char8_t> : std::true_type {};
-    template<> struct is_character_impl<const char8_t> : std::true_type {};
 #endif
 }
 
@@ -423,7 +418,7 @@ namespace detail {
 
 template<class T>
 constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_identity_t<T> ch) noexcept {
-    static_assert(is_character<T>);
+    static_assert(is_character<std::remove_const_t<T>>);
 #if BS_USE_AVX2
     if (!detail::is_constant_evaluated()) {
         return const_cast<T*>(detail::avx2_strrfind(str, count, ch));
@@ -442,7 +437,7 @@ constexpr T* strrfind(T (&str)[N], const detail::type_identity_t<T> ch) noexcept
 
 template<class T>
 constexpr T* cstr(T* const str) noexcept {
-    static_assert(is_character<T>);
+    static_assert(is_character<std::remove_const_t<T>>);
     return str;
 }
 
