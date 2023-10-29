@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include <betterstring/functions.hpp>
+#include <betterstring/splited_string.hpp>
 
 namespace bs
 {
@@ -99,9 +100,6 @@ private:
     size_type string_size;
     const CharT* find_ptr;
 };
-
-template<class>
-struct splited_string;
 
 struct slice {
     using index_type = std::ptrdiff_t;
@@ -377,8 +375,8 @@ public:
         return traits_type::findstr(data(), size(), str.data(), str.size()) != nullptr;
     }
 
-    constexpr splited_string<traits_type> split(const string_view separator) const noexcept {
-        return splited_string<traits_type>(*this, separator);
+    constexpr splited_string<string_view, string_view> split(const string_view separator) const noexcept {
+        return splited_string<string_view, string_view>(*this, separator);
     }
 
     constexpr size_type count(const value_type ch) const noexcept {
@@ -558,59 +556,6 @@ using u32string_view = string_view<char_traits<char32_t>>;
 #if __cplusplus >= 202002L
 using u8string_view = string_view<char_traits<char8_t>>;
 #endif
-
-template<class Traits>
-struct splited_string {
-public:
-    using separator_type = string_view<Traits>;
-    using string_type = string_view<Traits>;
-    using size_type = typename Traits::size_type;
-
-    constexpr splited_string(const string_type str, const separator_type sep) noexcept
-        : string(str), separator(sep) {}
-
-    struct iterator_end {};
-
-    class iterator {
-    public:
-        constexpr iterator(const string_type str, const separator_type sep) noexcept
-            : string(str), separator(sep), current_end(0) {}
-
-        constexpr string_type operator*() noexcept {
-            current_end = string.find(separator);
-            return string(0, current_end);
-        }
-        constexpr iterator& operator++() noexcept {
-            const auto remove_num = string.size() != current_end ? separator.size() : 0;
-            string.remove_prefix(current_end + remove_num);
-            return *this;
-        }
-        constexpr bool operator!=(const iterator_end) const noexcept {
-            return !string.empty();
-        }
-
-    private:
-        string_type string;
-        const separator_type separator;
-        size_type current_end;
-    };
-
-    constexpr iterator begin() const noexcept { return iterator(string, separator); }
-    constexpr iterator_end end() const noexcept { return iterator_end(); }
-
-    constexpr string_type operator[](size_type index) const noexcept {
-        size_type i = 0;
-        for (; index > 0; --index) {
-            i = string.find(separator, i) + separator.size();
-        }
-        const auto end = string.find(separator, i);
-        return string(i, end);
-    }
-
-private:
-    const string_type string;
-    const separator_type separator;
-};
 
 template<class Traits>
 constexpr std::size_t strlen(const string_view<Traits> str) noexcept {

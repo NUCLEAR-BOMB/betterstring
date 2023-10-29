@@ -12,6 +12,7 @@ option(INSTALL_BETTERSTRING "" ${PROJECT_IS_TOP_LEVEL})
 add_library(betterstring INTERFACE
     "include/betterstring/functions.hpp"
     "include/betterstring/string_view.hpp"
+    "include/betterstring/splited_string.hpp"
 )
 
 if (NOT PROJECT_IS_TOP_LEVEL)
