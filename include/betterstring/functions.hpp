@@ -95,7 +95,7 @@ namespace detail {
 template<class T>
 constexpr auto array_size(const T& x) noexcept {
     if constexpr (is_character<T>) {
-        return 1;
+        return std::size_t(1);
     } else if constexpr (detail::has_size_method<T>()) {
         return x.size();
     } else {

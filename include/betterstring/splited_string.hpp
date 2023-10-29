@@ -28,15 +28,13 @@ public:
         constexpr iterator(string_type str, separator_type sep) noexcept
             : string(str), separator(sep) {}
 
-        constexpr iterator& operator=(const iterator&) noexcept = default;
-
         constexpr string_type operator*() noexcept {
             current_end = string.find(separator);
             return string(0, current_end);
         }
 
         constexpr iterator& operator++() noexcept {
-            const auto remove_num = string.size() != current_end ? bs::array_size(separator) : 0;
+            const size_type remove_num = string.size() != current_end ? bs::array_size(separator) : 0;
             string.remove_prefix(current_end + remove_num);
             return *this;
         }
