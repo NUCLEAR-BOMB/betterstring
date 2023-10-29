@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <vector>
 
 #include <betterstring/string_view.hpp>
 #include "tools.hpp"
@@ -252,9 +253,16 @@ TEST_F(string_view, split) {
     EXPECT_EQ(str.split(" ").count(), 2);
     EXPECT_EQ(bs::string_view("  ").split(" ")[1], "");
 
+    const auto vec1 = std::vector(str.split(" ").begin(), str.split(" ").end());
+    EXPECT_EQ(vec1, std::vector<bs::string_view<>>({"test", "string"}));
+
     EXPECT_EQ(str.split(' ')[0], "test");
     EXPECT_EQ(str.split(' ')[1], "string");
     EXPECT_EQ(str.split(' ').count(), 2);
+
+    const auto vec2 = std::vector(str.split(' ').begin(), str.split(' ').end());
+    EXPECT_EQ(vec2, std::vector<bs::string_view<>>({"test", "string"}));
+
 }
 
 TEST_F(string_view, strip) {
