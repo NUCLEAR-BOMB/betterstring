@@ -230,21 +230,21 @@ public:
     template<class T1, class T2 = slice_end_t, std::enable_if_t<std::is_unsigned_v<T1>, int> = 0>
     constexpr string_view operator()(const T1 start, const T2 raw_finish) const noexcept {
         const auto finish = unwrap_slice_finish<T1>(raw_finish);
-        BS_VERIFY(start < size() && finish <= size(), "slice out of range");
+        BS_VERIFY(start <= size() && finish <= size(), "slice out of range");
         return string_view(data() + start, finish - start);
     }
     template<class T1, class T2 = slice_end_t, std::enable_if_t<std::is_signed_v<T1>, int> = 0>
     constexpr string_view operator()(const T1 start, const T2 raw_finish) const noexcept {
         const auto finish = unwrap_slice_finish<T1>(raw_finish);
         const T1 ssize = static_cast<T1>(size());
-        BS_VERIFY(start < ssize && start >= -ssize && finish <= ssize && finish > -ssize,
+        BS_VERIFY(start <= ssize && start >= -ssize && finish <= ssize && finish >+ -ssize,
             "slice out of range");
         return string_view(data() + to_index(start), to_index(finish) - to_index(start));
     }
 
     constexpr string_view operator[](const slice sl) const noexcept {
         const auto ssize = static_cast<typename slice::index_type>(size());
-        BS_VERIFY(sl.start < ssize && sl.start >= -ssize && sl.stop <= ssize && sl.stop > -ssize,
+        BS_VERIFY(sl.start <= ssize && sl.start >= -ssize && sl.stop <= ssize && sl.stop >+ -ssize,
             "slice out of range");
         return string_view(data() + to_index(sl.start), to_index(sl.stop) - to_index(sl.start));
     }

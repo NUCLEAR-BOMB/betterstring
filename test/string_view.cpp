@@ -259,6 +259,8 @@ TEST_F(string_view, split) {
     EXPECT_EQ(str.split(' ')[0], "test");
     EXPECT_EQ(str.split(' ')[1], "string");
     EXPECT_EQ(str.split(' ').count(), 2);
+    EXPECT_EQ(str.split('g')[0], "test strin");
+    EXPECT_EQ(str.split('g')[1], "");
 
     const auto vec2 = std::vector(str.split(' ').begin(), str.split(' ').end());
     EXPECT_EQ(vec2, std::vector<bs::string_view<>>({"test", "string"}));

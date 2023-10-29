@@ -1,6 +1,7 @@
 #pragma once
 
 #include <betterstring/functions.hpp>
+#include <betterstring/detail/preprocessor.hpp>
 #include <iterator>
 
 namespace bs {
@@ -57,7 +58,8 @@ public:
         for (; index > 0; --index) {
             i = string.find(separator, i) + bs::array_size(separator);
         }
-        const auto end = string.find(separator, i);
+        BS_VERIFY(i <= string.size(), "out of range");
+        const size_type end = string.find(separator, i);
         return string(i, end);
     }
     constexpr size_type count() const noexcept {
