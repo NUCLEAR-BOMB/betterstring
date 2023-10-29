@@ -379,6 +379,9 @@ public:
     constexpr splited_string<string_view, string_view> split(const string_view separator) const noexcept {
         return splited_string<string_view, string_view>(*this, separator);
     }
+    constexpr splited_string<string_view, value_type> split(const value_type character) const noexcept {
+        return splited_string<string_view, value_type>(*this, character);
+    }
 
     constexpr size_type count(const value_type ch) const noexcept {
         size_type result = 0;

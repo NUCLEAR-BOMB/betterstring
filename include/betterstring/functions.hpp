@@ -93,8 +93,10 @@ namespace detail {
 }
 
 template<class T>
-constexpr auto size(T& x) noexcept {
-    if constexpr (detail::has_size_method<T>()) {
+constexpr auto array_size(const T& x) noexcept {
+    if constexpr (is_character<T>) {
+        return 1;
+    } else if constexpr (detail::has_size_method<T>()) {
         return x.size();
     } else {
         static_assert(detail::always_false<T>, "cannot get underlying container size");

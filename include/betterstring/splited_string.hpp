@@ -4,7 +4,7 @@
 
 namespace bs {
 
-template<class Separator, class String>
+template<class String, class Separator>
 struct splited_string {
 public:
     using separator_type = Separator;
@@ -46,10 +46,13 @@ public:
     constexpr string_type operator[](size_type index) const noexcept {
         size_type i = 0;
         for (; index > 0; --index) {
-            i = string.find(separator, i) + separator.size();
+            i = string.find(separator, i) + bs::array_size(separator);
         }
         const auto end = string.find(separator, i);
         return string(i, end);
+    }
+    constexpr size_type count() const noexcept {
+        return string.count(separator) + 1;
     }
 
 private:
