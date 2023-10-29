@@ -185,6 +185,8 @@ TEST_F(functions, strrfind_string) {
 TEST_F(functions, cstr) {
     EXPECT_EQ(bs::cstr(cstr), cstr);
     EXPECT_EQ(bs::cstr(str_view), str_view.data());
+    decltype(auto) a = "h";
+    EXPECT_EQ(bs::cstr(a), a);
 }
 
 TEST_F(functions, strfill) {

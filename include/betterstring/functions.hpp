@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <cwchar>
+#include <type_traits>
 
 #include <betterstring/detail/preprocessor.hpp>
 
@@ -17,6 +18,9 @@ namespace detail {
         return false;
 #endif
     }
+
+    template<class>
+    inline constexpr bool always_false = false;
 
     template<class T>
     struct type_identity { using type = T; };
@@ -37,6 +41,26 @@ namespace detail {
 
 template<class T>
 inline constexpr bool is_character = detail::is_character_impl<T>();
+
+namespace detail {
+    template<class T, class = void>
+    inline constexpr bool has_data_member = false;
+    template<class T>
+    inline constexpr bool has_data_member<T, std::void_t<decltype(std::declval<T&>().data())>>
+        = bs::is_character<std::remove_cv_t<std::remove_pointer_t<decltypedecltype(std::declval<T&>().data())>>>;
+}
+
+template<class T>
+constexpr auto* cstr(const T& str) noexcept {
+    if constexpr (is_character<std::remove_cv_t<std::remove_pointer_t<T>>>
+                  || is_character<std::remove_cv_t<std::remove_extent_t<T>>>) {
+        return str;
+    } else if constexpr (detail::has_data_member<T>) {
+        return str.data();
+    } else {
+        static_assert(detail::always_false<T>, "cannot get underlying string data");
+    }
+}
 
 template<class T>
 constexpr std::size_t strlen(const T* const str) noexcept {
@@ -356,12 +380,6 @@ constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_
 template<class T, std::size_t N>
 constexpr T* strrfind(T (&str)[N], const detail::type_identity_t<T> ch) noexcept {
     return bs::strrfind(str, N - 1, ch);
-}
-
-template<class T>
-constexpr T* cstr(T* const str) noexcept {
-    static_assert(is_character<std::remove_const_t<T>>);
-    return str;
 }
 
 template<class T>
