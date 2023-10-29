@@ -6,6 +6,7 @@
 #include <cstring>
 #include <algorithm>
 
+#include <betterstring/detail/preprocessor.hpp>
 #include <betterstring/functions.hpp>
 #include <betterstring/splited_string.hpp>
 
