@@ -1,10 +1,8 @@
 
 include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
-include("${PROJECT_SOURCE_DIR}/cmake/enable_avx2.cmake")
 
 add_executable(betterstring-benchmark strrfind.cpp)
 target_add_warnings(betterstring-benchmark)
-target_enable_avx2(betterstring-benchmark)
 
 target_link_libraries(betterstring-benchmark PRIVATE betterstring)
 

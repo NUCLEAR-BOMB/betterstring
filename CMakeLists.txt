@@ -9,25 +9,34 @@ option(BUILD_FUZZ "" ${PROJECT_IS_TOP_LEVEL})
 option(USE_SANITIZERS "" ${PROJECT_IS_TOP_LEVEL})
 option(INSTALL_BETTERSTRING "" ${PROJECT_IS_TOP_LEVEL})
 
-add_library(betterstring INTERFACE
+include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
+
+add_library(betterstring
     "include/betterstring/functions.hpp"
     "include/betterstring/string_view.hpp"
     "include/betterstring/splited_string.hpp"
     "include/betterstring/detail/preprocessor.hpp"
+
+    "src/dispatch/default.cpp"
+    "src/dispatch/avx2.cpp"
+    "src/dispatch/utils.hpp"
 )
+set_property(SOURCE "src/dispatch/avx2.cpp" APPEND PROPERTY COMPILE_OPTIONS "/arch:AVX2")
+
+target_add_warnings(betterstring)
 
 if (NOT PROJECT_IS_TOP_LEVEL)
     set(include_as_system "SYSTEM")
 endif()
 
-target_include_directories(betterstring ${include_as_system} INTERFACE
+target_include_directories(betterstring ${include_as_system} PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-target_compile_features(betterstring INTERFACE cxx_std_17)
+target_compile_features(betterstring PUBLIC cxx_std_17)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(betterstring INTERFACE /Zc:__cplusplus /Zc:inline /Zc:preprocessor)
+    target_compile_options(betterstring PUBLIC /Zc:__cplusplus /Zc:inline /Zc:preprocessor)
 endif()
 
 if (BUILD_TEST)

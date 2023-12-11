@@ -303,70 +303,17 @@ constexpr auto strfind(Haystack& haystack, const Needle needle) noexcept
     return bs::strfind(haystack.data(), haystack.size(), needle);
 }
 
-#if BS_USE_AVX2
 namespace detail {
-    template<class T>
-    unsigned int lzcnt(const T x) noexcept {
-#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
-        if constexpr (sizeof(T) <= sizeof(unsigned int)) {
-            return unsigned(__builtin_clz(x));
-        } else if constexpr (sizeof(T) <= sizeof(unsigned long)) {
-            return unsigned(__builtin_clzl(x));
-        } else {
-            return unsigned(__builtin_clzll(x));
-        }
-#else
-        if constexpr (sizeof(T) <= sizeof(unsigned int)) {
-            return _lzcnt_u32(x);
-        } else {
-            return _lzcnt_u64(x);
-        }
-#endif
-    }
-
-    template<class T>
-    const T* avx2_strrfind_string(const T* const str, const std::size_t count, const T* const needle, const std::size_t needle_len) {
-        if (needle_len > count) return nullptr;
-        if (needle_len == 0) return str + count;
-
-        const T* char_ptr = str + (count - needle_len) + 1;
-
-        while (char_ptr >= str + sizeof(__m256)) {
-            char_ptr -= sizeof(__m256);
-
-            const __m256i loaded = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(char_ptr));
-            const __m256i cmp = _mm256_cmpeq_epi8(loaded, _mm256_set1_epi8(needle[0]));
-            std::uint32_t cmp_mask = static_cast<std::uint32_t>(_mm256_movemask_epi8(cmp));
-
-            for (const T* match_ptr = char_ptr + sizeof(__m256); cmp_mask != 0;) {
-                const unsigned lzcnt_result = bs::detail::lzcnt(cmp_mask) + 1;
-
-                cmp_mask = std::uint32_t(std::uint64_t(cmp_mask) << lzcnt_result);
-
-                match_ptr -= lzcnt_result;
-                if (std::memcmp(match_ptr, needle, needle_len) == 0) {
-                    return match_ptr;
-                }
-            }
-        }
-        for (; char_ptr != str;) {
-            --char_ptr;
-            if (std::memcmp(char_ptr, needle, needle_len) == 0) {
-                return char_ptr;
-            }
-        }
-        return nullptr;
-    }
+    extern const char* strrfind_impl(const char* const haystack, const std::size_t count, const char* const needle, const std::size_t needle_len) noexcept;
 }
-#endif
 
 template<class T>
 constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::type_identity_t<T>* const needle, const std::size_t needle_len) noexcept {
-#if BS_USE_AVX2
-    if (!detail::is_constant_evaluated()) {
-        return const_cast<T*>(detail::avx2_strrfind_string(haystack, count, needle, needle_len));
+    if constexpr (std::is_same_v<std::remove_const_t<T>, char>) {
+        if (!detail::is_constant_evaluated()) {
+            return const_cast<T*>(bs::detail::strrfind_impl(haystack, count, needle, needle_len));
+        }
     }
-#endif
     if (needle_len > count) return nullptr;
     if (needle_len == 0) return haystack + count;
 
@@ -384,7 +331,7 @@ constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::
     return bs::strrfind(haystack, count, needle, N - 1);
 }
 
-#if BS_USE_AVX2
+#if 0
 namespace detail {
     template<class T>
     const T* avx2_strrfind(const T* const string, std::size_t count, const T search_character) {
@@ -418,7 +365,7 @@ namespace detail {
 template<class T>
 constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_identity_t<T> ch) noexcept {
     static_assert(is_character<std::remove_const_t<T>>);
-#if BS_USE_AVX2
+#if 0
     if (!detail::is_constant_evaluated()) {
         return const_cast<T*>(detail::avx2_strrfind(str, count, ch));
     }

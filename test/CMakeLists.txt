@@ -1,6 +1,5 @@
 
 include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
-include("${PROJECT_SOURCE_DIR}/cmake/enable_avx2.cmake")
 
 add_executable(betterstring-test
     main.cpp string_view.cpp functions.cpp tools.hpp char_traits.cpp
@@ -8,7 +7,6 @@ add_executable(betterstring-test
 target_add_warnings(betterstring-test)
 target_link_libraries(betterstring-test PRIVATE betterstring)
 target_compile_definitions(betterstring-test PRIVATE BS_DONT_INCLUDE_STRING)
-target_enable_avx2(betterstring-test)
 
 include(FetchContent)
 FetchContent_Declare(
