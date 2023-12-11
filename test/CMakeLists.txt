@@ -36,5 +36,8 @@ gtest_discover_tests(betterstring-test)
 if (USE_CLANG_TIDY)
     include("${PROJECT_SOURCE_DIR}/cmake/clang_tidy.cmake")
     set_target_properties(betterstring-test PROPERTIES EXPORT_COMPILE_COMMANDS TRUE)
-    add_clang_tidy_target(tidy)
+    add_clang_tidy_target(NAME tidy
+        CONFIG "${PROJECT_SOURCE_DIR}/.clang-tidy"
+        USE_COLOR QUIET SHOW_TIME
+    )
 endif()
