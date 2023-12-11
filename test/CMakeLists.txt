@@ -27,7 +27,7 @@ FetchContent_MakeAvailable(googletest)
 target_link_libraries(betterstring-test PRIVATE GTest::gtest)
 if (USE_SANITIZERS)
     include("${PROJECT_SOURCE_DIR}/cmake/sanitizers.cmake")
-    target_add_sanitizer(betterstring-test gtest)
+    target_add_sanitizer(betterstring-test SANITIZERS Address UndefinedBehavior)
 endif()
 
 include(GoogleTest)
