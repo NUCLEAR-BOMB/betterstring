@@ -21,7 +21,9 @@ add_library(betterstring
     "src/dispatch/avx2.cpp"
     "src/dispatch/utils.hpp"
 )
-set_property(SOURCE "src/dispatch/avx2.cpp" APPEND PROPERTY COMPILE_OPTIONS "/arch:AVX2")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set_property(SOURCE "src/dispatch/avx2.cpp" APPEND PROPERTY COMPILE_OPTIONS "/arch:AVX2")
+endif()
 
 target_add_warnings(betterstring)
 

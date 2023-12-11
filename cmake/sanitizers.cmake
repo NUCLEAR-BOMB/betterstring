@@ -31,8 +31,10 @@ function(target_add_sanitizer target)
         get_target_libraries(libraries ${target})
         if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
             if (sanitizers_Address)
-                set_property(TARGET ${target} ${libraries} APPEND PROPERTY COMPILE_OPTIONS /fsanitize=address)
-                target_link_options(${target} PRIVATE /INCREMENTAL:NO)
+                set_property(TARGET ${target} ${libraries} APPEND PROPERTY COMPILE_OPTIONS
+                    $<$<CONFIG:Debug>:/fsanitize=address>
+                )
+                target_link_options(${target} PRIVATE $<$<CONFIG:Debug>:/INCREMENTAL:NO>)
             endif()
             return()
         elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")

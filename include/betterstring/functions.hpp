@@ -304,7 +304,7 @@ constexpr auto strfind(Haystack& haystack, const Needle needle) noexcept
 }
 
 namespace detail {
-    extern const char* strrfind_impl(const char* const haystack, const std::size_t count, const char* const needle, const std::size_t needle_len) noexcept;
+    extern const char*(*strrfind_impl)(const char*, std::size_t, const char*, std::size_t);
 }
 
 template<class T>
