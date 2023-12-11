@@ -4,16 +4,22 @@
     #include <string>
 #endif
 
-#ifdef BS_NO_AVX2
-    #define BS_USE_AVX2 0
-#elif defined(__AVX2__)
-    #define BS_USE_AVX2 1
+#if defined(__clang__)
+    #define BS_COMP_CLANG 1
+    #define BS_COMP_GCC   0
+    #define BS_COMP_MSVC  0
+#elif defined(__GNUC__) || defined(__GNUG__)
+    #define BS_COMP_CLANG 0
+    #define BS_COMP_GCC   1
+    #define BS_COMP_MSVC  0
+#elif defined(_MSC_VER)
+    #define BS_COMP_CLANG 0
+    #define BS_COMP_GCC   0
+    #define BS_COMP_MSVC  1
 #else
-    #define BS_USE_AVX2 0
-#endif
-
-#if BS_USE_AVX2
-#include <immintrin.h>
+    #define BS_COMP_CLANG 0
+    #define BS_COMP_GCC   0
+    #define BS_COMP_MSVC  0
 #endif
 
 #ifdef __has_builtin
@@ -24,9 +30,9 @@
 
 #if BS_HAS_BUILTIN(__builtin_debugtrap)
     #define BS_DEBUG_BREAK __builtin_debugtrap()
-#elif defined(__GNUC__) || defined(__GNUG__)
+#elif BS_COMP_GCC
     #define BS_DEBUG_BREAK __builtin_trap()
-#elif defined(_MSC_VER)
+#elif BS_COMP_MSVC
     #define BS_DEBUG_BREAK __debugbreak()
 #else
     #include <csignal>
@@ -42,16 +48,16 @@
 
 #if BS_HAS_BUILTIN(__builtin_assume)
     #define BS_ASSUME(expression) __builtin_assume(expression)
-#elif defined(__GNUC__) || defined(__GNUG__)
+#elif BS_COMP_GCC
     #define BS_ASSUME(expression) \
         ((expression) ? (void)0 : (void)__builtin_unreachable())
-#elif defined(_MSC_VER)
+#elif BS_COMP_MSVC
     #define BS_ASSUME(expression) __assume(expression)
 #else
     #define BS_ASSUME(expression) ((void)0)
 #endif
 
-#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+#if BS_COMP_CLANG || BS_COMP_GCC
     #define BS_CONST_FN [[gnu::const]]
 #elif defined(_MSC_VER)
     #define BS_CONST_FN __declspec(noalias)
@@ -59,16 +65,34 @@
     #define BS_CONST_FN
 #endif
 
-#if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+#if BS_COMP_CLANG || BS_COMP_GCC
     #define BS_UNREACHABLE() __builtin_unreachable()
-#elif defined(_MSC_VER)
+#elif BS_COMP_MSVC
     #define BS_UNREACHABLE() __assume(false)
 #else
     #define BS_UNREACHABLE()
 #endif
 
+#if BS_COMP_CLANG || BS_COMP_GCC
+    #define BS_FLATTEN [[gnu::flatten]]
+#elif BS_COMP_MSVC
+    #define BS_FLATTEN [[msvc::flatten]]
+#else
+    #define BS_FLATTEN
+#endif
+
+#if BS_COMP_CLANG
+    #define BS_FORCEINLINE [[clang::always_inline]]
+#elif BS_COMP_GCC
+    #define BS_FORCEINLINE [[gnu::always_inline]]
+#elif BS_COMP_MSVC
+    #define BS_FORCEINLINE [[msvc::forceinline]]
+#else
+    #define BS_FORCEINLINE
+#endif
+
 #ifndef NDEBUG
-    #if defined(__clang__) || defined(__GNUC__) || defined(__GNUG__)
+    #if BS_COMP_CLANG || BS_COMP_GCC
         #define BS_VERIFY(expression, message) \
             (__builtin_expect((expression), 1) ? (void)0 : BS_ABORT(expression, message))
     #else
