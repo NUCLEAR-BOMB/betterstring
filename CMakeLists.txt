@@ -22,7 +22,7 @@ add_library(betterstring
     "src/dispatch/utils.hpp"
 )
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set_property(SOURCE "src/dispatch/avx2.cpp" APPEND PROPERTY COMPILE_OPTIONS "/arch:AVX2")
+    set_property(SOURCE "src/dispatch/avx2.cpp" APPEND PROPERTY COMPILE_OPTIONS /arch:AVX2 /openmp)
 endif()
 
 target_add_warnings(betterstring)

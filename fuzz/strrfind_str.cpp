@@ -1,10 +1,6 @@
 #include <cinttypes>
 #include <cassert>
 
-#ifndef __AVX2__
-#error Need AVX2
-#endif
-
 #include <betterstring/functions.hpp>
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {

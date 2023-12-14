@@ -1,7 +1,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+
 #include <intrin.h>
+#include <immintrin.h>
 
 #include <betterstring/detail/preprocessor.hpp>
 
@@ -25,6 +27,51 @@ namespace {
         }
     #endif
     }
+
+    [[maybe_unused]] BS_FLATTEN
+    const char* strrfind_string_avx2_impl(const char* const str, const std::size_t count, const char* const needle, const std::size_t needle_len) {
+        if (needle_len > count) return nullptr;
+        if (needle_len == 0) return str + count;
+
+        //if (count < 32) {
+        //    for (const char* it = str + count - needle_len; it != (str - 1); --it) {
+        //        if (std::memcmp(it, needle, needle_len) == 0) {
+        //            return it;
+        //        }
+        //    }
+        //    return nullptr;
+        //}
+
+        const __m256i first = _mm256_set1_epi8(needle[0]);
+        const __m256i last  = _mm256_set1_epi8(needle[needle_len - 1]);
+
+        const char* str_ptr = str + count;
+        while (str_ptr >= str) {
+            str_ptr -= sizeof(__m256i);
+
+            // Accesses string out of bounds?
+            const __m256i block_first = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(str_ptr - needle_len + 1));
+            const __m256i block_last = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(str_ptr));
+
+            const __m256i eq_first = _mm256_cmpeq_epi8(block_first, first);
+            const __m256i eq_last = _mm256_cmpeq_epi8(block_last, last);
+
+            std::uint32_t mask = static_cast<std::uint32_t>(_mm256_movemask_epi8(_mm256_and_si256(eq_first, eq_last)));
+
+            const char* const match_ptr = str_ptr - needle_len + 1 + sizeof(__m256i);
+            while (mask != 0) {
+                const unsigned match_pos = lzcnt(mask) + 1;
+
+                //if (std::memcmp(match_ptr - match_pos + 1, needle + 1, needle_len - 2) == 0) {
+                if (std::memcmp(match_ptr - match_pos, needle, needle_len) == 0) {
+                    return match_ptr - match_pos;
+                }
+                mask <<= match_pos;
+                mask >>= match_pos;
+            }
+        }
+        return nullptr;
+    }
 }
 
 namespace bs::detail {
@@ -33,6 +80,7 @@ namespace bs::detail {
 
     BS_FLATTEN
     const char* strrfind_string_avx2(const char* const str, const std::size_t count, const char* const needle, const std::size_t needle_len) {
+#if 0
         if (needle_len > count) return nullptr;
         if (needle_len == 0) return str + count;
 
@@ -63,5 +111,8 @@ namespace bs::detail {
             }
         }
         return nullptr;
+#else
+        return strrfind_string_avx2_impl(str, count, needle, needle_len);
+#endif
     }
 }

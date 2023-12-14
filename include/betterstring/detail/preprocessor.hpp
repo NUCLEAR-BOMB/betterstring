@@ -102,3 +102,9 @@
 #else
     #define BS_VERIFY(expression, message) BS_ASSUME(expression)
 #endif
+
+#ifdef __AVX2__
+    #define BS_ARCH_AVX2 1
+#else
+    #define BS_ARCH_AVX2 0
+#endif
