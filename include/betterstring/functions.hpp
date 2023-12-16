@@ -175,7 +175,8 @@ constexpr void strcopy(T* const dest, const std::size_t dest_size, const T(&src)
 template<class T>
 constexpr int strcomp(const T* const left, const T* const right, const std::size_t count) noexcept {
     static_assert(is_character<T>);
-    BS_VERIFY(left != nullptr && right != nullptr, "left or right is null pointer");
+    BS_VERIFY(left != nullptr, "left is null pointer");
+    BS_VERIFY(right != nullptr, "right is null pointer");
 #if BS_HAS_BUILTIN(__builtin_wmemcmp) || defined(_MSC_VER)
     if constexpr (std::is_same_v<T, wchar_t>) {
         return __builtin_wmemcmp(left, right, count);
@@ -203,7 +204,8 @@ constexpr int strcomp(const T* const left, const T* const right, const std::size
 
 template<class T>
 constexpr int strcomp(const T* const left, const std::size_t left_len, const T* const right, const std::size_t right_len) noexcept {
-    BS_VERIFY(left != nullptr && right != nullptr, "left or right is null pointer");
+    BS_VERIFY(left != nullptr, "left is null pointer");
+    BS_VERIFY(right != nullptr, "right is null pointer");
     if (left_len > right_len) return 1;
     if (left_len < right_len) return -1;
     return bs::strcomp(left, right, left_len);
