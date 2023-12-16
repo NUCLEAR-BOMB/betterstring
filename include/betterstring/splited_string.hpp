@@ -30,23 +30,26 @@ public:
             : string(str), separator(sep) {}
 
         constexpr string_type operator*() noexcept {
-            current_end = string.find(separator);
-            return string(0, current_end);
+            current_end = string.find(separator, current_begin);
+            return string(current_begin, current_end);
         }
 
         constexpr iterator& operator++() noexcept {
-            const size_type remove_num = string.size() != current_end ? bs::array_size(separator) : 0;
-            string.remove_prefix(current_end + remove_num);
+            current_begin = current_end + bs::array_size(separator);
             return *this;
         }
+
         constexpr bool operator!=(const iterator&) const noexcept {
-            return !string.empty();
+            return current_end != string.size();
         }
-        constexpr bool operator==(const iterator& x) const noexcept { return !(*this == x); }
+        constexpr bool operator==(const iterator&) const noexcept {
+            return current_end == string.size();
+        }
 
     private:
         string_type string;
         separator_type separator;
+        size_type current_begin = 0;
         size_type current_end = 0;
     };
 

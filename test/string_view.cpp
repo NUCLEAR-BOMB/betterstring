@@ -1,37 +1,35 @@
 #include <betterstring/string_view.hpp>
+#include <array>
 #include "tools.hpp"
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_all.hpp>
+
+using namespace bs::literals;
 
 namespace {
 
-#if 0
-
-struct string_view : ::testing::Test {
-    bs::string_view<> str{"test string"};
-    static constexpr bs::string_view<> const_str{"test string"};
-};
-
-TEST_F(string_view, constructor) {
+TEST_CASE("constructor", "[string_view]") {
     const bs::string_view<> empty_str;
-    EXPECT_EQ(empty_str.size(), 0);
-    EXPECT_EQ(empty_str.data(), nullptr);
+    CHECK(empty_str.size() == 0);
+    CHECK(empty_str.data() == nullptr);
 
-    const bs::string_view<> copy_str(str);
-    EXPECT_EQ(copy_str, str);
+    const bs::string_view<> copy_str("test string"_sv);
+    CHECK(copy_str == "test string"_sv);
 
     const bs::string_view<> cut_str("test string", 4);
-    EXPECT_EQ(cut_str, "test");
+    CHECK(cut_str == "test");
 
     const bs::string_view<> cstr_view("test str");
-    EXPECT_EQ(cstr_view, "test str");
+    CHECK(cstr_view == "test str");
 
     constexpr auto cstring = "123456789";
     const bs::string_view<> range_str(cstring + 1, cstring + 7);
-    EXPECT_EQ(range_str, "234567");
+    CHECK(range_str == "234567");
 }
 
-TEST_F(string_view, begin_end) {
+TEST_CASE("begin, end", "[string_view]") {
+    const bs::string_view str = "test string";
     (void)str.begin();
     (void)str.cbegin();
     (void)str.crbegin();
@@ -41,387 +39,411 @@ TEST_F(string_view, begin_end) {
     (void)str.crend();
 }
 
-TEST_F(string_view, subscript) {
-    EXPECT_EQ(str[0], 't');
-    EXPECT_EQ(str[10], 'g');
+TEST_CASE("subscript", "[string_view]") {
+    const bs::string_view str = "test string";
 
-    EXPECT_EQ(str[1u], 'e');
-    EXPECT_EQ(str[2u], 's');
+    CHECK(str[0] == 't');
+    CHECK(str[10] == 'g');
 
-    EXPECT_EQ(str[-1], 'g');
-    EXPECT_EQ(str[-11], 't');
+    CHECK(str[1u] == 'e');
+    CHECK(str[2u] == 's');
+
+    CHECK(str[-1] == 'g');
+    CHECK(str[-11] == 't');
 }
 
-TEST_F(string_view, front_back) {
-    EXPECT_EQ(str.front(), 't');
-    EXPECT_EQ(str.back(), 'g');
+TEST_CASE("front, back", "[string_view]") {
+    const bs::string_view str = "test string";
+
+    CHECK(str.front() == 't');
+    CHECK(str.back() == 'g');
 }
 
-TEST_F(string_view, data) {
-    const auto cstring = "hello world";
+TEST_CASE("data", "[string_view]") {
+    const char* const cstring = "hello world";
     const bs::string_view strview(cstring);
-    EXPECT_EQ(strview.data(), cstring);
+    CHECK(strview.data() == cstring);
 }
-TEST_F(string_view, dataend) {
-    const auto cstr = "hello";
+
+TEST_CASE("dataend", "[string_view]") {
+    const char* const cstr = "hello";
     const bs::string_view view(cstr);
-    EXPECT_EQ(view.dataend(), cstr + 5);
+    CHECK(view.dataend() == cstr + 5);
 }
 
-TEST_F(string_view, size_length) {
-    EXPECT_EQ(str.size(), 11);
-    EXPECT_EQ(str.length(), str.size());
+TEST_CASE("size, lenght", "[string_view]") {
+    const bs::string_view str = "test string";
+    CHECK(str.size() == 11);
+    CHECK(str.length() == 11);
 }
 
-TEST_F(string_view, max_size) {
-    (void)str.max_size();
+TEST_CASE("max_size", "[string_view]") {
+    CHECK("test string"_sv.max_size() == static_cast<std::size_t>(-1));
 }
 
-TEST_F(string_view, empty) {
-    EXPECT_FALSE(str.empty());
-    EXPECT_TRUE(bs::string_view("").empty());
+TEST_CASE("empty", "[string_view]") {
+    CHECK("test"_sv.empty() == false);
+    CHECK(""_sv.empty() == true);
 }
 
-TEST_F(string_view, remove_prefix) {
+TEST_CASE("remove_prefix", "[string_view]") {
+    bs::string_view str = "test string";
     str.remove_prefix(4);
-    EXPECT_EQ(str, " string");
+    CHECK(str == " string");
 }
 
-TEST_F(string_view, remove_suffix) {
+TEST_CASE("remove_suffix", "[string_view]") {
+    bs::string_view str = "test string";
     str.remove_suffix(3);
-    EXPECT_EQ(str, "test str");
+    CHECK(str == "test str");
 }
 
-TEST_F(string_view, slice) {
-    EXPECT_EQ(str(0, 4), "test");
-    EXPECT_EQ(str(0, 4).size(), 4);
-
-    EXPECT_EQ(str(5, 11), "string");
-    EXPECT_EQ(str(5, 11).size(), 6);
-
-    EXPECT_EQ(str(0, -5), "test s");
-    EXPECT_EQ(str(-5, {}), "tring");
-
-    EXPECT_EQ(str(5u, {}), "string");
-    EXPECT_EQ(str(5, -2), "stri");
-
-    EXPECT_EQ(str[bs::slice(2)], "te");
-    EXPECT_EQ(str[bs::slice(0, 5)], "test ");
-    EXPECT_EQ(str[bs::slice(5, 5)], "");
-    EXPECT_EQ(str[bs::slice(5, 11)], "string");
+TEST_CASE("slice", "[string_view]") {
+    const bs::string_view str = "test string";
+    CHECK(str(0, 4) == "test");
+    CHECK(str(0, 4).size() == 4);
+    
+    CHECK(str(5, 11) == "string");
+    CHECK(str(5, 11).size() == 6);
+    
+    CHECK(str(0, -5) == "test s");
+    CHECK(str(-5, {}) == "tring");
+    
+    CHECK(str(5u, {}) == "string");
+    CHECK(str(5, -2) == "stri");
+    
+    CHECK(str[bs::slice(2)] == "te");
+    CHECK(str[bs::slice(0, 5)] == "test ");
+    CHECK(str[bs::slice(5, 5)] == "");
+    CHECK(str[bs::slice(5, 11)] == "string");
 }
 
-TEST_F(string_view, substr) {
-    EXPECT_EQ(str.substr(6), "tring");
-    EXPECT_EQ(str.substr(4, 3), " st");
+TEST_CASE("substr", "[string_view]") {
+    CHECK("test string"_sv.substr(6) == "tring");
+    CHECK("test string"_sv.substr(4, 3) == " st");
 }
 
-TEST_F(string_view, starts_with) {
-    EXPECT_TRUE(str.starts_with("test"));
-    EXPECT_FALSE(bs::string_view("hello").starts_with("hello!"));
-
-    EXPECT_TRUE(str.starts_with(str));
-
-    EXPECT_TRUE(str.starts_with('t'));
-    EXPECT_FALSE(str.starts_with('e'));
+TEST_CASE("starts_with", "[string_view]") {
+    CHECK("test string"_sv.starts_with("test") == true);
+    CHECK("!hello"_sv.starts_with("hello!") == false);
+    CHECK("test string"_sv.starts_with("test string") == true);
+    CHECK("test string"_sv.starts_with('t') == true);
+    CHECK("test string"_sv.starts_with('e') == false);
 }
 
-TEST_F(string_view, ends_with) {
-    EXPECT_TRUE(str.ends_with("string"));
-    EXPECT_FALSE(str.ends_with("strin"));
-
-    EXPECT_TRUE(str.ends_with(str));
-
-    EXPECT_TRUE(str.ends_with('g'));
-    EXPECT_FALSE(str.ends_with('n'));
+TEST_CASE("ends_with", "[string_view]") {
+    CHECK("test string"_sv.ends_with("string") == true);
+    CHECK("test string"_sv.ends_with("strin") == false);
+    CHECK("test string"_sv.ends_with("test string") == true);
+    CHECK("test string"_sv.ends_with('g') == true);
+    CHECK("test string"_sv.ends_with('n') == false);
 }
 
-TEST_F(string_view, operators) {
-    // ==
-    EXPECT_TRUE(str == str);
-    EXPECT_TRUE(str == "test string");
-    EXPECT_FALSE(str == "hello");
-    // !=
-    EXPECT_FALSE(str != str);
-    EXPECT_TRUE(str != "a");
-    EXPECT_FALSE(str != "test string");
-    // >
-    EXPECT_FALSE(str > str);
-    EXPECT_TRUE(str > "a");
-    EXPECT_FALSE(str > "test string+");
-    EXPECT_TRUE(str > "test strina");
-    // >=
-    EXPECT_TRUE(str >= str);
-    EXPECT_TRUE(str >= "b");
-    EXPECT_FALSE(str >= "test string+");
-    EXPECT_TRUE(str >= "test strina");
-    // <
-    EXPECT_FALSE(str < str);
-    EXPECT_TRUE(str < "test string!");
-    EXPECT_FALSE(str < "test-");
-    EXPECT_TRUE(str < "test strinj");
-    // <=
-    EXPECT_TRUE(str <= str);
-    EXPECT_TRUE(str <= "test string!!!");
-    EXPECT_FALSE(str <= "...");
-    EXPECT_TRUE(str <= "test strinj");
-}
-
-TEST_F(string_view, find) {
-    EXPECT_EQ(str.find("test"), 0);
-    EXPECT_EQ(str.find("string"), 5);
-    EXPECT_EQ(str.find("test string"), 0);
-    EXPECT_EQ(str.find(" "), 4);
-    EXPECT_EQ(str.find("e"), 1);
-    EXPECT_EQ(str.find("s", 3), 5);
-
-    EXPECT_EQ(str.find("test string!!!"), str.size());
-    EXPECT_EQ(str.find("hello"), str.size());
-    EXPECT_EQ(str.find(""), 0);
-    EXPECT_EQ(str.find("", 3), 3);
-    EXPECT_EQ(str.find("string", 8), str.size());
-
-    EXPECT_EQ(str.find("str", 0, 4), 4);
-    EXPECT_EQ(str.find("string", 5, 11), 5);
-
-    EXPECT_EQ(str.find('t'), 0);
-    EXPECT_EQ(str.find('g'), 10);
-    EXPECT_EQ(str.find('x'), str.size());
-    EXPECT_EQ(str.find('g', 11), str.size());
-    EXPECT_EQ(str.find('r', 5, 8), 7);
-
-    EXPECT_EQ(str.find('t').index(), 0);
-    EXPECT_EQ(str.find('g').index(), 10);
-    EXPECT_EQ(str.find('i').index_or_end(), 8);
-    EXPECT_EQ(str.find('k').index_or_end(), str.size());
-    EXPECT_EQ(str.find(' ').index_or_npos(), 4);
-    EXPECT_EQ(str.find('a').index_or_npos(), static_cast<std::size_t>(-1));
-
-    EXPECT_EQ(str.find('t').ptr(), &str[0]);
-    EXPECT_EQ(str.find('o').ptr_or_end(), str.data() + str.size());
-    EXPECT_EQ(str.find('q').ptr_or_null(), nullptr);
-
-    EXPECT_TRUE(str.find('e').found());
-    EXPECT_FALSE(str.find('p').found());
-
-    EXPECT_EQ(str.find('t', str.data() + 1).index(), 3);
-    EXPECT_EQ(str.find(" s", str.data() + 2).index(), 4);
-}
-
-TEST_F(string_view, rfind) {
-    EXPECT_EQ(str.rfind(' '), 4);
-    EXPECT_EQ(str.rfind('t'), 6);
-    EXPECT_EQ(bs::string_view("hello").rfind('h'), 0);
-    EXPECT_EQ(str.rfind('g'), 10);
-    EXPECT_EQ(str.rfind('t', 3), 0);
-    EXPECT_EQ(str.rfind('t', 11, 7), 7);
-    EXPECT_EQ(str.rfind(' ', 7, 1), 4);
-
-    EXPECT_EQ(str.rfind("test"), 0);
-    EXPECT_EQ(str.rfind("string"), 5);
-    EXPECT_EQ(str.rfind(" "), 4);
-    EXPECT_EQ(str.rfind("test", 8), 0);
-    EXPECT_EQ(str.rfind("string", 10), 0);
-    EXPECT_EQ(str.rfind("st", str.size(), 4), 5);
-}
-
-TEST_F(string_view, split) {
-    unsigned index = 0;
-    for (auto sub : str.split(" ")) {
-        if (index == 0) EXPECT_EQ(sub, "test");
-        if (index == 1) EXPECT_EQ(sub, "string");
-        if (index == 2) ADD_FAILURE();
-        ++index;
+TEST_CASE("operators", "[string_view]") {
+    const bs::string_view str = "test string";
+    SECTION("==") {
+        CHECK(str == str);
+        CHECK(str == "test string");
+        CHECK_FALSE(str == "hello");
     }
-    index = 0; // "test string"
-    for (auto sub : str.split("t")) {
-        if (index == 0) EXPECT_EQ(sub, "");
-        if (index == 1) EXPECT_EQ(sub, "es");
-        if (index == 2) EXPECT_EQ(sub, " s");
-        if (index == 3) EXPECT_EQ(sub, "ring");
-        if (index == 4) ADD_FAILURE();
-        ++index;
+    SECTION("!=") {
+        CHECK_FALSE(str != str);
+        CHECK(str != "a");
+        CHECK_FALSE(str != "test string");
     }
-    index = 0;
-    for (auto sub : bs::string_view("aaaa").split(" ")) {
-        if (index == 0) EXPECT_EQ(sub, "aaaa");
-        if (index == 1) ADD_FAILURE();
-        ++index;
+    SECTION(">") {
+        CHECK_FALSE(str > str);
+        CHECK(str > "a");
+        CHECK_FALSE(str > "test string+");
+        CHECK(str > "test strina");
+    }
+    SECTION(">=") {
+        CHECK(str >= str);
+        CHECK(str >= "b");
+        CHECK_FALSE(str >= "test string+");
+        CHECK(str >= "test strina");
+    }
+    SECTION("<") {
+        CHECK_FALSE(str < str);
+        CHECK(str < "test string!");
+        CHECK_FALSE(str < "test-");
+        CHECK(str < "test strinj");
+    }
+    SECTION("<=") {
+        CHECK(str <= str);
+        CHECK(str <= "test string!");
+        CHECK_FALSE(str <= "aaa");
+        CHECK(str <= "test strinj");
+    }
+}
+
+TEST_CASE("find", "[string_view]") {
+    const bs::string_view str = "test string";
+    SECTION("string") {
+        CHECK(str.find("test") == 0);
+        CHECK(str.find("string") == 5);
+        CHECK(str.find("test string") == 0);
+        CHECK(str.find(" ") == 4);
+        CHECK(str.find("e") == 1);
+        CHECK(str.find("s", 3) == 5);
+
+        CHECK(str.find("test string!!!") == str.size());
+        CHECK(str.find("hello") == str.size());
+        CHECK(str.find("") == 0);
+        CHECK(str.find("", 3) == 3);
+        CHECK(str.find("string", 8) == str.size());
+
+        CHECK(str.find("str", 0, 4) == 4);
+        CHECK(str.find("string", 5, 11) == 5);
+    }
+    SECTION("character") {
+        CHECK(str.find('t') == 0);
+        CHECK(str.find('g') == 10);
+        CHECK(str.find('x') == str.size());
+        CHECK(str.find('g', 11) == str.size());
+        CHECK(str.find('r', 5, 8) == 7);
+
+        CHECK(str.find('t').index() == 0);
+        CHECK(str.find('g').index() == 10);
+        CHECK(str.find('i').index_or_end() == 8);
+        CHECK(str.find('k').index_or_end() == str.size());
+        CHECK(str.find(' ').index_or_npos() == 4);
+        CHECK(str.find('a').index_or_npos() == static_cast<std::size_t>(-1));
+
+        CHECK(str.find('t').ptr() == str.data() + 0);
+        CHECK(str.find('o').ptr_or_end() == str.data() + str.size());
+        CHECK(str.find('q').ptr_or_null() == nullptr);
+
+        CHECK(str.find('e').found());
+        CHECK_FALSE(str.find('p').found());
+
+        CHECK(str.find('t', str.data() + 1).index() == 3);
+        CHECK(str.find(" s", str.data() + 2).index() == 4);
+    }
+}
+
+TEST_CASE("rfind", "[string_view]") {
+    const bs::string_view str = "test string";
+
+    SECTION("string") {
+        CHECK(str.rfind("test") == 0);
+        CHECK(str.rfind("string") == 5);
+        CHECK(str.rfind(" ") == 4);
+        CHECK(str.rfind("test", 8) == 0);
+        CHECK(str.rfind("string", 10) == 0);
+        CHECK(str.rfind("st", str.size(), 4) == 5);
+    }
+    SECTION("character") {
+        CHECK(str.rfind(' ') == 4);
+        CHECK(str.rfind('t') == 6);
+        CHECK("hello"_sv.rfind('h') == 0);
+        CHECK(str.rfind('g') == 10);
+        CHECK(str.rfind('t', 3) == 0);
+        CHECK(str.rfind('t', 11, 7) == 7);
+        CHECK(str.rfind(' ', 7, 1) == 4);
+    }
+}
+
+TEST_CASE("split", "[string_view]") {
+    using Catch::Matchers::RangeEquals;
+
+    SECTION("string") {
+        CHECK_THAT("test string"_sv.split(" "), RangeEquals(std::array{"test", "string"}));
+        CHECK_THAT("test string"_sv.split("t"), RangeEquals(std::array{"", "es", " s", "ring"}));
+        CHECK_THAT("aaaa"_sv.split(" "), RangeEquals(std::array{"aaaa"}));
+
+        CHECK("test string"_sv.split(" ")[0] =="test");
+        CHECK("test string"_sv.split(" ")[1] == "string");
+        CHECK("test string"_sv.split(" ").count() == 2);
+        CHECK("  "_sv.split(" ")[1] == "");
+
+        const auto splited_str = "test string"_sv.split(" ");
+        CHECK_THAT(std::vector(splited_str.begin(), splited_str.end()), RangeEquals(std::array{"test", "string"}));
+    }
+    SECTION("character") {
+        CHECK_THAT("test string"_sv.split(' '), RangeEquals(std::array{"test", "string"}));
+
+        CHECK("test string"_sv.split('g').count() == 2);
+        CHECK("test string"_sv.split('g')[0] == "test strin");
+        CHECK("test string"_sv.split('g')[1] == "");
+        CHECK_THAT("test string"_sv.split('g'), RangeEquals(std::array{"test strin", ""}));
+
+        const auto splited_str = "test string"_sv.split(' ');
+        CHECK_THAT(std::vector(splited_str.begin(), splited_str.end()), RangeEquals(std::array{"test", "string"}));
+    }
+}
+
+TEST_CASE("strip", "[string_view]") {
+    using Catch::Matchers::AllMatch;
+    using Catch::Matchers::Predicate;
+
+    const std::array strs{" hello "_sv, "hello "_sv, " hello"_sv, "  hello"_sv, "hello  "_sv, "  hello  "_sv};
+    for (const auto s : strs) {
+        CAPTURE(s);
+        CHECK(s.strip(' ') == "hello");
     }
 
-    EXPECT_EQ(str.split(" ")[0], "test");
-    EXPECT_EQ(str.split(" ")[1], "string");
-    EXPECT_EQ(str.split(" ").count(), 2);
-    EXPECT_EQ(bs::string_view("  ").split(" ")[1], "");
+    CHECK("test string"_sv.strip("test") == " string");
+    CHECK("test string"_sv.strip("tes") == " string");
+    CHECK(" \thellow\n "_sv.strip(" \t\n") == "hellow");
+    CHECK("aaaaa"_sv.strip("a") == "");
 
-    const auto vec1 = std::vector(str.split(" ").begin(), str.split(" ").end());
-    EXPECT_EQ(vec1, std::vector<bs::string_view<>>({"test", "string"}));
-
-    EXPECT_EQ(str.split(' ')[0], "test");
-    EXPECT_EQ(str.split(' ')[1], "string");
-    EXPECT_EQ(str.split(' ').count(), 2);
-    EXPECT_EQ(str.split('g')[0], "test strin");
-    EXPECT_EQ(str.split('g')[1], "");
-
-    const auto vec2 = std::vector(str.split(' ').begin(), str.split(' ').end());
-    EXPECT_EQ(vec2, std::vector<bs::string_view<>>({"test", "string"}));
-
+    CHECK("test string"_sv.strip() == "test string");
 }
 
-TEST_F(string_view, strip) {
-    const bs::string_view<> test_strings[]{" hello ", "hello ", " hello", "  hello", "hello  ", "  hello  "};
-    for (const auto s : test_strings) {
-        EXPECT_EQ(s.strip(' '), "hello");
+TEST_CASE("lstrip", "[string_view]") {
+    SECTION("character") {
+        CHECK(" hello"_sv.lstrip(' ') == "hello");
+        CHECK("  hello"_sv.lstrip(' ') == "hello");
+        CHECK("hello "_sv.lstrip(' ') == "hello ");
+        CHECK("hello  "_sv.lstrip(' ') == "hello  ");
+        CHECK(" hello "_sv.lstrip(' ') == "hello ");
     }
+    SECTION("string") {
+        CHECK("test string"_sv.lstrip("test") == " string");
+        CHECK("test string"_sv.lstrip("tes") == " string");
+        CHECK("test string"_sv.lstrip("t") == "est string");
+        CHECK("test string"_sv.lstrip("g") == "test string");
+        CHECK("test string"_sv.lstrip("string") == "est string");
 
-    EXPECT_EQ(str.strip("test"), " string");
-    EXPECT_EQ(str.strip("tes"), " string");
-    EXPECT_EQ(bs::string_view(" \thellow\n ").strip(" \t\n"), "hellow");
-    EXPECT_EQ(bs::string_view("aaaaa").strip("a"), "");
-
-    EXPECT_EQ(str.strip(), "test string");
+        CHECK("test string"_sv.lstrip() == "test string");
+        CHECK(" \t \ntest"_sv.lstrip() == "test");
+    }
 }
 
-TEST_F(string_view, lstrip) {
-    using strv = bs::string_view<>;
-    EXPECT_EQ(strv(" hello").lstrip(' '), "hello");
-    EXPECT_EQ(strv("  hello").lstrip(' '), "hello");
-    EXPECT_EQ(strv("hello ").lstrip(' '), "hello ");
-    EXPECT_EQ(strv("hello  ").lstrip(' '), "hello  ");
-    EXPECT_EQ(strv(" hello ").lstrip(' '), "hello ");
+TEST_CASE("rstrip", "[string_view]") {
+    SECTION("string") {
+        CHECK("hello "_sv.rstrip(' ') == "hello");
+        CHECK("hello  "_sv.rstrip(' ') == "hello");
+        CHECK(" hello"_sv.rstrip(' ') == " hello");
+        CHECK(" hello "_sv.rstrip(' ') == " hello");
 
-    EXPECT_EQ(str.lstrip("test"), " string");
-    EXPECT_EQ(str.lstrip("tes"), " string");
-    EXPECT_EQ(str.lstrip("t"), "est string");
-    EXPECT_EQ(str.lstrip("g"), "test string");
-    EXPECT_EQ(str.lstrip("string"), "est string");
+        CHECK("test string"_sv.rstrip("test") == "test string");
+        CHECK("test string"_sv.rstrip("string") == "test ");
+        CHECK("test string"_sv.rstrip("g") == "test strin");
+        CHECK("test string"_sv.rstrip("t") == "test string");
 
-    EXPECT_EQ(str.lstrip(), "test string");
-    EXPECT_EQ(strv(" \t \ntest").lstrip(), "test");
+        CHECK("test string"_sv.rstrip() == "test string");
+        CHECK(" test \n \v"_sv.rstrip() == " test");
+    }
 }
 
-TEST_F(string_view, rstrip) {
-    using strv = bs::string_view<>;
-    EXPECT_EQ(strv("hello ").rstrip(' '), "hello");
-    EXPECT_EQ(strv("hello  ").rstrip(' '), "hello");
-    EXPECT_EQ(strv(" hello").rstrip(' '), " hello");
-    EXPECT_EQ(strv(" hello ").rstrip(' '), " hello");
+TEST_CASE("contains", "[string_view]") {
+    const bs::string_view str = "test string";
 
-    EXPECT_EQ(str.rstrip("test"), "test string");
-    EXPECT_EQ(str.rstrip("string"), "test ");
-    EXPECT_EQ(str.rstrip("g"), "test strin");
-    EXPECT_EQ(str.rstrip("t"), "test string");
-
-    EXPECT_EQ(str.rstrip(), "test string");
-    EXPECT_EQ(strv(" test \n \v").rstrip(), " test");
+    SECTION("character") {
+        CHECK(str.contains('t'));
+        CHECK(str.contains(' '));
+        CHECK(str.contains('g'));
+        CHECK_FALSE(str.contains('h'));
+        CHECK_FALSE(str.contains('o'));
+    }
+    SECTION("string") {
+        CHECK(str.contains("t"));
+        CHECK(str.contains("g"));
+        CHECK(str.contains("test"));
+        CHECK(str.contains("test string"));
+        CHECK(str.contains("string"));
+        CHECK_FALSE(str.contains("123"));
+        CHECK_FALSE(str.contains("tes?"));
+        CHECK_FALSE(str.contains("l"));
+    }
 }
 
-TEST_F(string_view, contains) {
-    EXPECT_TRUE(str.contains('t'));
-    EXPECT_TRUE(str.contains(' '));
-    EXPECT_TRUE(str.contains('g'));
-    EXPECT_FALSE(str.contains('h'));
-    EXPECT_FALSE(str.contains('o'));
+TEST_CASE("count", "[string_view]") {
+    const bs::string_view str = "test string";
 
-    EXPECT_TRUE(str.contains("t"));
-    EXPECT_TRUE(str.contains("g"));
-    EXPECT_TRUE(str.contains("test"));
-    EXPECT_TRUE(str.contains("test string"));
-    EXPECT_TRUE(str.contains("string"));
-    EXPECT_FALSE(str.contains("123"));
-    EXPECT_FALSE(str.contains("tes?"));
-    EXPECT_FALSE(str.contains("l"));
-
-    CONSTEXPR_EXPECT(contains, {
-        if (!const_str.contains('t')) return 1;
-        if (!const_str.contains('g')) return 2;
-        if (!const_str.contains("test")) return 3;
-        if (const_str.contains("1233332222222222222")) return 4;
-        if (!const_str.contains("")) return 5;
-        return 0;
-    });
+    SECTION("character") {
+        CHECK(str.count('t') == 3);
+        CHECK(str.count(' ') == 1);
+        CHECK(str.count('j') == 0);
+        CHECK(str.count('g') == 1);
+    }
+    SECTION("string") {
+        CHECK(str.count("test") == 1);
+        CHECK(str.count("test string") == 1);
+        CHECK(str.count("............") == 0);
+        CHECK(str.count(" ") == 1);
+        CHECK(str.count("t") == 3);
+        CHECK(str.count("st") == 2);
+        CHECK(str.count("") == str.size() + 1);
+    }
 }
 
-TEST_F(string_view, count) {
-    EXPECT_EQ(str.count('t'), 3);
-    EXPECT_EQ(str.count(' '), 1);
-    EXPECT_EQ(str.count('j'), 0);
-    EXPECT_EQ(str.count('g'), 1);
+TEST_CASE("find_first_of", "[string_view]") {
+    const bs::string_view str = "test string";
 
-    EXPECT_EQ(str.count("test"), 1);
-    EXPECT_EQ(str.count("test string"), 1);
-    EXPECT_EQ(str.count("............"), 0);
-    EXPECT_EQ(str.count(" "), 1);
-    EXPECT_EQ(str.count("t"), 3);
-    EXPECT_EQ(str.count("st"), 2);
-    EXPECT_EQ(str.count(""), str.size() + 1);
+    SECTION("character") {
+        CHECK(str.find_first_of('t') == 0);
+        CHECK(str.find_first_of('g') == 10);
+        CHECK(str.find_first_of(' ') == 4);
+    }
+    SECTION("string") {
+        CHECK(str.find_first_of("t") == 0);
+        CHECK(str.find_first_of("g") == 10);
+        CHECK(str.find_first_of("s ing") == 2);
+        CHECK_FALSE(str.find_first_of("").found());
+        CHECK_FALSE(str.find_first_of("l").found());
+    }
 }
 
-TEST_F(string_view, literals) {
-    using namespace bs::literals;
-    EXPECT_EQ(str, "test string"_sv);
-    EXPECT_EQ("123"_sv.count('1'), 1);
-    EXPECT_EQ(" "_sv.find('j'), 1);
+TEST_CASE("find_last_of", "[string_view]") {
+    const bs::string_view str = "test string";
 
-    (void)L"1"_sv;
-    (void)u"2"_sv;
-    (void)U"3"_sv;
+    SECTION("character") {
+        CHECK(str.find_last_of('t').index() == 6);
+        CHECK(str.find_last_of('g').index() == 10);
+        CHECK(str.find_last_of(' ').index() == 4);
+    }
+    SECTION("string") {
+        CHECK(str.find_last_of("t") == 6);
+        CHECK(str.find_last_of("g") == 10);
+        CHECK(str.find_last_of("hei") == 8);
+        CHECK(str.find_last_of("").ptr_or_null() == nullptr);
+        CHECK(str.find_last_of("a").ptr_or_end() == str.data() + str.size());
+    }
 }
 
-TEST_F(string_view, find_first_of) {
-    EXPECT_EQ(str.find_first_of('t'), 0);
-    EXPECT_EQ(str.find_first_of('g'), 10);
-    EXPECT_EQ(str.find_first_of(' '), 4);
+TEST_CASE("strip_first", "[string_view]") {
+    const bs::string_view str = "test string";
 
-    EXPECT_EQ(str.find_first_of("t"), 0);
-    EXPECT_EQ(str.find_first_of("g"), 10);
-    EXPECT_EQ(str.find_first_of("s ing"), 2);
-    EXPECT_FALSE(str.find_first_of("").found());
-    EXPECT_FALSE(str.find_first_of("l").found());
+    SECTION("character") {
+        CHECK(str.strip_first('t') == "est string");
+        CHECK(str.strip_first('e') == "test string");
+        CHECK(str.strip_first('g') == "test string");
+    }
+    SECTION("string") {
+        CHECK(str.strip_first("t") == "est string");
+        CHECK(str.strip_first("test") == " string");
+        CHECK(str.strip_first("string") == "test string");
+        CHECK(str.strip_first("test string") == "");
+        CHECK(str.strip_first("test string!") == "test string");
+    }
 }
 
-TEST_F(string_view, find_last_of) {
-    EXPECT_EQ(str.find_last_of('t').index(), 6);
-    EXPECT_EQ(str.find_last_of('g').index(), 10);
-    EXPECT_EQ(str.find_last_of(' ').index(), 4);
+TEST_CASE("strip_last", "[string_view]") {
+    const bs::string_view str = "test string";
 
-    EXPECT_EQ(str.find_last_of("t"), 6);
-    EXPECT_EQ(str.find_last_of("g"), 10);
-    EXPECT_EQ(str.find_last_of("hei"), 8);
-    EXPECT_EQ(str.find_last_of("").ptr_or_null(), nullptr);
-    EXPECT_EQ(str.find_last_of("a").ptr_or_end(), str.data() + str.size());
+    SECTION("character") {
+        CHECK(str.strip_last('g') == "test strin");
+        CHECK(str.strip_last('t') == "test string");
+        CHECK(str.strip_last('n') == "test string");
+    }
+    SECTION("string") {
+        CHECK(str.strip_last("g") == "test strin");
+        CHECK(str.strip_last("string") == "test ");
+        CHECK(str.strip_last("test string") == "");
+        CHECK(str.strip_last("!test string") == "test string");
+        CHECK(str.strip_last("test") == "test string");
+    }
 }
 
-TEST_F(string_view, strip_first) {
-    EXPECT_EQ(str.strip_first('t'), "est string");
-    EXPECT_EQ(str.strip_first('e'), "test string");
-    EXPECT_EQ(str.strip_first('g'), "test string");
+TEST_CASE("idx", "[string_view]") {
+    const bs::string_view str = "test string";
 
-    EXPECT_EQ(str.strip_first("t"), "est string");
-    EXPECT_EQ(str.strip_first("test"), " string");
-    EXPECT_EQ(str.strip_first("string"), "test string");
-    EXPECT_EQ(str.strip_first("test string"), "");
-    EXPECT_EQ(str.strip_first("test string!"), "test string");
+    CHECK(str.idx(str.data() + 2) == 2);
+    CHECK(str.idx(str.dataend()) == str.size());
+    CHECK(str.idx(str.data()) == 0);
 }
-
-TEST_F(string_view, strip_last) {
-    EXPECT_EQ(str.strip_last('g'), "test strin");
-    EXPECT_EQ(str.strip_last('t'), "test string");
-    EXPECT_EQ(str.strip_last('n'), "test string");
-
-    EXPECT_EQ(str.strip_last("g"), "test strin");
-    EXPECT_EQ(str.strip_last("string"), "test ");
-    EXPECT_EQ(str.strip_last("test string"), "");
-    EXPECT_EQ(str.strip_last("!test string"), "test string");
-    EXPECT_EQ(str.strip_last("test"), "test string");
-}
-
-TEST_F(string_view, idx) {
-    EXPECT_EQ(str.idx(str.data() + 2), 2);
-    EXPECT_EQ(str.idx(str.dataend()), str.size());
-    EXPECT_EQ(str.idx(str.data()), 0);
-}
-
-#endif
 
 }
