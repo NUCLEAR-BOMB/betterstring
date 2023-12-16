@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cwchar>
 #include <type_traits>
+#include <algorithm>
 
 #include <betterstring/detail/preprocessor.hpp>
 
