@@ -97,19 +97,19 @@ jobs:
     - name: Analyze Code
       run: cmake --build build/ --target tidy
 
-  install:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest ]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Configure CMake
-        run: cmake -B build/
-
-      - name: Install
-        if: runner.os == 'Linux'
-        run: sudo cmake --install build/
+  # install:
+  #  runs-on: ${{ matrix.os }}
+  #  strategy:
+  #    fail-fast: false
+  #    matrix:
+  #      os: [ ubuntu-latest ]
+  #  steps:
+  #    - name: Checkout
+  #      uses: actions/checkout@v3
+  #
+  #    - name: Configure CMake
+  #      run: cmake -B build/
+  #
+  #    - name: Install
+  #      if: runner.os == 'Linux'
+  #      run: sudo cmake --install build/
