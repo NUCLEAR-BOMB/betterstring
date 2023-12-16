@@ -6,32 +6,28 @@
 
 namespace {
 
-#if 0
-
-TEST_F(char_traits, std_string) {
+TEST_CASE("std::string", "[char_traits]") {
     using string = std::basic_string<char, bs::char_traits<char>>;
     string str;
     str.resize(5, ' ');
-    EXPECT_EQ(str, "     ");
-    EXPECT_EQ(str[0], ' ');
-    EXPECT_EQ(str.at(1), ' ');
+    CHECK(str == "     ");
+    CHECK(str[0] == ' ');
+    CHECK(str.at(1) == ' ');
     str[2] = 'j';
-    EXPECT_EQ(str.find('j'), 2);
+    CHECK(str.find('j') == 2);
     const auto str2 = str.substr(2);
-    EXPECT_EQ(str2, "j  ");
+    CHECK(str2 == "j  ");
 }
 
-TEST_F(char_traits, std_string_view) {
+TEST_CASE("std::string_view", "[char_traits]") {
     using string_view = std::basic_string_view<char, bs::char_traits<char>>;
 
     const string_view str("test test test");
-    EXPECT_EQ(str[0], 't');
-    EXPECT_EQ(str[13], 't');
-    EXPECT_EQ(str.size(), 14);
-    EXPECT_EQ(str.find('e'), 1);
-    EXPECT_EQ(str.find(" test"), 4);
+    CHECK(str[0] == 't');
+    CHECK(str[13] == 't');
+    CHECK(str.size() == 14);
+    CHECK(str.find('e') == 1);
+    CHECK(str.find(" test") == 4);
 }
-
-#endif
 
 }
