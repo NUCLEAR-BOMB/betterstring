@@ -1,10 +1,11 @@
-#include <gtest/gtest.h>
-#include <vector>
-
 #include <betterstring/string_view.hpp>
 #include "tools.hpp"
 
+#include <catch2/catch_test_macros.hpp>
+
 namespace {
+
+#if 0
 
 struct string_view : ::testing::Test {
     bs::string_view<> str{"test string"};
@@ -420,5 +421,7 @@ TEST_F(string_view, idx) {
     EXPECT_EQ(str.idx(str.dataend()), str.size());
     EXPECT_EQ(str.idx(str.data()), 0);
 }
+
+#endif
 
 }

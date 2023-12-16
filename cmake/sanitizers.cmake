@@ -1,23 +1,5 @@
 include_guard(GLOBAL)
 
-function(get_target_libraries out target)
-    get_target_property(raw_libraries ${target} LINK_LIBRARIES)
-    set(result "")
-    foreach(raw_lib IN LISTS raw_libraries)
-        get_target_property(lib ${raw_lib} ALIASED_TARGET)
-
-        if (lib STREQUAL "lib-NOTFOUND")
-            list(APPEND result ${raw_lib})
-        else()
-            get_target_property(lib_type ${lib} TYPE)
-            if (NOT ${lib_type} STREQUAL "INTERFACE_LIBRARY")
-                list(APPEND result ${lib})
-            endif()
-        endif()
-    endforeach()
-    set(${out} ${result} PARENT_SCOPE)
-endfunction()
-
 function(target_add_sanitizer target)
     cmake_parse_arguments(ARG "" "" "SANITIZERS" ${ARGN})
     if (NOT ARG_SANITIZERS)
@@ -28,12 +10,10 @@ function(target_add_sanitizer target)
     cmake_parse_arguments(sanitizers "Address;UndefinedBehavior" "" "" ${ARG_SANITIZERS})
 
     if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-        get_target_libraries(libraries ${target})
         if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
             if (sanitizers_Address)
-                set_property(TARGET ${target} ${libraries} APPEND PROPERTY COMPILE_OPTIONS
-                    $<$<CONFIG:Debug>:/fsanitize=address>
-                )
+                target_compile_definitions(${target} PRIVATE _DISABLE_VECTOR_ANNOTATION _DISABLE_STRING_ANNOTATION)
+                target_compile_options(${target} PRIVATE $<$<CONFIG:Debug>:/fsanitize=address>)
                 target_link_options(${target} PRIVATE $<$<CONFIG:Debug>:/INCREMENTAL:NO>)
             endif()
             return()

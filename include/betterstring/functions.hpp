@@ -226,11 +226,6 @@ constexpr bool streq(const T* const left, const std::size_t left_len, const T(&r
 }
 
 template<class T>
-[[nodiscard]] constexpr bool empty(const T* const str) noexcept {
-    return str[0] == '\0';
-}
-
-template<class T>
 [[nodiscard]] constexpr T* strfind(
     T* const str, const std::size_t count, const detail::type_identity_t<T> ch
 ) noexcept {

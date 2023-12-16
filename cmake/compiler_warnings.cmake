@@ -18,6 +18,10 @@ function(target_add_warnings target)
         /wd4711 # function 'function' selected for inline expansion
         /wd4866 # 'file(line_number)' compiler may not enforce left-to-right evaluation order for call to operator_name
         /wd5072 # ASAN enabled without debug information emission. Enable debug info for better ASAN error reporting
+        /wd4623 # 'derived class' : default constructor was implicitly defined as deleted
+        /wd4388 # 'token' : signed/unsigned mismatch
+        /wd4868 # 'file(line_number)' compiler may not enforce left-to-right evaluation order in braced initializer list
+        /wd5267 # definition of implicit copy constructor/assignment operator for 'type' is deprecated because it has a user-provided assignment operator/copy constructor
         )
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
         target_compile_options(${target} PRIVATE

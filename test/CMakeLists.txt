@@ -2,35 +2,29 @@
 include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
 
 add_executable(betterstring-test
-    main.cpp string_view.cpp functions.cpp tools.hpp char_traits.cpp
+    string_view.cpp functions.cpp tools.hpp char_traits.cpp
 )
 target_add_warnings(betterstring-test)
 target_link_libraries(betterstring-test PRIVATE betterstring)
-target_compile_definitions(betterstring-test PRIVATE BS_DONT_INCLUDE_STRING)
 
 include(FetchContent)
 FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/refs/tags/v1.13.0.zip
-    URL_HASH SHA256=ffa17fbc5953900994e2deec164bb8949879ea09b411e07f215bfbb1f87f4632
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG        v3.5.0
     GIT_SHALLOW TRUE
-    FIND_PACKAGE_ARGS NAMES GTest
+    FIND_PACKAGE_ARGS 3.5.0
 )
-set(gtest_force_shared_crt TRUE CACHE BOOL "" FORCE)
-set(BUILD_GMOCK FALSE)
-set(INSTALL_GTEST FALSE)
-set(CMAKE_DISABLE_FIND_PACKAGE_Python TRUE)
-set(gtest_disable_pthreads TRUE)
-FetchContent_MakeAvailable(googletest)
+FetchContent_MakeAvailable(Catch2)
 
-target_link_libraries(betterstring-test PRIVATE GTest::gtest)
+target_compile_features(Catch2 PRIVATE cxx_std_17)
+
+target_link_libraries(betterstring-test PRIVATE Catch2::Catch2WithMain)
+
 if (USE_SANITIZERS)
     include("${PROJECT_SOURCE_DIR}/cmake/sanitizers.cmake")
     target_add_sanitizer(betterstring-test SANITIZERS Address UndefinedBehavior)
 endif()
-
-include(GoogleTest)
-gtest_discover_tests(betterstring-test)
 
 if (USE_CLANG_TIDY)
     include("${PROJECT_SOURCE_DIR}/cmake/clang_tidy.cmake")

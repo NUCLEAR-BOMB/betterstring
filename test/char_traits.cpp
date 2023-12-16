@@ -1,11 +1,12 @@
-#include <gtest/gtest.h>
 #include <betterstring/functions.hpp>
 #include <string>
 #include <string_view>
 
+#include <catch2/catch_test_macros.hpp>
+
 namespace {
 
-struct char_traits : ::testing::Test {};
+#if 0
 
 TEST_F(char_traits, std_string) {
     using string = std::basic_string<char, bs::char_traits<char>>;
@@ -30,5 +31,7 @@ TEST_F(char_traits, std_string_view) {
     EXPECT_EQ(str.find('e'), 1);
     EXPECT_EQ(str.find(" test"), 4);
 }
+
+#endif
 
 }
