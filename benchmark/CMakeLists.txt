@@ -8,17 +8,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nanobench)
 
-FetchContent_Declare(
-    fmt
-    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-    GIT_TAG 10.1.1
-    GIT_SHALLOW TRUE
-)
-FetchContent_MakeAvailable(fmt)
-
 add_executable(betterstring-benchmark
     "main.cpp"
     "samples.hpp"
 )
-target_link_libraries(betterstring-benchmark PRIVATE fmt::fmt nanobench betterstring)
+target_link_libraries(betterstring-benchmark PRIVATE nanobench betterstring)
 

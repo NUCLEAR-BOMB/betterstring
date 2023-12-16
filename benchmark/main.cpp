@@ -5,8 +5,6 @@
 
 #include <betterstring/functions.hpp>
 
-#include <fmt/format.h>
-
 #include "samples.hpp"
 
 namespace nb = ankerl::nanobench;

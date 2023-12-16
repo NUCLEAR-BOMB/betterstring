@@ -51,8 +51,8 @@ namespace {
     const char* strrfind_ch_resolver(const char* const str, const std::size_t count, const char ch) {
         using namespace bs::detail;
         if (is_cpu_supports_avx2()) {
-            strrfind_ch_impl = &strrfind_ch_default;
-            //strrfind_ch_impl = &strrfind_character_avx2;
+            //strrfind_ch_impl = &strrfind_ch_default;
+            strrfind_ch_impl = &strrfind_character_avx2;
         } else {
             strrfind_ch_impl = &strrfind_ch_default;
         }
