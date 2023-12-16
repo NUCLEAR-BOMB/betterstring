@@ -13,20 +13,30 @@ namespace nb = ankerl::nanobench;
 
 int main() {
     nb::Bench bench;
-    bench.minEpochIterations(10'000)
-         .minEpochTime(std::chrono::milliseconds(1000));
+    bench.warmup(200'000).minEpochIterations(100'000);
 
-    for (std::size_t search_string_len : {10, 100, 1000, 10'000, 40'000}) {
-        const char* const search_string = SAMPLE_STRING_50000 + 200;
-
-        for (std::size_t sample_string_len : {50'000, 10'000, 5000, 1000, 100}) {
-            if (sample_string_len <= search_string_len) continue;
-
-            const auto name = fmt::format("strrfind [{}] [{}]", sample_string_len, search_string_len);
-            bench.run(name, [&] {
-                auto result = bs::strrfind(SAMPLE_STRING_50000, sample_string_len, search_string, search_string_len);
-                nb::doNotOptimizeAway(result);
-            });
-        }
-    }
+#if 0
+    bench.run("random (large needle)", [&] {
+        auto result = bs::strrfind(strings::RANDOM, std::size(strings::RANDOM), R"(R#MjFR7d-)wMJRCVD0gft!5h9TWUybW>OQST;|\TStoqi3k)");
+        nb::doNotOptimizeAway(result);
+    });
+    bench.run("random (small needle)", [&] {
+        auto result = bs::strrfind(strings::RANDOM, std::size(strings::RANDOM), R"(\TStoqi3k)");
+        nb::doNotOptimizeAway(result);
+    });
+    bench.run("homogeneous (large needle)", [&] {
+        auto result = bs::strrfind(strings::HOMOGENEOUS, std::size(strings::HOMOGENEOUS), "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb");
+        nb::doNotOptimizeAway(result);
+    });
+    bench.run("homogeneous (small needle)", [&] {
+        auto result = bs::strrfind(strings::HOMOGENEOUS, std::size(strings::HOMOGENEOUS), R"(bbbbbbbbbb)");
+        nb::doNotOptimizeAway(result);
+    });
+#endif
+#if 1
+    bench.run("character", [&] {
+        auto result = bs::strrfind(strings::HOMOGENEOUS, std::size(strings::HOMOGENEOUS), 'b');
+        nb::doNotOptimizeAway(result);
+    });
+#endif
 }

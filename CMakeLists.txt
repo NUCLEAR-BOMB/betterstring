@@ -16,13 +16,15 @@ add_library(betterstring
     "include/betterstring/string_view.hpp"
     "include/betterstring/splited_string.hpp"
     "include/betterstring/detail/preprocessor.hpp"
+    "include/betterstring/detail/dispatch.hpp"
 
     "src/dispatch/default.cpp"
-    "src/dispatch/avx2.cpp"
-    "src/dispatch/utils.hpp"
+    "src/dispatch/strrfind_string_avx2.cpp"
+    "src/dispatch/strrfind_char_avx2.cpp"
 )
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    set_property(SOURCE "src/dispatch/avx2.cpp" APPEND PROPERTY COMPILE_OPTIONS /arch:AVX2 /openmp)
+    set_property(SOURCE "src/dispatch/strrfind_string_avx2.cpp" APPEND PROPERTY COMPILE_OPTIONS /arch:AVX2)
+    set_property(SOURCE "src/dispatch/strrfind_char_avx2.cpp" APPEND PROPERTY COMPILE_OPTIONS /arch:AVX2)
 endif()
 
 target_add_warnings(betterstring)

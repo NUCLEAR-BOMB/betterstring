@@ -167,6 +167,7 @@ TEST_F(functions, strrfind_string) {
 
     const auto long_string = "!longlonglonglonglonglonglonglong string";
     EXPECT_EQ(bs::strrfind(long_string, bs::strlen(long_string), "!long"), &long_string[0]);
+    EXPECT_EQ(bs::strrfind(long_string + 3, bs::strlen(long_string) - 3, "!long"), nullptr);
 
     EXPECT_EQ(bs::strrfind(static_cast<char*>(nullptr), 0, "123"), nullptr);
     EXPECT_EQ(bs::strrfind(static_cast<const char*>(nullptr), 0, ""), nullptr);

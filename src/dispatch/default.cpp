@@ -1,10 +1,10 @@
 #include <cstddef>
 #include <cstring>
 
-#include "utils.hpp"
+#include <betterstring/detail/dispatch.hpp>
 
 namespace {
-    inline const char* strrfind_default_impl(const char* const haystack, const std::size_t count, const char* const needle, const std::size_t needle_len) {
+    const char* strrfind_str_default(const char* const haystack, const std::size_t count, const char* const needle, const std::size_t needle_len) {
         if (needle_len > count) return nullptr;
         if (needle_len == 0) return haystack + count;
 
@@ -15,28 +15,47 @@ namespace {
             if (match_try == haystack) return nullptr;
         }
     }
+
+    const char* strrfind_ch_default(const char* const str, const std::size_t count, const char ch) {
+        for (std::size_t i = count; i > 0; --i) {
+            if (str[i - 1] == ch) return str + i - 1;
+        }
+        return nullptr;
+    }
 }
 
-
 namespace {
-    const char* strrfind_resolver(const char* const haystack, const std::size_t count, const char* const needle, const std::size_t needle_len);
+    const char* strrfind_str_resolver(const char* const haystack, const std::size_t count, const char* const needle, const std::size_t needle_len);
+    const char* strrfind_ch_resolver(const char* const str, const std::size_t count, const char ch);
 }
 
 namespace bs::detail {
     extern const char* strrfind_string_avx2(const char* const, const std::size_t, const char* const, const std::size_t);
+    extern const char* strrfind_character_avx2(const char* const, const std::size_t, const char);
 
-    const char*(*strrfind_impl)(const char*, std::size_t, const char*, std::size_t) = &strrfind_resolver;
+    const char*(*strrfind_str_impl)(const char*, std::size_t, const char*, std::size_t) = &strrfind_str_resolver;
+    const char*(*strrfind_ch_impl)(const char*, std::size_t, char) = &strrfind_ch_resolver;
 }
 
 namespace {
-    const char* strrfind_resolver(const char* const haystack, const std::size_t count, const char* const needle, const std::size_t needle_len) {
+    const char* strrfind_str_resolver(const char* const haystack, const std::size_t count, const char* const needle, const std::size_t needle_len) {
         using namespace bs::detail;
         if (is_cpu_supports_avx2()) {
-            //strrfind_impl = &strrfind_default_impl;
-            strrfind_impl = &strrfind_string_avx2;
+            //strrfind_impl = &strrfind_str_default;
+            strrfind_str_impl = &strrfind_string_avx2;
         } else {
-            strrfind_impl = &strrfind_default_impl;
+            strrfind_str_impl = &strrfind_str_default;
         }
-        return bs::detail::strrfind_impl(haystack, count, needle, needle_len);
+        return strrfind_str_impl(haystack, count, needle, needle_len);
+    }
+    const char* strrfind_ch_resolver(const char* const str, const std::size_t count, const char ch) {
+        using namespace bs::detail;
+        if (is_cpu_supports_avx2()) {
+            strrfind_ch_impl = &strrfind_ch_default;
+            //strrfind_ch_impl = &strrfind_character_avx2;
+        } else {
+            strrfind_ch_impl = &strrfind_ch_default;
+        }
+        return strrfind_ch_impl(str, count, ch);
     }
 }

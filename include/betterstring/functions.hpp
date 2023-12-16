@@ -304,14 +304,14 @@ constexpr auto strfind(Haystack& haystack, const Needle needle) noexcept
 }
 
 namespace detail {
-    extern const char*(*strrfind_impl)(const char*, std::size_t, const char*, std::size_t);
+    extern const char*(*strrfind_str_impl)(const char*, std::size_t, const char*, std::size_t);
 }
 
 template<class T>
 constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::type_identity_t<T>* const needle, const std::size_t needle_len) noexcept {
     if constexpr (std::is_same_v<std::remove_const_t<T>, char>) {
         if (!detail::is_constant_evaluated()) {
-            return const_cast<T*>(bs::detail::strrfind_impl(haystack, count, needle, needle_len));
+            return const_cast<T*>(bs::detail::strrfind_str_impl(haystack, count, needle, needle_len));
         }
     }
     if (needle_len > count) return nullptr;
@@ -331,45 +331,20 @@ constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::
     return bs::strrfind(haystack, count, needle, N - 1);
 }
 
-#if 0
 namespace detail {
-    template<class T>
-    const T* avx2_strrfind(const T* const string, std::size_t count, const T search_character) {
-        const T* char_ptr = string + count - 1;
-        // align
-        for (; count > 0; --count, --char_ptr) {
-            if (*char_ptr == search_character) return char_ptr;
-            if ((reinterpret_cast<std::uintptr_t>(char_ptr) & (sizeof(__m256) - 1)) == 0) {
-                --count;
-                break;
-            }
-        }
-        const __m256i search_char32 = _mm256_set1_epi8(search_character);
-        for (; count >= sizeof(__m256); count -= sizeof(__m256)) {
-            char_ptr -= sizeof(__m256);
-            const __m256i char32 = _mm256_load_si256(reinterpret_cast<const __m256i*>(char_ptr));
-            const __m256i cmpeq_result = _mm256_cmpeq_epi8(char32, search_char32);
-            const std::uint32_t cmp_mask = static_cast<std::uint32_t>(_mm256_movemask_epi8(cmpeq_result));
-            if (cmp_mask != 0) {
-                return &char_ptr[sizeof(__m256) - detail::lzcnt(cmp_mask) - 1];
-            }
-        }
-        for (; count != 0; --count) {
-            if (*--char_ptr == search_character) return char_ptr;
-        }
-        return nullptr;
-    }
+    extern const char*(*strrfind_ch_impl)(const char*, std::size_t, char);
 }
-#endif
 
 template<class T>
 constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_identity_t<T> ch) noexcept {
     static_assert(is_character<std::remove_const_t<T>>);
-#if 0
+    using type = std::remove_const_t<T>;
     if (!detail::is_constant_evaluated()) {
-        return const_cast<T*>(detail::avx2_strrfind(str, count, ch));
+        if constexpr (std::is_same_v<type, char>) {
+            return const_cast<T*>(bs::detail::strrfind_ch_impl(str, count, ch));
+        }
     }
-#endif
+
     for (std::size_t i = count; i > 0; --i) {
         if (str[i - 1] == ch) return str + i - 1;
     }
