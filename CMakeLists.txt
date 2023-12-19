@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
-project(betterstring VERSION 0.1 LANGUAGES CXX)
+project(betterstring VERSION 0.1 LANGUAGES CXX ASM_MASM)
 
 option(BUILD_TEST "" ${PROJECT_IS_TOP_LEVEL})
 option(USE_CLANG_TIDY "" ${PROJECT_IS_TOP_LEVEL})
@@ -21,6 +21,7 @@ add_library(betterstring
     "src/dispatch/default.cpp"
     "src/dispatch/strrfind_string_avx2.cpp"
     "src/dispatch/strrfind_char_avx2.cpp"
+    "src/dispatch/strrfind_char.asm"
 )
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     set_property(SOURCE "src/dispatch/strrfind_string_avx2.cpp" APPEND PROPERTY COMPILE_OPTIONS /arch:AVX2)
@@ -40,7 +41,10 @@ target_include_directories(betterstring ${include_as_system} PUBLIC
 target_compile_features(betterstring PUBLIC cxx_std_17)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(betterstring PUBLIC /Zc:__cplusplus /Zc:inline /Zc:preprocessor)
+    target_compile_options(betterstring PUBLIC
+        $<$<COMPILE_LANGUAGE:CXX>:/Zc:__cplusplus /Zc:inline /Zc:preprocessor>
+        $<$<COMPILE_LANGUAGE:ASM_MASM>:/WX>
+    )
 endif()
 
 if (BUILD_TEST)

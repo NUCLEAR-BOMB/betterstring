@@ -4,6 +4,7 @@
 #include <cwchar>
 #include <type_traits>
 #include <algorithm>
+#include <cstddef>
 
 #include <betterstring/detail/preprocessor.hpp>
 
@@ -330,7 +331,7 @@ constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::
 }
 
 namespace detail {
-    extern const char*(*strrfind_ch_impl)(const char*, std::size_t, char);
+    const char* strrfind_ch_runtime(const char*, std::size_t, char);
 }
 
 template<class T>
@@ -339,7 +340,7 @@ constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_
     using type = std::remove_const_t<T>;
     if (!detail::is_constant_evaluated()) {
         if constexpr (std::is_same_v<type, char>) {
-            return const_cast<T*>(bs::detail::strrfind_ch_impl(str, count, ch));
+            return const_cast<T*>(bs::detail::strrfind_ch_runtime(str, count, ch));
         }
     }
 

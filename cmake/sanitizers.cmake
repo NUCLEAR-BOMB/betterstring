@@ -7,13 +7,21 @@ function(target_add_sanitizer target)
         return()
     endif()
 
-    cmake_parse_arguments(sanitizers "Address;UndefinedBehavior" "" "" ${ARG_SANITIZERS})
+    cmake_parse_arguments(sanitizers "Address;UndefinedBehavior;Fuzzer" "" "" ${ARG_SANITIZERS})
 
     if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
             if (sanitizers_Address)
                 target_compile_definitions(${target} PRIVATE _DISABLE_VECTOR_ANNOTATION _DISABLE_STRING_ANNOTATION)
                 target_compile_options(${target} PRIVATE $<$<CONFIG:Debug>:/fsanitize=address>)
+            endif()
+            if (sanitizers_Fuzzer)
+                target_compile_options(${target} PRIVATE /fsanitize=fuzzer)
+                set_target_properties(${target} PROPERTIES
+                    MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>"
+                )
+            endif()
+            if (sanitizers_Address OR sanitizers_Fuzzer)
                 target_link_options(${target} PRIVATE $<$<CONFIG:Debug>:/INCREMENTAL:NO>)
             endif()
             return()

@@ -2,7 +2,7 @@ include_guard(GLOBAL)
 
 function(target_add_warnings target)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-        target_compile_options(${target} PRIVATE 
+        target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:
         /Wall /WX /permissive- /Za
         /wd5027 # 'type': move assignment operator was implicitly defined as deleted
         /wd4626 # 'derived class': assignment operator was implicitly defined as deleted because a base class assignment operator is inaccessible or deleted
@@ -22,7 +22,7 @@ function(target_add_warnings target)
         /wd4388 # 'token' : signed/unsigned mismatch
         /wd4868 # 'file(line_number)' compiler may not enforce left-to-right evaluation order in braced initializer list
         /wd5267 # definition of implicit copy constructor/assignment operator for 'type' is deprecated because it has a user-provided assignment operator/copy constructor
-        )
+        >)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
         target_compile_options(${target} PRIVATE
         -Wall # Enables all the warnings

@@ -210,9 +210,15 @@ TEST_CASE("find", "[string_view]") {
         CHECK(str.find(' ').index_or_npos() == 4);
         CHECK(str.find('a').index_or_npos() == static_cast<std::size_t>(-1));
 
+        CHECK_THROWS_AS(str.find('x').index_or_throw(), std::logic_error);
+        CHECK_NOTHROW(str.find('t').index_or_throw());
+
         CHECK(str.find('t').ptr() == str.data() + 0);
         CHECK(str.find('o').ptr_or_end() == str.data() + str.size());
         CHECK(str.find('q').ptr_or_null() == nullptr);
+
+        CHECK_THROWS_AS(str.find('x').ptr_or_throw(), std::logic_error);
+        CHECK_NOTHROW(str.find(' ').ptr_or_throw());
 
         CHECK(str.find('e').found());
         CHECK_FALSE(str.find('p').found());

@@ -5,6 +5,7 @@
 #include <memory>
 #include <cstring>
 #include <algorithm>
+#include <stdexcept>
 
 #include <betterstring/detail/preprocessor.hpp>
 #include <betterstring/functions.hpp>
@@ -76,6 +77,13 @@ public:
         if (find_ptr == nullptr) return static_cast<size_type>(-1);
         return static_cast<size_type>(find_ptr - string_data);
     }
+    constexpr size_type index_or_throw() const {
+        if (find_ptr == nullptr) {
+            throw std::logic_error("result is not found");
+        }
+        return static_cast<size_type>(find_ptr - string_data);
+    }
+
     constexpr operator size_type() const noexcept {
         return index_or_end();
     }
@@ -89,6 +97,12 @@ public:
         return find_ptr;
     }
     constexpr const CharT* ptr_or_null() const noexcept {
+        return find_ptr;
+    }
+    constexpr const CharT* ptr_or_throw() const {
+        if (find_ptr == nullptr) {
+            throw std::logic_error("result is not found");
+        }
         return find_ptr;
     }
 

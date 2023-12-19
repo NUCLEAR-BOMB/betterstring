@@ -1,10 +1,6 @@
 #include <cinttypes>
 #include <cassert>
 
-#ifndef __AVX2__
-#error Need AVX2
-#endif
-
 #include <betterstring/functions.hpp>
 
 static const char* simple_strrfind(const char* const s, const std::size_t count, const char ch) {

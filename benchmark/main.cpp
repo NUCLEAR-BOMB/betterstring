@@ -4,6 +4,7 @@
 #include <string>
 
 #include <betterstring/functions.hpp>
+#include <immintrin.h>
 
 #include "samples.hpp"
 
@@ -11,8 +12,7 @@ namespace nb = ankerl::nanobench;
 
 int main() {
     nb::Bench bench;
-    bench.warmup(200'000).minEpochIterations(100'000);
-
+    bench.warmup(100'000).minEpochIterations(5'000'000);
 #if 0
     bench.run("random (large needle)", [&] {
         auto result = bs::strrfind(strings::RANDOM, std::size(strings::RANDOM), R"(R#MjFR7d-)wMJRCVD0gft!5h9TWUybW>OQST;|\TStoqi3k)");
