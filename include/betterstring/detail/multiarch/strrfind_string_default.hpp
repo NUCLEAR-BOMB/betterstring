@@ -18,6 +18,7 @@ namespace bs::detail::multiarch {
         if (needle_len > count) return nullptr;
 
         haystack += count - needle_len;
+        count -= needle_len - 1;
         if (needle_len == 0) return haystack;
 
         do {
