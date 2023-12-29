@@ -1,12 +1,36 @@
-#include <betterstring/detail/dispatch.hpp>
+#pragma once
+
+#include <betterstring/detail/preprocessor.hpp>
 #include <immintrin.h>
 
-namespace bs::detail {
-    // https://stackoverflow.com/a/25884902
-    // https://www.reddit.com/r/cpp/comments/weegza/comment/iinrhei/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+#if BS_COMP_MSVC
+    #include <intrin.h>
+#endif
 
-    BS_FLATTEN
-    const char* strrfind_string_avx2(const char* const str, const std::size_t count, const char* const needle, const std::size_t needle_len) {
+namespace bs::detail {
+    template<class T>
+    BS_FORCEINLINE
+    inline unsigned int lzcnt(const T x) noexcept {
+    #if BS_COMP_GCC || BS_COMP_CLANG
+        if constexpr (sizeof(T) <= sizeof(unsigned int)) {
+            return unsigned(__builtin_clz(x));
+        } else if constexpr (sizeof(T) <= sizeof(unsigned long)) {
+            return unsigned(__builtin_clzl(x));
+        } else {
+            return unsigned(__builtin_clzll(x));
+        }
+    #else
+        if constexpr (sizeof(T) <= sizeof(unsigned int)) {
+            return _lzcnt_u32(x);
+        } else {
+            return _lzcnt_u64(x);
+        }
+    #endif
+    }
+}
+
+namespace bs::detail::multiarch {
+    inline const char* strrfind_string_avx2(const char* const str, const std::size_t count, const char* const needle, const std::size_t needle_len) {
 #if 0
         if (needle_len > count) return nullptr;
         if (needle_len == 0) return str + count;
@@ -60,7 +84,7 @@ namespace bs::detail {
 
             const char* const match_ptr = str_ptr - needle_len + 1 + sizeof(__m256i);
             while (mask != 0) {
-                const unsigned match_pos = lzcnt(mask) + 1;
+                const unsigned match_pos = bs::detail::lzcnt(mask) + 1;
 
                 //if (std::memcmp(match_ptr - match_pos + 1, needle + 1, needle_len - 2) == 0) {
                 if (std::memcmp(match_ptr - match_pos, needle, needle_len) == 0) {

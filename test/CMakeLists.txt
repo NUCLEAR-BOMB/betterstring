@@ -20,10 +20,11 @@ FetchContent_MakeAvailable(Catch2)
 target_compile_features(Catch2 PRIVATE cxx_std_17)
 
 target_link_libraries(betterstring-test PRIVATE Catch2::Catch2WithMain)
+set_target_properties(Catch2 PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:Catch2,INTERFACE_INCLUDE_DIRECTORIES>)
 
 if (USE_SANITIZERS)
     include("${PROJECT_SOURCE_DIR}/cmake/sanitizers.cmake")
-    target_add_sanitizer(betterstring-test SANITIZERS Address UndefinedBehavior)
+    target_add_sanitizer(betterstring-test SANITIZERS Address UndefinedBehavior LIBRARIES Catch2 Catch2WithMain)
 endif()
 
 if (USE_CLANG_TIDY)

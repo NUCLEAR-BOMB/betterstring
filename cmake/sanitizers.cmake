@@ -1,7 +1,7 @@
 include_guard(GLOBAL)
 
 function(target_add_sanitizer target)
-    cmake_parse_arguments(ARG "" "" "SANITIZERS" ${ARGN})
+    cmake_parse_arguments(ARG "" "" "SANITIZERS;LIBRARIES" ${ARGN})
     if (NOT ARG_SANITIZERS)
         message(FATAL_ERROR "Please select sanitizers that will be enabled for target '${target}'")
         return()
@@ -9,6 +9,7 @@ function(target_add_sanitizer target)
 
     cmake_parse_arguments(sanitizers "Address;UndefinedBehavior;Fuzzer" "" "" ${ARG_SANITIZERS})
 
+    set(libraries ${ARG_LIBRARIES})
     if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
             if (sanitizers_Address)
@@ -34,6 +35,7 @@ function(target_add_sanitizer target)
             endif()
             return()
         elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+            
             set_property(TARGET ${target} ${libraries} APPEND PROPERTY COMPILE_DEFINITIONS _DISABLE_STRING_ANNOTATION _DISABLE_VECTOR_ANNOTATION)
             target_link_options(${target} PRIVATE -coverage)
             if (sanitizers_Address)

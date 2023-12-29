@@ -83,17 +83,16 @@ TEST_CASE("bs::strrfind", "[functions]") {
         CHECK(*bs::strrfind("123", '1') == '1');
         CHECK(bs::strrfind("test string", 11, 'x') == nullptr);
 
-        const auto strs = {
-            std::pair{"abcXabcabcabcabcabcabcabcabcabcabcabcabcabcabcabc", 3},
-            std::pair{"XbcXabcabcXbcabcabcabcabcabcabcabcabcabcabcabcabc", 10},
-            std::pair{"abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcX", 48},
-            std::pair{"abcabcabcabcabcabcabcabcabcabcabcabcabcabcXabcabc", 42},
-            std::pair{"abcabcXabcabcabcabcabcabcXabcabcabcabcabcabcabcab", 25},
-        };
-        for (const auto& [str, index] : strs) {
-            CAPTURE(str, index, bs::strrfind(str, bs::strlen(str), 'X') - str);
-            CHECK(bs::strrfind(str, bs::strlen(str), 'X') == &str[index]);
-        }
+        const char* const str1 = "abcXabcabcabcabcabcabcabcabcabcabcabcabcabcabcabc";
+        CHECK(bs::strrfind(str1, bs::strlen(str1), 'X') == &str1[3]);
+        const char* const str2 = "XbcXabcabcXbcabcabcabcabcabcabcabcabcabcabcabcabc";
+        CHECK(bs::strrfind(str2, bs::strlen(str2), 'X') == &str2[10]);
+        const char* const str3 = "abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcX";
+        CHECK(bs::strrfind(str3, bs::strlen(str3), 'X') == &str3[48]);
+        const char* const str4 = "abcabcabcabcabcabcabcabcabcabcabcabcabcabcXabcabc";
+        CHECK(bs::strrfind(str4, bs::strlen(str4), 'X') == &str4[42]);
+        const char* const str5 = "abcabcXabcabcabcabcabcabcXabcabcabcabcabcabcabcab";
+        CHECK(bs::strrfind(str5, bs::strlen(str5), 'X') == &str5[25]);
 
         CHECK(bs::strrfind(static_cast<char*>(nullptr), 0, 'k') == nullptr);
         CHECK(bs::strrfind(static_cast<const char*>(nullptr), 0, 'a') == nullptr);

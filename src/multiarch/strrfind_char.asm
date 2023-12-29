@@ -1,4 +1,6 @@
 
+OPTION AVXENCODING: PREFER_VEX
+
 .code
 
 ; string: rcx PTR BYTE

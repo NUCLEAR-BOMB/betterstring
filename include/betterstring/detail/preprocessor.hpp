@@ -22,6 +22,12 @@
     #define BS_COMP_MSVC  0
 #endif
 
+#if !BS_COMP_MSVC
+    #define BS_IS_COMPILER_SUPPORTS_DYNAMIC_DISPATCH 1
+#else
+    #define BS_IS_COMPILER_SUPPORTS_DYNAMIC_DISPATCH 0
+#endif
+
 #ifdef __has_builtin
     #define BS_HAS_BUILTIN(x) __has_builtin(x)
 #else
@@ -108,3 +114,5 @@
 #else
     #define BS_ARCH_AVX2 0
 #endif
+
+#define BS_ARCH_NO_AVX2 0
