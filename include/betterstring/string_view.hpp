@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 #include <betterstring/detail/preprocessor.hpp>
+#include <betterstring/detail/integer_cmps.hpp>
 #include <betterstring/functions.hpp>
 #include <betterstring/splited_string.hpp>
 
@@ -144,6 +145,10 @@ public:
     using size_type              = typename Traits::size_type;
     using difference_type        = typename Traits::difference_type;
 
+private:
+    using signed_size_type = std::make_signed_t<size_type>;
+public:
+
     constexpr string_view() noexcept : string_data(nullptr), string_size(0) {}
 
     constexpr string_view(const string_view&) noexcept = default;
@@ -181,23 +186,10 @@ public:
     constexpr const_reverse_iterator crbegin() const noexcept { return rbegin(); }
     constexpr const_reverse_iterator crend() const noexcept { return rend(); }
 
-private:
-    template<class T>
-    constexpr size_type to_index(const T integer) const noexcept {
-        return static_cast<size_type>(integer < T(0) ? integer + static_cast<T>(size()) : integer);
-    }
-public:
-
-    template<class T, std::enable_if_t<std::is_unsigned_v<T>, int> = 0>
-    constexpr const_reference operator[](const T index) const noexcept {
-        BS_VERIFY(index < size(), "out of range");
-        return data()[index];
-    }
-    template<class T, std::enable_if_t<std::is_signed_v<T>, int> = 0>
-    constexpr const_reference operator[](const T index) const noexcept {
-        const T ssize = static_cast<T>(size());
-        BS_VERIFY(index < ssize && index >= -ssize, "out of range");
-        return data()[to_index(index)];
+    template<class Idx, std::enable_if_t<std::is_integral_v<Idx>, int> = 0>
+    constexpr const_reference operator[](const Idx index) const noexcept {
+        BS_VERIFY(detail::cmp_less(index, size()) && detail::cmp_greater_equal(index, -ssize()), "out of range");
+        return data()[index >= 0 ? index : size() + index];
     }
 
     constexpr const_reference front() const noexcept {
@@ -213,6 +205,7 @@ public:
     BS_CONST_FN constexpr const_pointer dataend() const noexcept { return data() + size(); }
 
     BS_CONST_FN constexpr size_type size() const noexcept { return string_size; }
+    BS_CONST_FN constexpr signed_size_type ssize() const noexcept { return static_cast<signed_size_type>(string_size); }
     BS_CONST_FN constexpr size_type length() const noexcept { return size(); }
 
     BS_CONST_FN constexpr size_type max_size() const noexcept { return static_cast<size_type>(-1); }
@@ -230,37 +223,32 @@ public:
     }
 
 private:
-    struct slice_end_t {
-        constexpr slice_end_t() noexcept = default;
-    };
-
-    template<class T1, class T>
-    constexpr T1 unwrap_slice_finish(const T finish) const noexcept {
-        if constexpr (std::is_same_v<T, slice_end_t>) { return static_cast<T1>(size()); }
-        else { return static_cast<T1>(finish); }
-    }
+    struct slice_end_tag {};
 public:
 
-    template<class T1, class T2 = slice_end_t, std::enable_if_t<std::is_unsigned_v<T1>, int> = 0>
-    constexpr string_view operator()(const T1 start, const T2 raw_finish) const noexcept {
-        const auto finish = unwrap_slice_finish<T1>(raw_finish);
-        BS_VERIFY(start <= size() && finish <= size(), "slice out of range");
-        return string_view(data() + start, finish - start);
+    template<class Idx1, class Idx2, std::enable_if_t<std::is_integral_v<Idx1> && std::is_integral_v<Idx2>, int> = 0>
+    constexpr string_view operator()(const Idx1 start, const Idx2 finish) const noexcept {
+        using namespace bs::detail;
+        BS_VERIFY(cmp_less_equal(start, size()) && cmp_greater_equal(start, -ssize()), "slice start index is out of range");
+        BS_VERIFY(cmp_less_equal(finish, size()) && cmp_greater_equal(finish, -ssize()), "slice end index is out of range");
+        const auto start_idx = start >= 0 ? start : size() + start;
+        const auto finish_idx = finish >= 0 ? finish : size() + finish;
+        return string_view(data() + start_idx, finish_idx - start_idx);
     }
-    template<class T1, class T2 = slice_end_t, std::enable_if_t<std::is_signed_v<T1>, int> = 0>
-    constexpr string_view operator()(const T1 start, const T2 raw_finish) const noexcept {
-        const auto finish = unwrap_slice_finish<T1>(raw_finish);
-        const T1 ssize = static_cast<T1>(size());
-        BS_VERIFY(start <= ssize && start >= -ssize && finish <= ssize && finish >+ -ssize,
-            "slice out of range");
-        return string_view(data() + to_index(start), to_index(finish) - to_index(start));
+    template<class Idx, class SliceEndTag = slice_end_tag, std::enable_if_t<std::is_same_v<SliceEndTag, slice_end_tag> && std::is_integral_v<Idx>, int> = 0>
+    constexpr string_view operator()(const Idx start, const SliceEndTag) const noexcept {
+        using namespace bs::detail;
+        BS_VERIFY(cmp_less_equal(start, size()) && cmp_greater_equal(start, -ssize()), "slice start index is out of range");
+        const auto start_idx = start >= 0 ? start : size() + start;
+        return string_view(data() + start_idx, size() - start_idx);
     }
 
     constexpr string_view operator[](const slice sl) const noexcept {
-        const auto ssize = static_cast<typename slice::index_type>(size());
-        BS_VERIFY(sl.start <= ssize && sl.start >= -ssize && sl.stop <= ssize && sl.stop >+ -ssize,
-            "slice out of range");
-        return string_view(data() + to_index(sl.start), to_index(sl.stop) - to_index(sl.start));
+        BS_VERIFY(sl.start <= ssize() && sl.start >= -ssize(), "slice start index is out of range");
+        BS_VERIFY(sl.stop <= ssize() && sl.stop >= -ssize(), "slice end index is out of range");
+        const auto start_idx = sl.start >= 0 ? sl.start : size() + sl.start;
+        const auto finish_idx = sl.stop >= 0 ? sl.stop : size() + sl.stop;
+        return string_view(data() + start_idx, finish_idx - start_idx);
     }
 
     BS_CONST_FN constexpr size_type idx(const const_pointer ptr) const noexcept {
@@ -570,8 +558,7 @@ private:
 using wstring_view = string_view<char_traits<wchar_t>>;
 using u16string_view = string_view<char_traits<char16_t>>;
 using u32string_view = string_view<char_traits<char32_t>>;
-
-#if __cplusplus >= 202002L
+#if BS_HAS_CHAR8_T
 using u8string_view = string_view<char_traits<char8_t>>;
 #endif
 
@@ -645,7 +632,7 @@ inline namespace literals {
     constexpr bs::u32string_view operator ""_sv(const char32_t* const str, const std::size_t len) noexcept {
         return bs::u32string_view(str, len);
     }
-#if __cplusplus >= 202002L
+#if BS_HAS_CHAR8_T
     constexpr bs::u8string_view operator ""_sv(const char8_t* const str, const std::size_t len) noexcept {
         return bs::u8string_view(str, len);
     }

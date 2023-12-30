@@ -4,6 +4,17 @@
     #include <string>
 #endif
 
+#if __has_include(<version>)
+    #include <version>
+#endif
+
+#ifdef __cpp_lib_char8_t
+    #define BS_HAS_CHAR8_T 1
+#else
+    #define BS_HAS_CHAR8_T 0
+#endif
+
+
 #if defined(__clang__)
     #define BS_COMP_CLANG 1
     #define BS_COMP_GCC   0
@@ -116,3 +127,5 @@
 #endif
 
 #define BS_ARCH_NO_AVX2 0
+
+
