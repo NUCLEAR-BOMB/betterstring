@@ -524,6 +524,34 @@ public:
         return string_view(data(), size() - str.size());
     }
 
+    template<class Predicate>
+    constexpr bool all_of(Predicate pred) const {
+        for (const value_type* it = data(); it != dataend(); ++it) {
+            if (!bool(pred(*it))) {
+                return false;
+            }
+        }
+        return true;
+    }
+    template<class Predicate>
+    constexpr bool any_of(Predicate pred) const {
+        for (const value_type* it = data(); it != dataend(); ++it) {
+            if (pred(*it)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    template<class Predicate>
+    constexpr bool none_of(Predicate pred) const {
+        for (const value_type* it = data(); it != dataend(); ++it) {
+            if (pred(*it)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 private:
     static constexpr int trait_cmp(const string_view l, const string_view r) noexcept {
         if (l.size() > r.size()) return 1;

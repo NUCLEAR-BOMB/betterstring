@@ -1,9 +1,10 @@
-#include <betterstring/string_view.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_all.hpp>
 #include <array>
 #include "tools.hpp"
 
-#include <catch2/catch_test_macros.hpp>
-#include <catch2/matchers/catch_matchers_all.hpp>
+#include <betterstring/string_view.hpp>
+#include <betterstring/ascii.hpp>
 
 using namespace bs::literals;
 
@@ -459,6 +460,28 @@ TEST_CASE("idx", "[string_view]") {
     CHECK(str.idx(str.data() + 2) == 2);
     CHECK(str.idx(str.dataend()) == str.size());
     CHECK(str.idx(str.data()) == 0);
+}
+
+TEST_CASE("all_of", "[string_view]") {
+    CHECK("teststring"_sv.all_of(bs::ascii::is_alpha<char>));
+    CHECK_FALSE("test string"_sv.all_of(bs::ascii::is_space<char>));
+    CHECK("12345"_sv.all_of(bs::ascii::is_digit<char>));
+    CHECK(""_sv.all_of(bs::ascii::is_graph<char>) == true);
+
+    CHECK("test string"_sv.all_of(bs::ascii::is_ascii<char>));
+    CHECK_FALSE(u"test\u0d9estring"_sv.all_of(bs::ascii::is_ascii<char16_t>));
+    CHECK_FALSE(U"test\U0001f34cstring"_sv.all_of(bs::ascii::is_ascii<char32_t>));
+}
+
+TEST_CASE("any_of", "[string_view]") {
+    CHECK("test string"_sv.any_of(bs::ascii::is_blank<char>));
+    CHECK(""_sv.any_of(bs::ascii::is_alnum<char>) == false);
+}
+
+TEST_CASE("none_of", "[string_view]") {
+    CHECK("test string"_sv.none_of(bs::ascii::is_digit<char>));
+    CHECK(""_sv.none_of(bs::ascii::is_graph<char>) == true);
+    CHECK_FALSE("test string"_sv.none_of(bs::ascii::is_blank<char>));
 }
 
 }
