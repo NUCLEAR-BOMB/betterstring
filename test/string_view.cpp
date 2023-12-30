@@ -45,8 +45,10 @@ TEST_CASE("subscript", "[string_view]") {
     CHECK(str[0] == 't');
     CHECK(str[10] == 'g');
 
+    CHECK(str[0u] == 't');
     CHECK(str[1u] == 'e');
     CHECK(str[2u] == 's');
+    CHECK(str[10u] == 'g');
 
     CHECK(str[-1] == 'g');
     CHECK(str[-11] == 't');
@@ -104,13 +106,20 @@ TEST_CASE("slice", "[string_view]") {
     CHECK(str(0, 4).size() == 4);
     
     CHECK(str(5, 11) == "string");
-    CHECK(str(5, 11).size() == 6);
+    CHECK(str(5u, 10u) == "strin");
     
     CHECK(str(0, -5) == "test s");
-    CHECK(str(-5, {}) == "tring");
-    
-    CHECK(str(5u, {}) == "string");
     CHECK(str(5, -2) == "stri");
+    CHECK(str(7, -1) == "rin");
+    CHECK(str(7u, -1) == "rin");
+
+    CHECK(str(0, {}) == "test string");
+    CHECK(str(-5, {}) == "tring");
+    CHECK(str(5u, {}) == "string");
+    CHECK(str(1, {}) == "est string");
+    CHECK(str(11, {}) == "");
+    CHECK(str(11u, {}) == "");
+    CHECK(str(0u, {}) == "test string");
     
     CHECK(str[bs::slice(2)] == "te");
     CHECK(str[bs::slice(0, 5)] == "test ");

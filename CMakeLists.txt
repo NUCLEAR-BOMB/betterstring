@@ -16,6 +16,7 @@ add_library(betterstring
     "include/betterstring/string_view.hpp"
     "include/betterstring/splited_string.hpp"
     "include/betterstring/detail/preprocessor.hpp"
+    "include/betterstring/detail/integer_cmps.hpp"
 
     "include/betterstring/detail/multiarch/strrfind_char_avx2.hpp"
     "include/betterstring/detail/multiarch/strrfind_char_default.hpp"
