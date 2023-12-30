@@ -12,4 +12,4 @@
 !cmake/
 !.github/
 !benchmark/
-!fuzzing/
+!fuzz/
