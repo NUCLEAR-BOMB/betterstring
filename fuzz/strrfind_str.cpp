@@ -17,7 +17,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     if (result == nullptr) {
         for (std::size_t i = 0; i + needle_size < haystack_size; ++i) {
             if (std::memcmp(needle, haystack + i, needle_size) == 0) {
-                bs::strrfind(haystack, haystack_size, needle, needle_size);
                 std::abort();
             }
         }
@@ -27,7 +26,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
         }
         for (auto it = haystack + (haystack_size - needle_size); it != result; --it) {
             if (std::memcmp(it, needle, needle_size) == 0) {
-                bs::strrfind(haystack, haystack_size, needle, needle_size);
                 std::abort();
             }
         }
