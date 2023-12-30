@@ -308,7 +308,7 @@ constexpr auto strfind(Haystack& haystack, const Needle needle) noexcept
     return bs::strfind(haystack.data(), haystack.size(), needle);
 }
 
-#if BS_COMP_MSVC
+#if BS_COMP_MSVC && !BS_ARCH_NO_AVX2
 namespace detail {
     const char* strrfind_str_runtime(const char*, std::size_t, const char*, std::size_t);
 }
@@ -346,7 +346,7 @@ constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::
     return bs::strrfind(haystack, count, needle, N - 1);
 }
 
-#if BS_COMP_MSVC
+#if BS_COMP_MSVC && !BS_ARCH_NO_AVX2
 namespace detail {
     const char* strrfind_ch_runtime(const char*, std::size_t, char);
 }
@@ -453,71 +453,5 @@ template<class T>
 constexpr void strmove(T* const dest, const std::size_t dest_size, const T* const src, const std::size_t count) noexcept {
     return bs::strmove(dest, src, std::min(dest_size, count));
 }
-
-template<class T>
-class char_traits
-#ifndef BS_DONT_INCLUDE_STRING
-    : private std::char_traits<T>
-#endif
-{
-public:
-    using size_type = std::size_t;
-    using difference_type = std::ptrdiff_t;
-    using char_type = T;
-#ifndef BS_DONT_INCLUDE_STRING
-private:
-    using base = std::char_traits<T>;
-public:
-    using int_type = typename base::int_type;
-    using off_type = typename base::off_type;
-    using pos_type = typename base::pos_type;
-    using state_type = typename base::state_type;
-
-    using base::to_char_type;
-    using base::to_int_type;
-    using base::eq_int_type;
-    using base::eof;
-    using base::not_eof;
-#endif
-
-    static constexpr void assign(char_type& dest, const char_type& src) noexcept {
-        dest = src;
-    }
-    static constexpr void assign(char_type* const dest, const size_type count, const char_type ch) noexcept {
-        bs::strfill(dest, count, ch);
-    }
-    static constexpr bool eq(const char_type l, const char_type r) noexcept {
-        return l == r;
-    }
-    static constexpr bool lt(const char_type l, const char_type r) noexcept {
-        return l < r;
-    }
-    static constexpr char_type* move(char_type* const dest, const char_type* const src, const std::size_t count) noexcept {
-        bs::strmove(dest, src, count);
-        return dest;
-    }
-    static constexpr char_type* copy(char_type* const dest, const char_type* const src, const std::size_t count) noexcept {
-        bs::strcopy(dest, src, count);
-        return dest;
-    }
-    static constexpr int compare(const char_type* const left, const char_type* const right, const std::size_t count) noexcept {
-        return bs::strcomp(left, right, count);
-    }
-    static constexpr std::size_t length(const char_type* const str) noexcept {
-        return bs::strlen(str);
-    }
-    static constexpr const char_type* find(const char_type* const str, const std::size_t count, const char_type& ch) noexcept {
-        return bs::strfind(str, count, ch);
-    }
-    static constexpr const char_type* findstr(const char_type* const str, const std::size_t count, const char_type* const substr, const std::size_t substr_len) noexcept {
-        return bs::strfind(str, count, substr, substr_len);
-    }
-    static constexpr const char_type* rfind(const char_type* const str, const std::size_t count, const char_type ch) noexcept {
-        return bs::strrfind(str, count, ch);
-    }
-    static constexpr const char_type* rfindstr(const char_type* const str, const std::size_t count, const char_type* const substr, const std::size_t substr_len) noexcept {
-        return bs::strrfind(str, count, substr, substr_len);
-    }
-};
 
 }

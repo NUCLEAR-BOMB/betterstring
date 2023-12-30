@@ -11,6 +11,7 @@
 #include <betterstring/detail/integer_cmps.hpp>
 #include <betterstring/functions.hpp>
 #include <betterstring/splited_string.hpp>
+#include <betterstring/char_traits.hpp>
 
 namespace bs
 {

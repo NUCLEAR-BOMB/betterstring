@@ -1,8 +1,9 @@
-#include <betterstring/functions.hpp>
 #include <string>
 #include <string_view>
 
 #include <catch2/catch_test_macros.hpp>
+
+#include <betterstring/char_traits.hpp>
 
 namespace {
 
