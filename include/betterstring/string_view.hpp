@@ -592,11 +592,6 @@ using u8string_view = string_view<char_traits<char8_t>>;
 #endif
 
 template<class Traits>
-constexpr std::size_t strlen(const string_view<Traits> str) noexcept {
-    return str.size();
-}
-
-template<class Traits>
 constexpr void strcopy(typename Traits::char_type* const dest, const std::size_t dest_size, const string_view<Traits> src) noexcept {
     bs::strcopy(dest, dest_size, src.data(), src.size());
 }
@@ -604,11 +599,6 @@ constexpr void strcopy(typename Traits::char_type* const dest, const std::size_t
 template<class Traits>
 constexpr int strcomp(const string_view<Traits> left, const string_view<Traits> right) noexcept {
     return bs::strcomp(left.data(), left.size(), right.data(), right.size());
-}
-
-template<class Traits>
-[[nodiscard]] constexpr bool empty(const string_view<Traits> str) noexcept {
-    return str.empty();
 }
 
 template<class Traits>
@@ -623,12 +613,6 @@ constexpr auto strrfind(
     const string_view<Traits> str, const typename Traits::char_type ch
 ) noexcept -> const typename Traits::char_type* {
     return bs::strrfind(str.data(), str.size(), ch);
-}
-
-template<class Traits>
-constexpr auto cstr(const string_view<Traits> str) noexcept
-    -> const typename Traits::char_type* {
-    return str.data();
 }
 
 template<class Traits>
