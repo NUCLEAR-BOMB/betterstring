@@ -23,93 +23,100 @@ TEST_CASE("is_digit", "[ascii]") {
     CHECK_FALSE(bs::ascii::is_digit(U'\U0001f34c'));
 }
 
-TEST_CASE("is_hex_digit", "[ascii]") {
-    CHECK(bs::ascii::is_hex_digit('0'));
-    CHECK(bs::ascii::is_hex_digit('9'));
-    CHECK(bs::ascii::is_hex_digit('A'));
-    CHECK(bs::ascii::is_hex_digit('a'));
-    CHECK(bs::ascii::is_hex_digit('F'));
-    CHECK(bs::ascii::is_hex_digit('f'));
+TEST_CASE("is_hexdigit", "[ascii]") {
+    CHECK(bs::ascii::is_hexdigit('0'));
+    CHECK(bs::ascii::is_hexdigit('9'));
+    CHECK(bs::ascii::is_hexdigit('A'));
+    CHECK(bs::ascii::is_hexdigit('a'));
+    CHECK(bs::ascii::is_hexdigit('F'));
+    CHECK(bs::ascii::is_hexdigit('f'));
 
-    CHECK_FALSE(bs::ascii::is_hex_digit('/'));
-    CHECK_FALSE(bs::ascii::is_hex_digit(':'));
-    CHECK_FALSE(bs::ascii::is_hex_digit('`'));
-    CHECK_FALSE(bs::ascii::is_hex_digit('g'));
+    CHECK_FALSE(bs::ascii::is_hexdigit('/'));
+    CHECK_FALSE(bs::ascii::is_hexdigit(':'));
+    CHECK_FALSE(bs::ascii::is_hexdigit('`'));
+    CHECK_FALSE(bs::ascii::is_hexdigit('g'));
 
-    CHECK(bs::ascii::is_digit(u'0'));
-    CHECK_FALSE(bs::ascii::is_digit(u'\u0d9e'));
+    CHECK(bs::ascii::is_hexdigit(u'0'));
+    CHECK_FALSE(bs::ascii::is_hexdigit(u'\u0d9e'));
 }
 
-TEST_CASE("is_lower", "[ascii]") {
-    CHECK(bs::ascii::is_lower('a'));
-    CHECK(bs::ascii::is_lower('z'));
-    CHECK(bs::ascii::is_lower('r'));
-
-    CHECK_FALSE(bs::ascii::is_lower('A'));
-    CHECK_FALSE(bs::ascii::is_lower('Z'));
-    CHECK_FALSE(bs::ascii::is_lower('`'));
-    CHECK_FALSE(bs::ascii::is_lower('{'));
-
-    CHECK(bs::ascii::is_lower(u'a'));
-    CHECK(bs::ascii::is_lower(U'z'));
+TEST_CASE("is_octdigit", "[ascii]") {
+    CHECK(bs::ascii::is_octdigit('0'));
+    CHECK(bs::ascii::is_octdigit('5'));
+    CHECK(bs::ascii::is_octdigit('7'));
+    CHECK_FALSE(bs::ascii::is_octdigit('8'));
 }
 
-TEST_CASE("is_upper", "[ascii]") {
-    CHECK(bs::ascii::is_upper('A'));
-    CHECK(bs::ascii::is_upper('Z'));
-    CHECK_FALSE(bs::ascii::is_upper('a'));
-    CHECK_FALSE(bs::ascii::is_upper('z'));
+TEST_CASE("is_lowercase", "[ascii]") {
+    CHECK(bs::ascii::is_lowercase('a'));
+    CHECK(bs::ascii::is_lowercase('z'));
+    CHECK(bs::ascii::is_lowercase('r'));
+
+    CHECK_FALSE(bs::ascii::is_lowercase('A'));
+    CHECK_FALSE(bs::ascii::is_lowercase('Z'));
+    CHECK_FALSE(bs::ascii::is_lowercase('`'));
+    CHECK_FALSE(bs::ascii::is_lowercase('{'));
+
+    CHECK(bs::ascii::is_lowercase(u'a'));
+    CHECK(bs::ascii::is_lowercase(U'z'));
 }
 
-TEST_CASE("is_alpha", "[ascii]") {
-    CHECK(bs::ascii::is_alpha('a'));
-    CHECK(bs::ascii::is_alpha('b'));
-    CHECK(bs::ascii::is_alpha('A'));
-    CHECK(bs::ascii::is_alpha('B'));
-    CHECK(bs::ascii::is_alpha('z'));
-    CHECK(bs::ascii::is_alpha('Z'));
-
-    CHECK_FALSE(bs::ascii::is_alpha('0'));
-    CHECK_FALSE(bs::ascii::is_alpha('{'));
+TEST_CASE("is_uppercase", "[ascii]") {
+    CHECK(bs::ascii::is_uppercase('A'));
+    CHECK(bs::ascii::is_uppercase('Z'));
+    CHECK_FALSE(bs::ascii::is_uppercase('a'));
+    CHECK_FALSE(bs::ascii::is_uppercase('z'));
 }
 
-TEST_CASE("is_alnum", "[ascii]") {
-    CHECK(bs::ascii::is_alnum('a'));
-    CHECK(bs::ascii::is_alnum('b'));
-    CHECK(bs::ascii::is_alnum('A'));
-    CHECK(bs::ascii::is_alnum('B'));
-    CHECK(bs::ascii::is_alnum('Z'));
-    CHECK(bs::ascii::is_alnum('0'));
-    CHECK(bs::ascii::is_alnum('1'));
-    CHECK(bs::ascii::is_alnum('9'));
+TEST_CASE("is_alphabetic", "[ascii]") {
+    CHECK(bs::ascii::is_alphabetic('a'));
+    CHECK(bs::ascii::is_alphabetic('b'));
+    CHECK(bs::ascii::is_alphabetic('A'));
+    CHECK(bs::ascii::is_alphabetic('B'));
+    CHECK(bs::ascii::is_alphabetic('z'));
+    CHECK(bs::ascii::is_alphabetic('Z'));
 
-    CHECK_FALSE(bs::ascii::is_alnum('!'));
-    CHECK_FALSE(bs::ascii::is_alnum('{'));
-    CHECK_FALSE(bs::ascii::is_alnum('/'));
+    CHECK_FALSE(bs::ascii::is_alphabetic('0'));
+    CHECK_FALSE(bs::ascii::is_alphabetic('{'));
 }
 
-TEST_CASE("is_punct", "[ascii]") {
-    CHECK(bs::ascii::is_punct('!'));
-    CHECK(bs::ascii::is_punct('"'));
-    CHECK(bs::ascii::is_punct('/'));
-    CHECK(bs::ascii::is_punct(':'));
-    CHECK(bs::ascii::is_punct('@'));
-    CHECK(bs::ascii::is_punct('['));
-    CHECK(bs::ascii::is_punct('`'));
-    CHECK(bs::ascii::is_punct('{'));
-    CHECK(bs::ascii::is_punct('~'));
+TEST_CASE("is_alphanumeric", "[ascii]") {
+    CHECK(bs::ascii::is_alphanumeric('a'));
+    CHECK(bs::ascii::is_alphanumeric('b'));
+    CHECK(bs::ascii::is_alphanumeric('A'));
+    CHECK(bs::ascii::is_alphanumeric('B'));
+    CHECK(bs::ascii::is_alphanumeric('Z'));
+    CHECK(bs::ascii::is_alphanumeric('0'));
+    CHECK(bs::ascii::is_alphanumeric('1'));
+    CHECK(bs::ascii::is_alphanumeric('9'));
 
-    CHECK_FALSE(bs::ascii::is_punct('a'));
-    CHECK_FALSE(bs::ascii::is_punct('b'));
-    CHECK_FALSE(bs::ascii::is_punct('1'));
-    CHECK_FALSE(bs::ascii::is_punct(' '));
+    CHECK_FALSE(bs::ascii::is_alphanumeric('!'));
+    CHECK_FALSE(bs::ascii::is_alphanumeric('{'));
+    CHECK_FALSE(bs::ascii::is_alphanumeric('/'));
 }
 
-TEST_CASE("is_graph", "[ascii]") {
-    CHECK(bs::ascii::is_graph('!'));
-    CHECK(bs::ascii::is_graph('~'));
+TEST_CASE("is_punctuation", "[ascii]") {
+    CHECK(bs::ascii::is_punctuation('!'));
+    CHECK(bs::ascii::is_punctuation('"'));
+    CHECK(bs::ascii::is_punctuation('/'));
+    CHECK(bs::ascii::is_punctuation(':'));
+    CHECK(bs::ascii::is_punctuation('@'));
+    CHECK(bs::ascii::is_punctuation('['));
+    CHECK(bs::ascii::is_punctuation('`'));
+    CHECK(bs::ascii::is_punctuation('{'));
+    CHECK(bs::ascii::is_punctuation('~'));
 
-    CHECK_FALSE(bs::ascii::is_graph(' '));
+    CHECK_FALSE(bs::ascii::is_punctuation('a'));
+    CHECK_FALSE(bs::ascii::is_punctuation('b'));
+    CHECK_FALSE(bs::ascii::is_punctuation('1'));
+    CHECK_FALSE(bs::ascii::is_punctuation(' '));
+}
+
+TEST_CASE("is_graphic", "[ascii]") {
+    CHECK(bs::ascii::is_graphic('!'));
+    CHECK(bs::ascii::is_graphic('~'));
+
+    CHECK_FALSE(bs::ascii::is_graphic(' '));
 }
 
 TEST_CASE("is_blank", "[ascii]") {
@@ -119,21 +126,21 @@ TEST_CASE("is_blank", "[ascii]") {
     CHECK_FALSE(bs::ascii::is_blank('a'));
 }
 
-TEST_CASE("is_space", "[ascii]") {
-    CHECK(bs::ascii::is_space('\t'));
-    CHECK(bs::ascii::is_space('\r'));
-    CHECK(bs::ascii::is_space(' '));
+TEST_CASE("is_whitespace", "[ascii]") {
+    CHECK(bs::ascii::is_whitespace('\t'));
+    CHECK(bs::ascii::is_whitespace('\r'));
+    CHECK(bs::ascii::is_whitespace(' '));
 
-    CHECK_FALSE(bs::ascii::is_space('\10'));
-    CHECK_FALSE(bs::ascii::is_space('\16'));
+    CHECK_FALSE(bs::ascii::is_whitespace('\10'));
+    CHECK_FALSE(bs::ascii::is_whitespace('\16'));
 }
 
-TEST_CASE("is_print", "[ascii]") {
-    CHECK(bs::ascii::is_print(' '));
-    CHECK(bs::ascii::is_print('~'));
+TEST_CASE("is_printable", "[ascii]") {
+    CHECK(bs::ascii::is_printable(' '));
+    CHECK(bs::ascii::is_printable('~'));
 
-    CHECK_FALSE(bs::ascii::is_print('\177'));
-    CHECK_FALSE(bs::ascii::is_print('\37'));
+    CHECK_FALSE(bs::ascii::is_printable('\177'));
+    CHECK_FALSE(bs::ascii::is_printable('\37'));
 }
 
 TEST_CASE("is_ascii", "[ascii]") {
@@ -149,36 +156,36 @@ TEST_CASE("is_ascii", "[ascii]") {
     CHECK_FALSE(bs::ascii::is_ascii(U'\U0001f34c'));
 }
 
-TEST_CASE("to_lower", "[ascii]") {
-    CHECK(bs::ascii::to_lower('a') == 'a');
-    CHECK(bs::ascii::to_lower('A') == 'a');
-    CHECK(bs::ascii::to_lower('z') == 'z');
-    CHECK(bs::ascii::to_lower('Z') == 'z');
-    CHECK(bs::ascii::to_lower('0') == '0');
-    CHECK(bs::ascii::to_lower('9') == '9');
-    CHECK(bs::ascii::to_lower('!') == '!');
+TEST_CASE("to_lowercase", "[ascii]") {
+    CHECK(bs::ascii::to_lowercase('a') == 'a');
+    CHECK(bs::ascii::to_lowercase('A') == 'a');
+    CHECK(bs::ascii::to_lowercase('z') == 'z');
+    CHECK(bs::ascii::to_lowercase('Z') == 'z');
+    CHECK(bs::ascii::to_lowercase('0') == '0');
+    CHECK(bs::ascii::to_lowercase('9') == '9');
+    CHECK(bs::ascii::to_lowercase('!') == '!');
 
-    CHECK(bs::ascii::to_lower(u'a') == 'a');
-    CHECK(bs::ascii::to_lower(u'A') == 'a');
-    CHECK(bs::ascii::to_lower(U'a') == 'a');
-    CHECK(bs::ascii::to_lower(U'A') == 'a');
+    CHECK(bs::ascii::to_lowercase(u'a') == 'a');
+    CHECK(bs::ascii::to_lowercase(u'A') == 'a');
+    CHECK(bs::ascii::to_lowercase(U'a') == 'a');
+    CHECK(bs::ascii::to_lowercase(U'A') == 'a');
 }
 
-TEST_CASE("to_upper", "[ascii]") {
-    CHECK(bs::ascii::to_upper('a') == 'A');
-    CHECK(bs::ascii::to_upper('A') == 'A');
-    CHECK(bs::ascii::to_upper('b') == 'B');
-    CHECK(bs::ascii::to_upper('B') == 'B');
-    CHECK(bs::ascii::to_upper('Z') == 'Z');
-    CHECK(bs::ascii::to_upper('z') == 'Z');
-    CHECK(bs::ascii::to_upper('1') == '1');
-    CHECK(bs::ascii::to_upper('!') == '!');
-    CHECK(bs::ascii::to_upper('~') == '~');
+TEST_CASE("to_uppercase", "[ascii]") {
+    CHECK(bs::ascii::to_uppercase('a') == 'A');
+    CHECK(bs::ascii::to_uppercase('A') == 'A');
+    CHECK(bs::ascii::to_uppercase('b') == 'B');
+    CHECK(bs::ascii::to_uppercase('B') == 'B');
+    CHECK(bs::ascii::to_uppercase('Z') == 'Z');
+    CHECK(bs::ascii::to_uppercase('z') == 'Z');
+    CHECK(bs::ascii::to_uppercase('1') == '1');
+    CHECK(bs::ascii::to_uppercase('!') == '!');
+    CHECK(bs::ascii::to_uppercase('~') == '~');
 
-    CHECK(bs::ascii::to_upper(u'a') == 'A');
-    CHECK(bs::ascii::to_upper(u'A') == 'A');
-    CHECK(bs::ascii::to_upper(U'a') == 'A');
-    CHECK(bs::ascii::to_upper(U'A') == 'A');
+    CHECK(bs::ascii::to_uppercase(u'a') == 'A');
+    CHECK(bs::ascii::to_uppercase(u'A') == 'A');
+    CHECK(bs::ascii::to_uppercase(U'a') == 'A');
+    CHECK(bs::ascii::to_uppercase(U'A') == 'A');
 }
 
 TEST_CASE("to_digit", "[ascii]") {
@@ -188,17 +195,24 @@ TEST_CASE("to_digit", "[ascii]") {
     CHECK(bs::ascii::to_digit(u'5') == 5);
 }
 
-TEST_CASE("to_hex_digit", "[ascii]") {
-    CHECK(bs::ascii::to_hex_digit('0') == 0);
-    CHECK(bs::ascii::to_hex_digit('9') == 9);
-    CHECK(bs::ascii::to_hex_digit('A') == 10);
-    CHECK(bs::ascii::to_hex_digit('a') == 10);
-    CHECK(bs::ascii::to_hex_digit('b') == 11);
-    CHECK(bs::ascii::to_hex_digit('B') == 11);
-    CHECK(bs::ascii::to_hex_digit('f') == 15);
-    CHECK(bs::ascii::to_hex_digit('F') == 15);
-    CHECK(bs::ascii::to_hex_digit(u'5') == 5);
-    CHECK(bs::ascii::to_hex_digit(u'c') == 12);
+TEST_CASE("to_hexdigit", "[ascii]") {
+    CHECK(bs::ascii::to_hexdigit('0') == 0);
+    CHECK(bs::ascii::to_hexdigit('9') == 9);
+    CHECK(bs::ascii::to_hexdigit('A') == 10);
+    CHECK(bs::ascii::to_hexdigit('a') == 10);
+    CHECK(bs::ascii::to_hexdigit('b') == 11);
+    CHECK(bs::ascii::to_hexdigit('B') == 11);
+    CHECK(bs::ascii::to_hexdigit('f') == 15);
+    CHECK(bs::ascii::to_hexdigit('F') == 15);
+    CHECK(bs::ascii::to_hexdigit(u'5') == 5);
+    CHECK(bs::ascii::to_hexdigit(u'c') == 12);
+}
+
+TEST_CASE("to_octdigit", "[ascii]") {
+    CHECK(bs::ascii::to_octdigit('0') == 0);
+    CHECK(bs::ascii::to_octdigit('1') == 1);
+    CHECK(bs::ascii::to_octdigit('6') == 6);
+    CHECK(bs::ascii::to_octdigit('7') == 7);
 }
 
 TEST_CASE("from_digit", "[ascii]") {
@@ -209,24 +223,31 @@ TEST_CASE("from_digit", "[ascii]") {
     CHECK(bs::ascii::from_digit<char32_t>(7) == U'7');
 }
 
-TEST_CASE("from_lower_hex_digit", "[ascii]") {
-    CHECK(bs::ascii::from_lower_hex_digit(0) == '0');
-    CHECK(bs::ascii::from_lower_hex_digit(9) == '9');
-    CHECK(bs::ascii::from_lower_hex_digit(10) == 'a');
-    CHECK(bs::ascii::from_lower_hex_digit(11) == 'b');
-    CHECK(bs::ascii::from_lower_hex_digit(15) == 'f');
-    CHECK(bs::ascii::from_lower_hex_digit<char16_t>(12) == 'c');
-    CHECK(bs::ascii::from_lower_hex_digit<char32_t>(13) == 'd');
+TEST_CASE("from_lowercase_hexdigit", "[ascii]") {
+    CHECK(bs::ascii::from_lowercase_hexdigit(0) == '0');
+    CHECK(bs::ascii::from_lowercase_hexdigit(9) == '9');
+    CHECK(bs::ascii::from_lowercase_hexdigit(10) == 'a');
+    CHECK(bs::ascii::from_lowercase_hexdigit(11) == 'b');
+    CHECK(bs::ascii::from_lowercase_hexdigit(15) == 'f');
+    CHECK(bs::ascii::from_lowercase_hexdigit<char16_t>(12) == 'c');
+    CHECK(bs::ascii::from_lowercase_hexdigit<char32_t>(13) == 'd');
 }
 
-TEST_CASE("from_upper_hex_digit", "[ascii]") {
-    CHECK(bs::ascii::from_upper_hex_digit(0) == '0');
-    CHECK(bs::ascii::from_upper_hex_digit(9) == '9');
-    CHECK(bs::ascii::from_upper_hex_digit(10) == 'A');
-    CHECK(bs::ascii::from_upper_hex_digit(11) == 'B');
-    CHECK(bs::ascii::from_upper_hex_digit(15) == 'F');
-    CHECK(bs::ascii::from_upper_hex_digit<char16_t>(12) == 'C');
-    CHECK(bs::ascii::from_upper_hex_digit<char32_t>(13) == 'D');
+TEST_CASE("from_uppercase_hexdigit", "[ascii]") {
+    CHECK(bs::ascii::from_uppercase_hexdigit(0) == '0');
+    CHECK(bs::ascii::from_uppercase_hexdigit(9) == '9');
+    CHECK(bs::ascii::from_uppercase_hexdigit(10) == 'A');
+    CHECK(bs::ascii::from_uppercase_hexdigit(11) == 'B');
+    CHECK(bs::ascii::from_uppercase_hexdigit(15) == 'F');
+    CHECK(bs::ascii::from_uppercase_hexdigit<char16_t>(12) == 'C');
+    CHECK(bs::ascii::from_uppercase_hexdigit<char32_t>(13) == 'D');
+}
+
+TEST_CASE("from_octdigit", "[ascii]") {
+    CHECK(bs::ascii::from_octdigit(0) == '0');
+    CHECK(bs::ascii::from_octdigit(1) == '1');
+    CHECK(bs::ascii::from_octdigit(6) == '6');
+    CHECK(bs::ascii::from_octdigit(7) == '7');
 }
 
 }

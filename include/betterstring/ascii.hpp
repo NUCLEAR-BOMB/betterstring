@@ -31,31 +31,35 @@ constexpr bool is_digit(const Ch ch) noexcept {
     return ch >= '0' && ch <= '9';
 }
 template<class Ch, detail::enable_is_ascii_compatible<Ch> = 0>
-constexpr bool is_hex_digit(const Ch ch) noexcept {
+constexpr bool is_hexdigit(const Ch ch) noexcept {
     return is_digit(ch) || (ch >= 'A' && ch <= 'F') || (ch >= 'a' && ch <= 'f');
 }
 template<class Ch, detail::enable_is_ascii_compatible<Ch> = 0>
-constexpr bool is_lower(const Ch ch) noexcept {
+constexpr bool is_octdigit(const Ch ch) noexcept {
+    return ch >= '0' && ch <= '7';
+}
+template<class Ch, detail::enable_is_ascii_compatible<Ch> = 0>
+constexpr bool is_lowercase(const Ch ch) noexcept {
     return ch >= 'a' && ch <= 'z';
 }
 template<class Ch, detail::enable_is_ascii_compatible<Ch> = 0>
-constexpr bool is_upper(const Ch ch) noexcept {
+constexpr bool is_uppercase(const Ch ch) noexcept {
     return ch >= 'A' && ch <= 'Z';
 }
 template<class Ch, detail::enable_is_ascii_compatible<Ch> = 0>
-constexpr bool is_alpha(const Ch ch) noexcept {
-    return is_lower(ch) || is_upper(ch);
+constexpr bool is_alphabetic(const Ch ch) noexcept {
+    return is_lowercase(ch) || is_uppercase(ch);
 }
 template<class Ch, detail::enable_is_ascii_compatible<Ch> = 0>
-constexpr bool is_alnum(const Ch ch) noexcept {
-    return is_alpha(ch) || is_digit(ch);
+constexpr bool is_alphanumeric(const Ch ch) noexcept {
+    return is_alphabetic(ch) || is_digit(ch);
 }
 template<class Ch, detail::enable_is_ascii_compatible<Ch> = 0>
-constexpr bool is_punct(const Ch ch) noexcept {
+constexpr bool is_punctuation(const Ch ch) noexcept {
     return (ch >= '!' && ch <= '/') || (ch >= ':' && ch <= '@') || (ch >= '[' && ch <= '`') || (ch >= '{' && ch <= '~');
 }
 template<class Ch, detail::enable_is_ascii_compatible<Ch> = 0>
-constexpr bool is_graph(const Ch ch) noexcept {
+constexpr bool is_graphic(const Ch ch) noexcept {
     return ch >= '!' && ch <= '~';
 }
 template<class Ch, detail::enable_is_ascii_compatible<Ch> = 0>
@@ -63,25 +67,30 @@ constexpr bool is_blank(const Ch ch) noexcept {
     return ch == '\t' || ch == ' ';
 }
 template<class Ch, detail::enable_is_ascii_compatible<Ch> = 0>
-constexpr bool is_space(const Ch ch) noexcept {
+constexpr bool is_whitespace(const Ch ch) noexcept {
     return (ch >= '\t' && ch <= '\r') || ch == ' ';
 }
 template<class Ch, detail::enable_is_ascii_compatible<Ch> = 0>
-constexpr bool is_print(const Ch ch) noexcept {
+constexpr bool is_printable(const Ch ch) noexcept {
     return ch >= ' ' && ch <= '~';
 }
+template<class Ch, detail::enable_is_ascii_compatible<Ch> = 0>
+constexpr bool is_control(const Ch ch) noexcept {
+    return ch >= '\0' && ch <= '\37';
+}
+
 template<class Ch, detail::enable_is_ascii_compatible<Ch> = 0>
 constexpr bool is_ascii(const Ch ch) noexcept {
     return ch >= 0 && ch <= 127;
 }
 
 template<class Ch, detail::enable_is_ascii_compatible<Ch> = 0>
-constexpr Ch to_lower(const Ch ch) noexcept {
-    return is_upper(ch) ? Ch(ch + ('a' - 'A')) : ch;
+constexpr Ch to_lowercase(const Ch ch) noexcept {
+    return is_uppercase(ch) ? Ch(ch + ('a' - 'A')) : ch;
 }
 template<class Ch, detail::enable_is_ascii_compatible<Ch> = 0>
-constexpr Ch to_upper(const Ch ch) noexcept {
-    return is_lower(ch) ? Ch(ch - ('a' - 'A')) : ch;
+constexpr Ch to_uppercase(const Ch ch) noexcept {
+    return is_lowercase(ch) ? Ch(ch - ('a' - 'A')) : ch;
 }
 
 template<class Ch, detail::enable_is_ascii_compatible<Ch> = 0>
@@ -90,10 +99,15 @@ constexpr int to_digit(const Ch ch) noexcept {
     return ch - '0';
 }
 template<class Ch, detail::enable_is_ascii_compatible<Ch> = 0>
-constexpr int to_hex_digit(const Ch ch) noexcept {
-    BS_VERIFY(is_hex_digit(ch), "character must be a hexadecimal digit");
+constexpr int to_hexdigit(const Ch ch) noexcept {
+    BS_VERIFY(is_hexdigit(ch), "character must be a hexadecimal digit");
     if (ch >= 'a' && ch <= 'f') return ch - 'a' + 10;
     if (ch >= 'A' && ch <= 'F') return ch - 'A' + 10;
+    return ch - '0';
+}
+template<class Ch, detail::enable_is_ascii_compatible<Ch> = 0>
+constexpr int to_octdigit(const Ch ch) noexcept {
+    BS_VERIFY(is_octdigit(ch), "character must be a octal digit");
     return ch - '0';
 }
 
@@ -104,15 +118,20 @@ constexpr Ch from_digit(const int d) noexcept {
 }
 
 template<class Ch = char, detail::enable_is_ascii_compatible<Ch> = 0>
-constexpr Ch from_lower_hex_digit(const int d) noexcept {
+constexpr Ch from_lowercase_hexdigit(const int d) noexcept {
     BS_VERIFY(d >= 0 && d <= 15, "integer must be a single hexadecimal digit");
     return static_cast<Ch>(d <= 9 ? d + '0' : d + 'a' - 10);
 }
 template<class Ch = char, detail::enable_is_ascii_compatible<Ch> = 0>
-constexpr Ch from_upper_hex_digit(const int d) noexcept {
+constexpr Ch from_uppercase_hexdigit(const int d) noexcept {
     BS_VERIFY(d >= 0 && d <= 15, "integer must be a single hexadecimal digit");
     return static_cast<Ch>(d <= 9 ? d + '0' : d + 'A' - 10);
 }
 
+template<class Ch = char, detail::enable_is_ascii_compatible<Ch> = 0>
+constexpr Ch from_octdigit(const int d) noexcept {
+    BS_VERIFY(d >= 0 && d <= 7, "integer must be a single octal digit");
+    return static_cast<Ch>(d + '0');
+}
 
 }
