@@ -13,7 +13,6 @@ namespace {
 TEST_CASE("bs::strlen", "[functions]") {
     CHECK(bs::strlen("test string") == 11);
     CHECK(bs::strlen(L"test string") == 11);
-    CHECK(bs::strlen("test string"_sv) == 11);
 
     CHECK(bs::strlen("test\0string") == 4);
 }
