@@ -30,7 +30,7 @@ align_loop:
 general:
     movzx r8d, r8b
     vmovd xmm0, r8d
-    vpbroadcastb ymm0,xmm0
+    vpbroadcastb ymm0, xmm0
 general_loop:
     sub rcx, 32
     vmovdqa ymm1, YMMWORD PTR [rcx]
@@ -51,9 +51,11 @@ fallback_loop:
     dec rdx
     jne fallback_loop
 not_found_exit:
+    vzeroupper
     ret                     ; return 0
 exit:
     add rax, rcx
+    vzeroupper
     ret
 betterstring_impl_strrfind_ch_avx2 ENDP
 
