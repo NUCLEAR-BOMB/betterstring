@@ -14,7 +14,6 @@
     #define BS_HAS_CHAR8_T 0
 #endif
 
-
 #if defined(__clang__)
     #define BS_COMP_CLANG 1
     #define BS_COMP_GCC   0
@@ -96,6 +95,12 @@
     #define BS_FLATTEN [[msvc::flatten]]
 #else
     #define BS_FLATTEN
+#endif
+
+#if BS_COMP_CLANG || BS_COMP_GCC || BS_COMP_MSVC
+    #define BS_RESTRICT __restrict
+#else
+    #define BS_RESTRICT
 #endif
 
 #if BS_COMP_CLANG

@@ -7,6 +7,8 @@
 #include <cstddef>
 
 #include <betterstring/detail/preprocessor.hpp>
+#include <betterstring/type_traits.hpp>
+
 #if !BS_ARCH_NO_AVX2 && BS_ARCH_AVX2
     #include <betterstring/detail/multiarch/strrfind_char_avx2.hpp>
     #include <betterstring/detail/multiarch/strrfind_string_avx2.hpp>
@@ -15,40 +17,6 @@
 #include <betterstring/detail/multiarch/strrfind_string_default.hpp>
 
 namespace bs {
-
-namespace detail {
-    constexpr bool is_constant_evaluated() noexcept {
-#ifdef __cpp_lib_is_constant_evaluated
-        return std::is_constant_evaluated();
-#elif defined(__clang__) || defined(__GNUC__) || defined(__GNUG__) || defined(_MSC_VER)
-        return __builtin_is_constant_evaluated();
-#else
-        return false;
-#endif
-    }
-
-    template<class>
-    inline constexpr bool always_false = false;
-
-    template<class T>
-    struct type_identity { using type = T; };
-
-    template<class T>
-    using type_identity_t = typename type_identity<T>::type;
-
-    template<class T>
-    struct is_character_impl : std::false_type {};
-    template<> struct is_character_impl<char> : std::true_type {};
-    template<> struct is_character_impl<wchar_t> : std::true_type {};
-    template<> struct is_character_impl<char16_t> : std::true_type {};
-    template<> struct is_character_impl<char32_t> : std::true_type {};
-#if __cplusplus >= 202002L
-    template<> struct is_character_impl<char8_t> : std::true_type {};
-#endif
-}
-
-template<class T>
-inline constexpr bool is_character = detail::is_character_impl<T>();
 
 namespace detail {
     template<class T, class = void>

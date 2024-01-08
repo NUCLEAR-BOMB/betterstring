@@ -12,6 +12,7 @@ endmacro()
 
 add_fuzzer(strrfind_ch_fuzz strrfind_ch.cpp)
 add_fuzzer(strrfind_str_fuzz strrfind_str.cpp)
+add_fuzzer(parse_fuzz parse.cpp)
 
 include(ProcessorCount)
 ProcessorCount(cores_number)
@@ -22,7 +23,7 @@ foreach(fuzz_target IN LISTS fuzz_targets)
         -D executable=$<TARGET_FILE:${fuzz_target}>
         -D forks=${cores_number}
         #-D runs=1000000
-        -D time=15
+        -D time=5
         -P "${PROJECT_SOURCE_DIR}/fuzz/run_fuzzing.cmake"
     )
 endforeach()

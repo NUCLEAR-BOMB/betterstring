@@ -12,32 +12,17 @@
 #include <betterstring/functions.hpp>
 #include <betterstring/splited_string.hpp>
 #include <betterstring/char_traits.hpp>
+#include <betterstring/type_traits.hpp>
+
+#if BS_COMP_CLANG
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wsign-conversion"
+#endif
 
 namespace bs
 {
 
 namespace detail {
-    template<class T, class = void>
-    inline constexpr bool has_pointer_traits_to_address = false;
-    template<class T>
-    inline constexpr bool has_pointer_traits_to_address<T, std::void_t<
-        decltype(std::pointer_traits<T>::to_address(std::declval<T&>()))
-    >> = true;
-
-    template<class T>
-    constexpr T* to_address(T* ptr) noexcept {
-        static_assert(!std::is_function_v<T>);
-        return ptr;
-    }
-    template<class T>
-    constexpr auto to_address(const T& fancy_ptr) noexcept {
-        if constexpr (has_pointer_traits_to_address<T>) {
-            return std::pointer_traits<T>::to_address(fancy_ptr);
-        } else {
-            return to_address(fancy_ptr.operator->());
-        }
-    }
-
     template<class T>
     class char_bitmap {
     public:
@@ -232,23 +217,23 @@ public:
         using namespace bs::detail;
         BS_VERIFY(cmp_less_equal(start, size()) && cmp_greater_equal(start, -ssize()), "slice start index is out of range");
         BS_VERIFY(cmp_less_equal(finish, size()) && cmp_greater_equal(finish, -ssize()), "slice end index is out of range");
-        const auto start_idx = start >= 0 ? start : size() + start;
-        const auto finish_idx = finish >= 0 ? finish : size() + finish;
+        const size_type start_idx = start >= 0 ? start : size() + start;
+        const size_type finish_idx = finish >= 0 ? finish : size() + finish;
         return string_view(data() + start_idx, finish_idx - start_idx);
     }
     template<class Idx, class SliceEndTag = slice_end_tag, std::enable_if_t<std::is_same_v<SliceEndTag, slice_end_tag> && std::is_integral_v<Idx>, int> = 0>
     constexpr string_view operator()(const Idx start, const SliceEndTag) const noexcept {
         using namespace bs::detail;
         BS_VERIFY(cmp_less_equal(start, size()) && cmp_greater_equal(start, -ssize()), "slice start index is out of range");
-        const auto start_idx = start >= 0 ? start : size() + start;
+        const size_type start_idx = start >= 0 ? start : size() + start;
         return string_view(data() + start_idx, size() - start_idx);
     }
 
     constexpr string_view operator[](const slice sl) const noexcept {
         BS_VERIFY(sl.start <= ssize() && sl.start >= -ssize(), "slice start index is out of range");
         BS_VERIFY(sl.stop <= ssize() && sl.stop >= -ssize(), "slice end index is out of range");
-        const auto start_idx = sl.start >= 0 ? sl.start : size() + sl.start;
-        const auto finish_idx = sl.stop >= 0 ? sl.stop : size() + sl.stop;
+        const auto start_idx = sl.start >= 0 ? sl.start : ssize() + sl.start;
+        const auto finish_idx = sl.stop >= 0 ? sl.stop : ssize() + sl.stop;
         return string_view(data() + start_idx, finish_idx - start_idx);
     }
 
@@ -653,3 +638,7 @@ inline namespace literals {
 }
 
 }
+
+#if BS_COMP_CLANG
+    #pragma clang diagnostic pop
+#endif

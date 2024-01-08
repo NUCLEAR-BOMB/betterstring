@@ -17,9 +17,12 @@ add_library(betterstring
     "include/betterstring/splited_string.hpp"
     "include/betterstring/char_traits.hpp"
     "include/betterstring/ascii.hpp"
+    "include/betterstring/parsing.hpp"
+    "include/betterstring/type_traits.hpp"
 
     "include/betterstring/detail/preprocessor.hpp"
     "include/betterstring/detail/integer_cmps.hpp"
+    "include/betterstring/detail/parse_unsigned.hpp"
 
     "include/betterstring/detail/multiarch/strrfind_char_avx2.hpp"
     "include/betterstring/detail/multiarch/strrfind_char_default.hpp"
@@ -31,9 +34,9 @@ set_target_properties(betterstring PROPERTIES LINKER_LANGUAGE CXX)
 if (CMAKE_GENERATOR MATCHES "Visual Studio")
     enable_language(ASM_MASM)
     target_sources(betterstring PRIVATE
-        "src/multiarch/strrfind_char.asm"
         "src/multiarch/dispatch.cpp"
         "src/multiarch/avx2.cpp"
+        "src/multiarch/strrfind_char.asm"
     )
     set_property(SOURCE "src/multiarch/avx2.cpp" APPEND PROPERTY COMPILE_OPTIONS "/arch:AVX2")
 endif()
