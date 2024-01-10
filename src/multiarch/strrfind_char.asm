@@ -7,11 +7,13 @@ OPTION AVXENCODING: PREFER_VEX
 ; lenght: rdx QWORD
 ; char: r8b   BYTE
 betterstring_impl_strrfind_ch_avx2 PROC
-        ;int 3
+
     add rcx, rdx
     xor rax, rax
     cmp rdx, 32
     jb fallback ; lenght < 32
+    ; cmp rdx, 100
+    ; jbe general
     mov rax, rcx
     and rax, 32-1
     jz general
@@ -33,10 +35,11 @@ general:
     vpbroadcastb ymm0, xmm0
 general_loop:
     sub rcx, 32
+    prefetchnta [rcx - 1024]
     vmovdqa ymm1, YMMWORD PTR [rcx]
     vpcmpeqb ymm1, ymm1, ymm0
     vpmovmskb rax, ymm1
-    bsr rax, rax ; BitScanReverse
+    bsr rax, rax              ; BitScanReverse
     jnz exit ; rax == 0
     sub rdx, 32
     cmp rdx, 32
@@ -44,6 +47,7 @@ general_loop:
 fallback:
     test rdx, rdx
     jz not_found_exit ; lenght == 0
+    prefetcht0 [rdx]
 fallback_loop:
     dec rcx
     cmp r8b, BYTE PTR [rcx]

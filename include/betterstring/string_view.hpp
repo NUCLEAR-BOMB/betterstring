@@ -232,8 +232,8 @@ public:
     constexpr string_view operator[](const slice sl) const noexcept {
         BS_VERIFY(sl.start <= ssize() && sl.start >= -ssize(), "slice start index is out of range");
         BS_VERIFY(sl.stop <= ssize() && sl.stop >= -ssize(), "slice end index is out of range");
-        const auto start_idx = sl.start >= 0 ? sl.start : ssize() + sl.start;
-        const auto finish_idx = sl.stop >= 0 ? sl.stop : ssize() + sl.stop;
+        const auto start_idx = sl.start >= 0 ? sl.start : size() + sl.start;
+        const auto finish_idx = sl.stop >= 0 ? sl.stop : size() + sl.stop;
         return string_view(data() + start_idx, finish_idx - start_idx);
     }
 

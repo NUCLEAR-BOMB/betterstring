@@ -3,13 +3,6 @@
 
 #include <betterstring/functions.hpp>
 
-static const char* simple_strrfind(const char* const s, const std::size_t count, const char ch) {
-    for (std::size_t i = count; i != 0; --i) {
-        if (s[i - 1] == ch) return &s[i - 1];
-    }
-    return nullptr;
-}
-
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     if (Size == 0) return -1;
 

@@ -3,11 +3,17 @@
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
+#include <exception>
 
 #include <betterstring/detail/parse_unsigned.hpp>
 
 namespace bs {
 
+struct bad_parse : std::exception {
+    parse_error err;
+
+    bad_parse(const parse_error err_) noexcept : err{err_} {}
+};
 
 template<class T>
 class parse_result {
@@ -34,6 +40,10 @@ public:
     constexpr T unchecked_value() const noexcept {
         return val;
     }
+    constexpr T value_or_throw() const {
+        if (err != parse_error{}) { throw bad_parse{err}; }
+        return val;
+    }
 
     constexpr parse_error error() const noexcept {
         return err;
@@ -54,9 +64,15 @@ public:
 template<class T, class Ch>
 constexpr parse_result<T> parse(const Ch* const str, const std::size_t count) {
     if constexpr (std::is_unsigned_v<T>) {
-        T result = 0;
-        const auto err = bs::detail::parse_unsigned<T>(result, str, count);
-        return bs::parse_result<T>{result, err};
+        if (detail::is_constant_evaluated()) {
+            T result = 0;
+            const auto err = bs::detail::constexpr_parse_unsigned<T>(result, str, count);
+            return bs::parse_result<T>{result, err};
+        } else {
+            T result;
+            const auto err = bs::detail::parse_unsigned<T>(result, str, count);
+            return bs::parse_result<T>{result, err};
+        }
     } else {
         static_assert(sizeof(T) == 0, "unimplemented");
     }

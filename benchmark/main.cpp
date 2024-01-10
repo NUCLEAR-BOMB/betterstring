@@ -14,7 +14,6 @@ namespace nb = ankerl::nanobench;
 
 int main() {
     nb::Bench bench;
-    bench.warmup(100'000).minEpochIterations(20'000'000);
 #if 0
     bench.run("random (large needle)", [&] {
         auto result = bs::strrfind(strings::RANDOM, std::size(strings::RANDOM), R"(R#MjFR7d-)wMJRCVD0gft!5h9TWUybW>OQST;|\TStoqi3k)");
@@ -34,8 +33,24 @@ int main() {
     });
 #endif
 #if 1
-    bench.run("character", [&] {
-        auto result = bs::strrfind(strings::HOMOGENEOUS, std::size(strings::HOMOGENEOUS), 'b');
+    bench.minEpochIterations(450'000).run("character (229362)", [] {
+        auto result = bs::strrfind(strings::HOMOGENEOUS, 229362, 'b');
+        nb::doNotOptimizeAway(result);
+    });
+    bench.minEpochIterations(500'000).run("character (114681)", [] {
+        auto result = bs::strrfind(strings::HOMOGENEOUS, 114681, 'b');
+        nb::doNotOptimizeAway(result);
+    });
+    bench.minEpochIterations(65'000'000).run("character (1000)", [] {
+        auto result = bs::strrfind(strings::HOMOGENEOUS, 1000, 'b');
+        nb::doNotOptimizeAway(result);
+    });
+    bench.minEpochIterations(100'000'000).run("character (250)", [] {
+        auto result = bs::strrfind(strings::HOMOGENEOUS, 250, 'b');
+        nb::doNotOptimizeAway(result);
+    });
+    bench.minEpochIterations(500'000'000).run("character (60)", [] {
+        auto result = bs::strrfind(strings::HOMOGENEOUS, 60, 'b');
         nb::doNotOptimizeAway(result);
     });
 #endif

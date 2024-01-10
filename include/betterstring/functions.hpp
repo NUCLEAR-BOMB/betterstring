@@ -329,6 +329,7 @@ constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_
 #if BS_ARCH_NO_AVX2
             return const_cast<char*>(bs::detail::multiarch::strrfind_char_default(str, count, ch));
 #elif BS_COMP_MSVC
+            if (count == 0) { return nullptr; }
             return const_cast<char*>(bs::detail::strrfind_ch_runtime(str, count, ch));
 #elif BS_ARCH_AVX2
             return const_cast<char*>(bs::detail::multiarch::strrfind_char_avx2(str, count, ch));
