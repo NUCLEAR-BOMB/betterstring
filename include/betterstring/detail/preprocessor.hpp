@@ -113,6 +113,16 @@
     #define BS_FORCEINLINE
 #endif
 
+#if BS_COMP_CLANG
+    #define BS_NOINLINE [[clang::noinline]]
+#elif BS_COMP_GCC
+    #define BS_NOINLINE [[gnu::noinline]]
+#elif BS_COMP_MSVC
+    #define BS_NOINLINE [[msvc::noinline]]
+#else
+    #define BS_NOINLINE
+#endif
+
 #ifndef NDEBUG
     #if BS_COMP_CLANG || BS_COMP_GCC
         #define BS_VERIFY(expression, message) \
