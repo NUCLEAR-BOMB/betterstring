@@ -47,10 +47,27 @@ BS_FORCEINLINE parse_error swar_parse_unsigned2(T& value, const Ch* const str) {
     uint16_t chunk;
     std::memcpy(&chunk, str, 2);
 
-    const bool is_valid_string = (chunk & 0xF0F0) == 0x3030 && ((chunk + 0x0606) & 0xF0F0) == 0x3030;
+    const bool is_valid_string = ((chunk & (chunk + 0x0606)) & 0xF0F0) == 0x3030;
     if (!is_valid_string) { return parse_error::invalid_argument; }
 
     chunk = ((chunk & 0x0F00) >> 8) + (chunk & 0x000F) * 10;
+
+    value = static_cast<T>(chunk);
+
+    return parse_error{};
+}
+
+template<class T, class Ch>
+BS_FORCEINLINE parse_error swar_parse_unsigned3(T& value, const Ch* const str) {
+    //__debugbreak();
+    uint32_t chunk;
+    std::memcpy(&chunk, str, 3);
+
+    const bool is_valid_string = ((chunk & (chunk + 0x00060606)) & 0x00F0F0F0) == 0x00303030;
+    if (!is_valid_string) { return parse_error::invalid_argument; }
+
+    chunk = ((chunk & 0x000F0F00) >> 8) + (chunk & 0x0000000F) * 10;
+    chunk = (chunk >> 8) + (chunk & 0x000000FF) * 10;
 
     value = static_cast<T>(chunk);
 
@@ -62,8 +79,7 @@ BS_FORCEINLINE parse_error swar_parse_unsigned4(T& value, const Ch* const str) {
     uint32_t chunk;
     std::memcpy(&chunk, str, 4);
 
-    const bool is_valid_string = (chunk & 0xF0F0F0F0) == 0x30303030
-                              && ((chunk + 0x06060606) & 0xF0F0F0F0) == 0x30303030;
+    const bool is_valid_string = ((chunk & (chunk + 0x06060606)) & 0xF0F0F0F0) == 0x30303030;
     if (!is_valid_string) { return parse_error::invalid_argument; }
 
     chunk = ((chunk & 0x0F000F00) >> 8) + (chunk & 0x000F000F) * 10;
@@ -96,8 +112,13 @@ BS_FORCEINLINE parse_error swar_parse_unsigned8(T& value, const Ch* const str) {
     //
     // This is equivalent to performing an operation the >= '0' && <= '9' for each byte,
     // i.e. checking whether each ASCII character of the string is a valid digit.
-    const bool is_valid_string = (chunk & 0xF0F0F0F0F0F0F0F0) == 0x3030303030303030
-                              && ((chunk + 0x0606060606060606) & 0xF0F0F0F0F0F0F0F0) == 0x3030303030303030;
+
+    // A more simplified and understandable version.
+    // const bool is_valid_string = (chunk & 0xF0F0F0F0F0F0F0F0) == 0x3030303030303030
+    //                            && ((chunk + 0x0606060606060606) & 0xF0F0F0F0F0F0F0F0) == 0x3030303030303030;
+
+    // https://godbolt.org/z/qz4qY714x
+    const bool is_valid_string = ((chunk & (chunk + 0x0606060606060606)) & 0xF0F0F0F0F0F0F0F0) == 0x3030303030303030;
     if (!is_valid_string) { return parse_error::invalid_argument; }
 
     // The bytes in the chunk variable are arranged in the opposite order than in the original string,
