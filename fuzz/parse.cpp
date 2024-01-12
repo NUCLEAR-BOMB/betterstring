@@ -3,24 +3,43 @@
 #include <betterstring/parsing.hpp>
 #include <charconv>
 
+#define TRAP() std::abort()
+
 template<class T>
 void parse_fuzz(const char* const str, const std::size_t count) {
     const auto res = bs::parse<T>(str, count);
 
     T fc_res = 0;
-    const auto fc_err = std::from_chars(str, str + count, fc_res).ec;
-    if (res.error() != bs::parse_error::too_long) {
-        if (fc_err == std::errc::invalid_argument && res.error() != bs::parse_error::invalid_argument) {
-            std::abort();
-        }
-        if (fc_err == std::errc::result_out_of_range && res.error() != bs::parse_error::out_of_range) {
-            std::abort();
-        }
+    const std::from_chars_result fc_err = std::from_chars(str, str + count, fc_res);
+
+    if (res.error() == bs::parse_error::too_long) {
+        return;
     }
-    if (!res.has_error()) {
-        if (res.value() != fc_res) {
-            std::abort();
+    if (fc_err.ec == std::errc::invalid_argument) {
+        if (res.error() != bs::parse_error::invalid_argument) {
+            TRAP();
         }
+        return;
+    }
+    if (fc_err.ec == std::errc::result_out_of_range) {
+        if (res.error() != bs::parse_error::out_of_range) {
+            TRAP();
+        }
+        return;
+    }
+    if (fc_err.ptr != (str + count)) {
+        if (res.error() != bs::parse_error::invalid_argument) {
+            TRAP();
+        }
+        return;
+    }
+
+    if (res.has_error()) {
+        TRAP();
+    }
+
+    if (res.value() != fc_res) {
+        TRAP();
     }
 }
 
