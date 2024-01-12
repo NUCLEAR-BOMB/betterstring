@@ -64,15 +64,14 @@ public:
 template<class T, class Ch>
 constexpr parse_result<T> parse(const Ch* const str, const std::size_t count) {
     if constexpr (std::is_unsigned_v<T>) {
+        T result{};
+        parse_error err{};
         if (detail::is_constant_evaluated()) {
-            T result = 0;
-            const auto err = bs::detail::constexpr_parse_unsigned<T>(result, str, count);
-            return bs::parse_result<T>{result, err};
+            err = bs::detail::constexpr_parse_unsigned<T>(result, str, count);
         } else {
-            T result;
-            const auto err = bs::detail::parse_unsigned<T>(result, str, count);
-            return bs::parse_result<T>{result, err};
+            err = bs::detail::parse_unsigned<T>(result, str, count);
         }
+        return bs::parse_result<T>{result, err};
     } else {
         static_assert(sizeof(T) == 0, "unimplemented");
     }
