@@ -48,6 +48,7 @@ TEST_CASE("uint16", "[parsing]") {
     CHECK(bs::parse<uint16_t>("a", 1) == bs::parse_error::invalid_argument);
     CHECK(bs::parse<uint16_t>("10", 2) == 10);
     CHECK(bs::parse<uint16_t>("ab", 2) == bs::parse_error::invalid_argument);
+    CHECK(bs::parse<uint16_t>("546", 3) == 546);
     CHECK(bs::parse<uint16_t>("1234", 4) == 1234);
     CHECK(bs::parse<uint16_t>("65535", 5) == 65535);
     CHECK(bs::parse<uint16_t>("65536", 5) == bs::parse_error::out_of_range);
