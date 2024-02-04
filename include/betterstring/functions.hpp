@@ -7,14 +7,8 @@
 #include <cstddef>
 
 #include <betterstring/detail/preprocessor.hpp>
+#include <betterstring/detail/cpu_features.hpp>
 #include <betterstring/type_traits.hpp>
-
-#if !BS_ARCH_NO_AVX2 && BS_ARCH_AVX2
-    #include <betterstring/detail/multiarch/strrfind_char_avx2.hpp>
-    #include <betterstring/detail/multiarch/strrfind_string_avx2.hpp>
-#endif
-#include <betterstring/detail/multiarch/strrfind_char_default.hpp>
-#include <betterstring/detail/multiarch/strrfind_string_default.hpp>
 
 namespace bs {
 
@@ -276,27 +270,19 @@ constexpr auto strfind(Haystack& haystack, const Needle needle) noexcept
     return bs::strfind(haystack.data(), haystack.size(), needle);
 }
 
-#if BS_COMP_MSVC && !BS_ARCH_NO_AVX2
 namespace detail {
-    const char* strrfind_str_runtime(const char*, std::size_t, const char*, std::size_t);
+    const char* strrfind_string_impl(const char*, std::size_t, const char*, std::size_t);
 }
-#endif
 
 template<class T>
 constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::type_identity_t<T>* const needle, const std::size_t needle_len) noexcept {
+#if 0
     if constexpr (std::is_same_v<std::remove_const_t<T>, char>) {
         if (!detail::is_constant_evaluated()) {
-#if BS_ARCH_NO_AVX2
-            return const_cast<char*>(bs::detail::multiarch::strrfind_string_default(haystack, count, needle, needle_len));
-#elif BS_COMP_MSVC
-            return const_cast<char*>(bs::detail::strrfind_str_runtime(haystack, count, needle, needle_len));
-#elif BS_ARCH_AVX2
-            return const_cast<char*>(bs::detail::multiarch::strrfind_string_avx2(haystack, count, needle, needle_len));
-#else
-            return const_cast<char*>(bs::detail::multiarch::strrfind_string_default(haystack, count, needle, needle_len));
-#endif
+            return const_cast<char*>(detail::strrfind_string_impl(haystack, count, needle, needle_len));
         }
     }
+#endif
     if (needle_len > count) return nullptr;
     if (needle_len == 0) return haystack + count;
 
@@ -314,11 +300,10 @@ constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::
     return bs::strrfind(haystack, count, needle, N - 1);
 }
 
-#if BS_COMP_MSVC && !BS_ARCH_NO_AVX2
 namespace detail {
-    const char* strrfind_ch_runtime(const char*, std::size_t, char);
+    //const char* strrfind_char_avx2(const char*, std::size_t, char);
+    extern "C" const char* betterstring_strrfind_char_avx2(const char*, std::size_t, char);
 }
-#endif
 
 template<class T>
 constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_identity_t<T> ch) noexcept {
@@ -326,16 +311,14 @@ constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_
     using type = std::remove_const_t<T>;
     if (!detail::is_constant_evaluated()) {
         if constexpr (std::is_same_v<type, char>) {
-#if BS_ARCH_NO_AVX2
-            return const_cast<char*>(bs::detail::multiarch::strrfind_char_default(str, count, ch));
-#elif BS_COMP_MSVC
-            if (count == 0) { return nullptr; }
-            return const_cast<char*>(bs::detail::strrfind_ch_runtime(str, count, ch));
-#elif BS_ARCH_AVX2
-            return const_cast<char*>(bs::detail::multiarch::strrfind_char_avx2(str, count, ch));
-#else
-            return const_cast<char*>(bs::detail::multiarch::strrfind_char_default(str, count, ch));
-#endif
+            if (detail::cpu_features.avx2) {
+                return const_cast<char*>(detail::betterstring_strrfind_char_avx2(str, count, ch));
+            } else {
+                for (std::size_t i = count; i > 0; --i) {
+                    if (str[i - 1] == ch) return str + i - 1;
+                }
+                return nullptr;
+            }
         }
     }
 
