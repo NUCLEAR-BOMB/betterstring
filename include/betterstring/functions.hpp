@@ -311,7 +311,8 @@ constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_
     using type = std::remove_const_t<T>;
     if (!detail::is_constant_evaluated()) {
         if constexpr (std::is_same_v<type, char>) {
-            if (detail::cpu_features.avx2) {
+            using detail::cpu_features;
+            if (cpu_features.value & (cpu_features.AVX2 + cpu_features.BMI2)) {
                 return const_cast<char*>(detail::betterstring_strrfind_char_avx2(str, count, ch));
             } else {
                 for (std::size_t i = count; i > 0; --i) {

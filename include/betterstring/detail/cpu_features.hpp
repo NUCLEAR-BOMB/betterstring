@@ -49,7 +49,12 @@ inline uint64_t xgetbv(unsigned int a) {
 #endif
 
 struct cpu_features_t {
-    unsigned avx2 : 1;
+    uint64_t value{};
+
+    enum : uint64_t {
+        AVX2 = (1 << 0),
+        BMI2 = (1 << 1),
+    };
 };
 
 // CPUID:
@@ -67,15 +72,17 @@ inline cpu_features_t dynamic_cpu_features_initializer() noexcept {
 
     regs = cpuid(0x7, 0x0);
     const bool avx2 = regs.ebx & (1 << 5);
+    const bool bmi2 = regs.ebx & (1 << 8);
 
     cpu_features_t features{};
+    features.value |= bmi2 ? features.BMI2 : 0;
 
     if (osxsave && avx2) {
         uint64_t xcr0 = xgetbv(0x0);
         const bool os_sse = xcr0 & (1 << 1); // XMM regs
         const bool os_avx = xcr0 & (1 << 2); // YMM regs
         if (os_sse && os_avx) {
-            features.avx2 = 1;
+            features.value |= avx2 ? features.AVX2 : 0;
         }
     }
     return features;
