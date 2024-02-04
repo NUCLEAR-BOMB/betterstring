@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
-project(betterstring VERSION 0.1 LANGUAGES CXX)
+project(betterstring VERSION 0.1 LANGUAGES CXX ASM_MASM)
 
 option(BUILD_TEST "" ${PROJECT_IS_TOP_LEVEL})
 option(USE_CLANG_TIDY "" ${PROJECT_IS_TOP_LEVEL})
@@ -19,27 +19,18 @@ add_library(betterstring
     "include/betterstring/ascii.hpp"
     "include/betterstring/parsing.hpp"
     "include/betterstring/type_traits.hpp"
+    "include/betterstring/string.hpp"
 
     "include/betterstring/detail/preprocessor.hpp"
     "include/betterstring/detail/integer_cmps.hpp"
     "include/betterstring/detail/parse_unsigned.hpp"
+    "include/betterstring/detail/cpu_features.hpp"
 
-    "include/betterstring/detail/multiarch/strrfind_char_avx2.hpp"
-    "include/betterstring/detail/multiarch/strrfind_char_default.hpp"
-    "include/betterstring/detail/multiarch/strrfind_string_avx2.hpp"
-    "include/betterstring/detail/multiarch/strrfind_string_default.hpp"
+    "src/strrfind_char_avx2.asm"
 )
 set_target_properties(betterstring PROPERTIES LINKER_LANGUAGE CXX)
 
-if (CMAKE_GENERATOR MATCHES "Visual Studio")
-    enable_language(ASM_MASM)
-    target_sources(betterstring PRIVATE
-        "src/multiarch/dispatch.cpp"
-        "src/multiarch/avx2.cpp"
-        "src/multiarch/strrfind_char.asm"
-    )
-    set_property(SOURCE "src/multiarch/avx2.cpp" APPEND PROPERTY COMPILE_OPTIONS "/arch:AVX2")
-endif()
+target_compile_options(betterstring PRIVATE $<$<COMPILE_LANGUAGE:ASM_MASM>:/Cp>)
 
 target_add_warnings(betterstring)
 
