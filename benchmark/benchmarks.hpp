@@ -70,7 +70,7 @@ inline void benchmark_strrfind_character(ankerl::nanobench::Bench& bench) {
         20,
     });
     using namespace std::chrono_literals;
-    bench.minEpochTime(200ms).minEpochIterations(500);
+    bench.minEpochTime(200ms).minEpochIterations(550);
     for (const auto& sample : samples) {
         bench.run(fmt::format("character ({} lenght)", sample), [&]() {
             auto result = bs::strrfind(strings::HOMOGENEOUS, sample, 'b');
