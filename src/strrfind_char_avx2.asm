@@ -21,7 +21,7 @@ betterstring_strrfind_char_avx2 PROC
     xor rax, rax            ; set up return value in case it is not found
 
     cmp rdx, 32
-    jb compare_small
+    jb compare_small        ; count < 32
 
     ; DEBUGBREAK
 
@@ -29,13 +29,14 @@ betterstring_strrfind_char_avx2 PROC
     vmovd xmm0, r9d
     vpbroadcastb ymm0, xmm0 ; _mm256_set1_epi8
 
-    je vec0                 ; rdx == 32
+    je compare_vec_last     ; count == 32
+
+    lea r9, [rcx + rdx]
 
     cmp rdx, 32*8
-    jb compare_vec_x8
+    jbe compare_vec_x8      ; count <= 32*8
 
     lea r8, [rcx + 32*8]
-    lea r9, [rcx + rdx]
 vec_x8_loop:
     vpcmpeqb ymm1, ymm0, YMMWORD PTR [r9 - 32*1]
     vpcmpeqb ymm2, ymm0, YMMWORD PTR [r9 - 32*2]
@@ -65,177 +66,143 @@ vec_x8_loop:
     jz vzeroupper_return
 
     cmp rdx, 32
-    jbe vec0
+    jbe compare_vec_last
 
 compare_vec_x8:
-    mov r11, rdx
-    and r11, 32-1
-    add r11, rcx
 
-    mov r9, rdx
-    shr r9, 5
-    lea r10, OFFSET __ImageBase
-    mov r9d, DWORD PTR [(IMAGEREL compare_vec_8_table) + r10 + r9*4]
-    add r9, r10
-    jmp r9
-vec7:
-    vpcmpeqb ymm1, ymm0, YMMWORD PTR [r11 + 32*6]
-    vptest ymm1, ymm1
-    jnz return_vec7
-vec6:
-    vpcmpeqb ymm2, ymm0, YMMWORD PTR [r11 + 32*5]
-    vptest ymm2, ymm2
-    jnz return_vec6
-vec5:
-    vpcmpeqb ymm3, ymm0, YMMWORD PTR [r11 + 32*4]
-    vptest ymm3, ymm3
-    jnz return_vec5
-vec4:
-    vpcmpeqb ymm4, ymm0, YMMWORD PTR [r11 + 32*3]
-    vptest ymm4, ymm4
-    jnz return_vec4
-vec3:
-    vpcmpeqb ymm5, ymm0, YMMWORD PTR [r11 + 32*2]
-    vptest ymm5, ymm5
-    jnz return_vec3
-vec2:
-    vpcmpeqb ymm1, ymm0, YMMWORD PTR [r11 + 32*1]
-    vptest ymm1, ymm1
-    jnz return_vec2
-vec1:
-    vpcmpeqb ymm2, ymm0, YMMWORD PTR [r11 + 32*0]
-    vptest ymm2, ymm2
-    jnz return_vec1
-vec0:
-    vpcmpeqb ymm3, ymm0, YMMWORD PTR [rcx]
-    vpmovmskb r9, ymm3
-    bsr r9d, r9d
-    lea r8, [r9 + rcx]
+    vpcmpeqb ymm1, ymm0, YMMWORD PTR [r9 - 32*1]
+    vpmovmskb r8, ymm1
+    bsr r8d, r8d
+    jnz vec_return1
+    cmp rdx, 32*2
+    jbe compare_vec_last
+
+    vpcmpeqb ymm2, ymm0, YMMWORD PTR [r9 - 32*2]
+    vpmovmskb r8, ymm2
+    bsr r8d, r8d
+    jnz vec_return2
+    cmp rdx, 32*3
+    jbe compare_vec_last
+
+    vpcmpeqb ymm3, ymm0, YMMWORD PTR [r9 - 32*3]
+    vpmovmskb r8, ymm3
+    bsr r8d, r8d
+    jnz vec_return3
+    cmp rdx, 32*4
+    jbe compare_vec_last
+
+    vpcmpeqb ymm4, ymm0, YMMWORD PTR [r9 - 32*4]
+    vpmovmskb r8, ymm4
+    bsr r8d, r8d
+    jnz vec_return4
+    cmp rdx, 32*5
+    jbe compare_vec_last
+
+    vpcmpeqb ymm5, ymm0, YMMWORD PTR [r9 - 32*5]
+    vpmovmskb r8, ymm5
+    bsr r8d, r8d
+    jnz vec_return5
+    cmp rdx, 32*6
+    jbe compare_vec_last
+
+    vpcmpeqb ymm1, ymm0, YMMWORD PTR [r9 - 32*6]
+    vpmovmskb r8, ymm1
+    bsr r8d, r8d
+    jnz vec_return6
+    cmp rdx, 32*7
+    jbe compare_vec_last
+
+    vpcmpeqb ymm3, ymm0, YMMWORD PTR [r9 - 32*7]
+    vpmovmskb r8, ymm3
+    bsr r8d, r8d
+    jnz vec_return7
+
+compare_vec_last:
+    vpcmpeqb ymm1, ymm0, YMMWORD PTR [rcx]
+    vpmovmskb r8, ymm1
+    bsr r8, r8
+    lea r8, [r8 + rcx]
+    ; rax must be 0
     cmovnz rax, r8
     vzeroupper
     ret
 
 vzeroupper_return:
     vzeroupper
-    ret
-    
-return_vec1:
-    vpmovmskb r8, ymm2
-    bsr r8d, r8d
-    lea rax, [r8 + r11 + 32*0]
-    vzeroupper
-    ret
-return_vec2:
-    vpmovmskb r8, ymm1
-    bsr r8d, r8d
-    lea rax, [r8 + r11 + 32*1]
-    vzeroupper
-    ret
-return_vec3:
-    vpmovmskb r8, ymm5
-    bsr r8d, r8d
-    lea rax, [r8 + r11 + 32*2]
-    vzeroupper
-    ret
-return_vec4:
-    vpmovmskb r8, ymm4
-    bsr r8d, r8d
-    lea rax, [r8 + r11 + 32*3]
-    vzeroupper
-    ret
-return_vec5:
-    vpmovmskb r8, ymm3
-    bsr r8d, r8d
-    lea rax, [r8 + r11 + 32*4]
-    vzeroupper
-    ret
-return_vec6:
-    vpmovmskb r8, ymm2
-    bsr r8d, r8d
-    lea rax, [r8 + r11 + 32*5]
-    vzeroupper
-    ret
-return_vec7:
-    vpmovmskb r8, ymm1
-    bsr r8d, r8d
-    lea rax, [r8 + r11 + 32*6]
-    vzeroupper
+    ; rax must be 0
     ret
 
 vec_x8_match:
     vpcmpeqb ymm1, ymm0, YMMWORD PTR [r9 - 32*1]
     vpmovmskb r8, ymm1
     bsr r8d, r8d
-    jnz vec_x8_return1
+    jnz vec_return1
 
     vpcmpeqb ymm2, ymm0, YMMWORD PTR [r9 - 32*2]
     vpmovmskb r8, ymm2
     bsr r8d, r8d
-    jnz vec_x8_return2
+    jnz vec_return2
 
     vpcmpeqb ymm3, ymm0, YMMWORD PTR [r9 - 32*3]
     vpmovmskb r8, ymm3
     bsr r8d, r8d
-    jnz vec_x8_return3
+    jnz vec_return3
 
     vpcmpeqb ymm4, ymm0, YMMWORD PTR [r9 - 32*4]
     vpmovmskb r8, ymm4
     bsr r8d, r8d
-    jnz vec_x8_return4
+    jnz vec_return4
 
     vpcmpeqb ymm5, ymm0, YMMWORD PTR [r9 - 32*5]
     vpmovmskb r8, ymm5
     bsr r8d, r8d
-    jnz vec_x8_return5
+    jnz vec_return5
 
     vpcmpeqb ymm1, ymm0, YMMWORD PTR [r9 - 32*6]
     vpmovmskb r8, ymm1
     bsr r8d, r8d
-    jnz vec_x8_return6
+    jnz vec_return6
 
     vpcmpeqb ymm2, ymm0, YMMWORD PTR [r9 - 32*7]
     vpmovmskb r8, ymm2
     bsr r8d, r8d
-    jnz vec_x8_return7
+    jnz vec_return7
 
     vpcmpeqb ymm3, ymm0, YMMWORD PTR [r9 - 32*8]
     vpmovmskb r8, ymm3
     bsr r8d, r8d
-    jnz vec_x8_return8
-
+    lea r9, [r9 + r8 - 32*8]
+    ; rax must be 0
+    cmovnz rax, r9
     vzeroupper
     ret
 
-vec_x8_return1:
+vec_return1:
     lea rax, [r9 + r8 - 32*1]
     vzeroupper
     ret
-vec_x8_return2:
+vec_return2:
     lea rax, [r9 + r8 - 32*2]
     vzeroupper
     ret
-vec_x8_return3:
+vec_return3:
     lea rax, [r9 + r8 - 32*3]
     vzeroupper
     ret
-vec_x8_return4:
+vec_return4:
     lea rax, [r9 + r8 - 32*4]
     vzeroupper
     ret
-vec_x8_return5:
+vec_return5:
     lea rax, [r9 + r8 - 32*5]
     vzeroupper
     ret
-vec_x8_return6:
+vec_return6:
     lea rax, [r9 + r8 - 32*6]
     vzeroupper
     ret
-vec_x8_return7:
+vec_return7:
     lea rax, [r9 + r8 - 32*7]
-    vzeroupper
-    ret
-vec_x8_return8:
-    lea rax, [r9 + r8 - 32*8]
     vzeroupper
     ret
 
@@ -285,16 +252,6 @@ one_or_less:
 return_nullptr:
     ; no ymm register was modified
     ret
-
-compare_vec_8_table dd  IMAGEREL vec0
-                    dd  IMAGEREL vec1
-                    dd  IMAGEREL vec2
-                    dd  IMAGEREL vec3
-                    dd  IMAGEREL vec4
-                    dd  IMAGEREL vec5
-                    dd  IMAGEREL vec6
-                    dd  IMAGEREL vec7
-    
 
 betterstring_strrfind_char_avx2 ENDP
     
