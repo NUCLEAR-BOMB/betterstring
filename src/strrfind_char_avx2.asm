@@ -171,9 +171,7 @@ vec_x8_match:
     vpcmpeqb ymm3, ymm0, YMMWORD PTR [r9 - 32*8]
     vpmovmskb r8, ymm3
     bsr r8d, r8d
-    lea r9, [r9 + r8 - 32*8]
-    ; rax must be 0
-    cmovnz rax, r9
+    lea rax, [r9 + r8 - 32*8]
     vzeroupper
     ret
 
