@@ -83,18 +83,62 @@ TEST_CASE("bs::strrfind", "[functions]") {
         CHECK(bs::strrfind("test string", 11, 'x') == nullptr);
 
         const char* const str1 = "abcXabcabcabcabcabcabcabcabcabcabcabcabcabcabcabc";
-        CHECK(bs::strrfind(str1, bs::strlen(str1), 'X') == &str1[3]);
+        CHECK(bs::strrfind(str1, 50, 'X') == &str1[3]);
+        CHECK(bs::strrfind(str1, 50, 'Y') == nullptr);
         const char* const str2 = "XbcXabcabcXbcabcabcabcabcabcabcabcabcabcabcabcabc";
-        CHECK(bs::strrfind(str2, bs::strlen(str2), 'X') == &str2[10]);
+        CHECK(bs::strrfind(str2, 50, 'X') == &str2[10]);
+        CHECK(bs::strrfind(str2, 50, 'Y') == nullptr);
         const char* const str3 = "abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcX";
-        CHECK(bs::strrfind(str3, bs::strlen(str3), 'X') == &str3[48]);
+        CHECK(bs::strrfind(str3, 50, 'X') == &str3[48]);
+        CHECK(bs::strrfind(str3, 50, 'Y') == nullptr);
         const char* const str4 = "abcabcabcabcabcabcabcabcabcabcabcabcabcabcXabcabc";
-        CHECK(bs::strrfind(str4, bs::strlen(str4), 'X') == &str4[42]);
+        CHECK(bs::strrfind(str4, 50, 'X') == &str4[42]);
+        CHECK(bs::strrfind(str4, 50, 'Y') == nullptr);
         const char* const str5 = "abcabcXabcabcabcabcabcabcXabcabcabcabcabcabcabcab";
-        CHECK(bs::strrfind(str5, bs::strlen(str5), 'X') == &str5[25]);
+        CHECK(bs::strrfind(str5, 50, 'X') == &str5[25]);
+        CHECK(bs::strrfind(str5, 50, 'Y') == nullptr);
 
         CHECK(bs::strrfind(static_cast<char*>(nullptr), 0, 'k') == nullptr);
         CHECK(bs::strrfind(static_cast<const char*>(nullptr), 0, 'a') == nullptr);
+
+        CHECK(*bs::strrfind("a", 1, 'a') == 'a');
+        CHECK(bs::strrfind("a", 1, 'b') == nullptr);
+        CHECK(bs::strrfind("", 0, 'a') == nullptr);
+        const char* const str6 = "abcdsldhwamdsbdjfhwaeradjsdgawd";
+        CHECK(bs::strrfind(str6, 32, 'X') == nullptr);
+        CHECK(bs::strrfind(str6, 32, 'l') == &str6[5]);
+        const char* const str7 = "ubcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabc";
+        CHECK(bs::strrfind(str7, 64, 'u') == &str7[0]);
+        CHECK(bs::strrfind(str7, 64, 'q') == nullptr);
+        const char* const str8 = "ubcdabcdabcdabcdabcdabcdabcdabcdabcdabcdabcd";
+        CHECK(bs::strrfind(str8, 45, 'u') == &str8[0]);
+        CHECK(bs::strrfind(str8, 45, 'k') == nullptr);
+
+        char str9[32*3+1];
+        str9[32*3] = '\0';
+        bs::strfill(str9, 32*3, 'y');
+        str9[5] = 'b';
+        CHECK(bs::strrfind(str9, 32*3, 'a') == nullptr);
+        CHECK(bs::strrfind(str9, 32*3, 'b') == &str9[5]);
+        CHECK(bs::strrfind(str9, 32*3, 'y') == &str9[32*3 - 1]);
+
+        char str10[32*5+1];
+        str10[32*5] = '\0';
+        bs::strfill(str10, 32*5, 'a');
+        str10[10] = 'q';
+        CHECK(bs::strrfind(str10, 32*5, 'h') == nullptr);
+        CHECK(bs::strrfind(str10, 32*5, 'q') == &str10[10]);
+        CHECK(bs::strrfind(str10, 32*5, 'a') == &str10[32*5-1]);
+
+        char str11[32*8+1];
+        str11[32*8] = '\0';
+        bs::strfill(str11, 32*8, 'd');
+        str11[3] = '&';
+        CHECK(bs::strrfind(str11, 32*8, 'i') == nullptr);
+        CHECK(bs::strrfind(str11, 32*8, '&') == &str11[3]);
+        CHECK(bs::strrfind(str11, 32*8, 'd') == &str11[32*8-1]);
+
+        
     }
     SECTION("string") {
         CHECK(bs::strrfind(test_str, 11, "t") == &test_str[6]);
