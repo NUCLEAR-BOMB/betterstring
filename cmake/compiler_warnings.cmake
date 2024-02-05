@@ -22,7 +22,8 @@ function(target_add_warnings target)
         /wd4388 # 'token' : signed/unsigned mismatch
         /wd4868 # 'file(line_number)' compiler may not enforce left-to-right evaluation order in braced initializer list
         /wd5267 # definition of implicit copy constructor/assignment operator for 'type' is deprecated because it has a user-provided assignment operator/copy constructor
-        >)
+        /wd4574 # 'Identifier' is defined to be '0': did you mean to use '#if identifier'?
+		>)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
         target_compile_options(${target} PRIVATE
         -Wall # Enables all the warnings
