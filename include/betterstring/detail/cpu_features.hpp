@@ -10,6 +10,12 @@
     #include <xsaveintrin.h>
 #endif
 
+#ifdef _XCR_XFEATURE_ENABLED_MASK
+    #define BS_XFEATURE_ENABLED_MASK _XCR_XFEATURE_ENABLED_MASK
+#else
+    #define BS_XFEATURE_ENABLED_MASK 0x0
+#endif
+
 namespace bs::detail {
 
 struct cpuid_t {
@@ -78,7 +84,7 @@ inline cpu_features_t dynamic_cpu_features_initializer() noexcept {
     features.value |= bmi2 ? features.BMI2 : 0;
 
     if (osxsave && avx2) {
-        uint64_t xcr0 = xgetbv(0x0);
+        uint64_t xcr0 = xgetbv(BS_XFEATURE_ENABLED_MASK);
         const bool os_sse = xcr0 & (1 << 1); // XMM regs
         const bool os_avx = xcr0 & (1 << 2); // YMM regs
         if (os_sse && os_avx) {
