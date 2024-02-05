@@ -60,6 +60,7 @@ struct cpu_features_t {
     enum : uint64_t {
         AVX2 = (1 << 0),
         BMI2 = (1 << 1),
+        POPCNT = (1 << 2),
     };
 };
 
@@ -75,6 +76,7 @@ inline cpu_features_t dynamic_cpu_features_initializer() noexcept {
     regs = cpuid(0x1, 0x0);
 
     const bool osxsave = regs.ecx & (1 << 27); // is cpu support xgetbv instruction
+    const bool popcnt = regs.ecx & (1 << 23);
 
     regs = cpuid(0x7, 0x0);
     const bool avx2 = regs.ebx & (1 << 5);
@@ -82,6 +84,7 @@ inline cpu_features_t dynamic_cpu_features_initializer() noexcept {
 
     cpu_features_t features{};
     features.value |= bmi2 ? features.BMI2 : 0;
+    features.value |= popcnt ? features.POPCNT : 0;
 
     if (osxsave && avx2) {
         uint64_t xcr0 = xgetbv(BS_XFEATURE_ENABLED_MASK);
