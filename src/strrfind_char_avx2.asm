@@ -1,8 +1,6 @@
 
 OPTION AVXENCODING:PREFER_VEX
 
-extrn __ImageBase:byte
-
 .code
 
 DEBUGBREAK equ <int 3>
@@ -21,55 +19,64 @@ betterstring_strrfind_char_avx2 PROC
     xor rax, rax            ; set up return value in case it is not found
 
     cmp rdx, 32
-    jb compare_small        ; count < 32
+    jb compare_small        ; if count < 32 go to the handling of small string
 
     ; DEBUGBREAK
 
-    movzx r9d, r8b
-    vmovd xmm0, r9d
-    vpbroadcastb ymm0, xmm0 ; _mm256_set1_epi8
+    movzx r9d, r8b          ;
+    vmovd xmm0, r9d         ;
+    vpbroadcastb ymm0, xmm0 ; _mm256_set1_epi8(character)
 
     je compare_vec_last     ; count == 32
 
-    lea r9, [rcx + rdx]
+    lea r9, [rcx + rdx]     ; r9 is past-the-end pointer
 
     cmp rdx, 32*8
     jbe compare_vec_x8      ; count <= 32*8
 
-    lea r8, [rcx + 32*8]
+    lea r8, [rcx + 32*8]    ; if r9 >= r8 when its safe to read next 256 bytes
+                            ; otherwise end the loop and go to handling the string < 256 bytes
+
+    sub rsp, 32
+    vmovdqu YMMWORD PTR [rsp], ymm6 ; save ymm6 due to that it is nonvolatile in Windows x64 ABI
+
 vec_x8_loop:
+    ; vpor      Latency - 1 Throughput - 0.33
+    ; vpcmpeqb  Latency - 1 Throughput - 0.5
+
     vpcmpeqb ymm1, ymm0, YMMWORD PTR [r9 - 32*1]
     vpcmpeqb ymm2, ymm0, YMMWORD PTR [r9 - 32*2]
     vpcmpeqb ymm3, ymm0, YMMWORD PTR [r9 - 32*3]
     vpcmpeqb ymm4, ymm0, YMMWORD PTR [r9 - 32*4]
-    vpor ymm1, ymm1, ymm2
-    vpor ymm1, ymm1, ymm3
-    vpor ymm4, ymm1, ymm4
     vpcmpeqb ymm5, ymm0, YMMWORD PTR [r9 - 32*5]
-    vpcmpeqb ymm1, ymm0, YMMWORD PTR [r9 - 32*6]
-    vpcmpeqb ymm2, ymm0, YMMWORD PTR [r9 - 32*7]
-    vpcmpeqb ymm3, ymm0, YMMWORD PTR [r9 - 32*8]
-    vpor ymm1, ymm1, ymm5
+    vpcmpeqb ymm6, ymm0, YMMWORD PTR [r9 - 32*6]
     vpor ymm1, ymm1, ymm2
-    vpor ymm1, ymm1, ymm3
-    vpor ymm1, ymm1, ymm4
-
+    vpor ymm2, ymm3, ymm4
+    vpor ymm3, ymm5, ymm6
+    vpcmpeqb ymm5, ymm0, YMMWORD PTR [r9 - 32*7]
+    vpcmpeqb ymm6, ymm0, YMMWORD PTR [r9 - 32*8]
+    vpor ymm4, ymm5, ymm6
+    vpor ymm5, ymm1, ymm2
+    vpor ymm6, ymm3, ymm4
+    vpor ymm1, ymm5, ymm6
     vptest ymm1, ymm1
-    jnz vec_x8_match
+    jnz vec_x8_match        ; if ymm1 is not filled with zeros
 
     sub r9, 32*8
-    cmp r9, r8
+    cmp r9, r8              ; check if next loop cycle will cause out-of-bounds reading
     jae vec_x8_loop
 
+    vmovdqu ymm6, YMMWORD PTR [rsp] ; restore ymm6
+    add rsp, 32
+
     mov rdx, r9
-    sub rdx, rcx
+    sub rdx, rcx            ; calculate remaining length
     jz vzeroupper_return
 
     cmp rdx, 32
-    jbe compare_vec_last
+    jbe compare_vec_last    ; if the remaining length is <= 32, compare beginning of the string
 
 compare_vec_x8:
-
     vpcmpeqb ymm1, ymm0, YMMWORD PTR [r9 - 32*1]
     vpmovmskb r8, ymm1
     bsr r8d, r8d
@@ -117,6 +124,7 @@ compare_vec_x8:
     bsr r8d, r8d
     jnz vec_return7
 
+    ; compare remaining bytes 
 compare_vec_last:
     vpcmpeqb ymm1, ymm0, YMMWORD PTR [rcx]
     vpmovmskb r8, ymm1
@@ -133,6 +141,9 @@ vzeroupper_return:
     ret
 
 vec_x8_match:
+    vmovdqu ymm6, YMMWORD PTR [rsp] ; restore ymm6
+    add rsp, 32
+
     vpcmpeqb ymm1, ymm0, YMMWORD PTR [r9 - 32*1]
     vpmovmskb r8, ymm1
     bsr r8d, r8d
@@ -172,6 +183,8 @@ vec_x8_match:
     vpmovmskb r8, ymm3
     bsr r8d, r8d
     lea rax, [r9 + r8 - 32*8]
+    ; we know that this chunk contains matching character, and this is the last comparison,
+    ; so the cmov instruction is not needed
     vzeroupper
     ret
 
@@ -229,6 +242,7 @@ compare_small:
     ret
 
 page_cross:
+    ; just do a simple loop if the string crosses pages
     cmp r8b, BYTE PTR [rcx + rdx - 1]
     je page_cross_exit
     dec rdx
