@@ -4,10 +4,11 @@ include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
 add_executable(betterstring-test
     "string_view.cpp"
     "functions.cpp"
-    "tools.hpp"
     "char_traits.cpp"
     "ascii.cpp"
     "parsing.cpp"
+
+    "util.hpp"
 )
 target_add_warnings(betterstring-test)
 target_link_libraries(betterstring-test PRIVATE betterstring)
