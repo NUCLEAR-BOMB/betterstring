@@ -1,10 +1,13 @@
 #define BS_DONT_INCLUDE_STRING
 
 #include <betterstring/string_view.hpp>
+#include <betterstring/functions.hpp>
 #include <string>
-#include "tools.hpp"
+#include <cstdlib>
 
-#include <catch2/catch_all.hpp>
+#include <catch2/catch_test_macros.hpp>
+
+#include "util.hpp"
 
 using namespace bs::literals;
 
@@ -138,7 +141,12 @@ TEST_CASE("bs::strrfind", "[functions]") {
         CHECK(bs::strrfind(str11, 32*8, '&') == &str11[3]);
         CHECK(bs::strrfind(str11, 32*8, 'd') == &str11[32*8-1]);
 
-        
+        char* const str12 = (char*)page_alloc();
+        bs::strfill(str12 + (4096 - 15), 15, 'q');
+        str12[4096 - 15] = 'b';
+        CHECK(bs::strrfind(str12 + (4096 - 15), 15, 'a') == nullptr);
+        CHECK(bs::strrfind(str12 + (4096 - 15), 15, 'b') == (str12 + (4096 - 15)));
+        page_free(str12);
     }
     SECTION("string") {
         CHECK(bs::strrfind(test_str, 11, "t") == &test_str[6]);
@@ -195,6 +203,43 @@ TEST_CASE("bs::strmove", "[functions]") {
     bs::strmove(str1, str1 + 2, 5);
     CHECK(bs::strcomp(str1, 10, "elloeoello") == 0);
     delete[] str1;
+}
+
+TEST_CASE("bs::strcount", "[functions]") {
+    SECTION("character") {
+        CHECK(bs::strcount("test string", 11, 't') == 3);
+        CHECK(bs::strcount(static_cast<char*>(nullptr), 0, 't') == 0);
+        CHECK(bs::strcount("", 0, 't') == 0);
+        CHECK(bs::strcount("a", 1, 'a') == 1);
+        CHECK(bs::strcount("b", 1, 'a') == 0);
+        CHECK(bs::strcount("   ", 3, ' ') == 3);
+        CHECK(bs::strcount("hello world", 11, 'q') == 0);
+        CHECK(bs::strcount("test", 4, 'e') == 1);
+        CHECK(bs::strcount("123", 3, '2') == 1);
+
+        CHECK(bs::strcount("1234567890123456789012345678901234567890", 40, '0') == 4);
+
+        char str1[32*5 + 1];
+        str1[32*5] = '\0';
+        bs::strfill(str1, 32*5, 'a');
+        str1[4] = 'b';
+        str1[7] = 'b';
+        CHECK(bs::strcount(str1, 32*5, 'b') == 2);
+
+        char str2[32*9 + 1];
+        str2[32*9] = '\0';
+        bs::strfill(str2, 32*9, 'X');
+        str2[6] = 'Y';
+        str2[23] = 'Y';
+        str2[32] = 'Y';
+        str2[200] = 'Y';
+        CHECK(bs::strcount(str2, 32*9, 'Y') == 4);
+
+        char* const str3 = (char*)page_alloc();
+        bs::strfill(str3 + (4096 - 10), 10, 'a');
+        CHECK(bs::strcount(str3 + (4096 - 10), 10, 'a') == 10);
+        page_free(str3);
+    }
 }
 
 }
