@@ -301,7 +301,6 @@ constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::
 }
 
 namespace detail {
-    //const char* strrfind_char_avx2(const char*, std::size_t, char);
     extern "C" const char* betterstring_strrfind_char_avx2(const char*, std::size_t, char);
 }
 
@@ -405,6 +404,31 @@ constexpr void strmove(const T* const, const T* const, const std::size_t) noexce
 template<class T>
 constexpr void strmove(T* const dest, const std::size_t dest_size, const T* const src, const std::size_t count) noexcept {
     return bs::strmove(dest, src, std::min(dest_size, count));
+}
+
+namespace detail {
+    extern "C" std::size_t betterstring_strcount_char_avx2(const char*, std::size_t, char);
+}
+
+template<class T>
+constexpr std::size_t strcount(const T* str, const std::size_t count, const detail::type_identity_t<T> ch) noexcept {
+    static_assert(is_character<T>);
+    if (!detail::is_constant_evaluated()) {
+        if constexpr (std::is_same_v<T, char>) {
+            using detail::cpu_features;
+            if (cpu_features.value & (cpu_features.AVX2)) {
+                return detail::betterstring_strcount_char_avx2(str, count, ch);
+            }
+        }
+    }
+    std::size_t result = 0;
+    const auto match_end = str + count;
+    for (;; ++str) {
+        str = bs::strfind(str, static_cast<std::size_t>(match_end - str), ch);
+        if (str == nullptr) { break; }
+        ++result;
+    }
+    return result;
 }
 
 }

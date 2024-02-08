@@ -19,7 +19,6 @@ add_library(betterstring
     "include/betterstring/ascii.hpp"
     "include/betterstring/parsing.hpp"
     "include/betterstring/type_traits.hpp"
-    "include/betterstring/string.hpp"
 
     "include/betterstring/detail/preprocessor.hpp"
     "include/betterstring/detail/integer_cmps.hpp"
@@ -27,6 +26,7 @@ add_library(betterstring
     "include/betterstring/detail/cpu_features.hpp"
 
     "src/strrfind_char_avx2.asm"
+    "src/strcount_char_avx2.asm"
 )
 set_target_properties(betterstring PROPERTIES LINKER_LANGUAGE CXX)
 
