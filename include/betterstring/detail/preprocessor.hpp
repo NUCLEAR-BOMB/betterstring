@@ -32,6 +32,12 @@
     #define BS_COMP_MSVC  0
 #endif
 
+#if defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
+    #define BS_OS_WINDOWS 1
+#else
+    #define BS_OS_WINDOWS 0
+#endif
+
 #if !BS_COMP_MSVC
     #define BS_IS_COMPILER_SUPPORTS_DYNAMIC_DISPATCH 1
 #else
