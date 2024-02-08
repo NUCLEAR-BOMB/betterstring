@@ -1,7 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
-#include <catch2/matchers/catch_matchers_all.hpp>
+#include <catch2/matchers/catch_matchers_range_equals.hpp>
 #include <array>
-#include "tools.hpp"
 
 #include <betterstring/string_view.hpp>
 #include <betterstring/ascii.hpp>
@@ -290,9 +289,6 @@ TEST_CASE("split", "[string_view]") {
 }
 
 TEST_CASE("strip", "[string_view]") {
-    using Catch::Matchers::AllMatch;
-    using Catch::Matchers::Predicate;
-
     const std::array strs{" hello "_sv, "hello "_sv, " hello"_sv, "  hello"_sv, "hello  "_sv, "  hello  "_sv};
     for (const auto s : strs) {
         CAPTURE(s);
