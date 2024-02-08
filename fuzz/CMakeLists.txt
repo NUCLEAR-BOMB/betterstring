@@ -12,6 +12,7 @@ endmacro()
 
 add_fuzzer(strrfind_ch_fuzz strrfind_ch.cpp)
 add_fuzzer(strrfind_str_fuzz strrfind_str.cpp)
+add_fuzzer(strcount_ch_fuzz strcount_ch.cpp)
 add_fuzzer(parse_fuzz parse.cpp)
 
 include(ProcessorCount)
