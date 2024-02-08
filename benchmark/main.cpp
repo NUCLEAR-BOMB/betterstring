@@ -29,17 +29,20 @@ int main(int argc, char* argv[]) {
 #endif // _WIN32
 
     if (argc <= 1) {
-        fmt::println("select the name benchmark: "
-            "[strrfind_ch,strrfind_str,parse_u8,parse_u16,parse_u32,parse_u64]");
+        fmt::println("select the benchmark name: "
+            "[strrfind_ch,strcount_ch,parse_u8,parse_u16,parse_u32,parse_u64]");
         return -1;
     }
     nb::Bench bench;
 
+    using namespace std::chrono_literals;
+    bench.clockResolutionMultiple(6'000'000).warmup(1000);
+
     const bs::string_view benchmark_name{argv[1], bs::strlen(argv[1])};
     if (benchmark_name == "strrfind_ch") {
         benchmark_strrfind_character(bench);
-    } else if (benchmark_name == "strrfind_str") {
-        benchmark_strrfind_string(bench);
+    } else if (benchmark_name == "strcount_ch") {
+        benchmark_strcount_ch(bench);
     } else if (benchmark_name == "parse_u8") {
         benchmark_parse_u8(bench);
     } else if (benchmark_name == "parse_u16") {
@@ -50,7 +53,10 @@ int main(int argc, char* argv[]) {
         benchmark_parse_u64(bench);
     } else {
         fmt::println("unknown benchmark name: {}", benchmark_name.data());
-        return -1;
+        return 1;
     }
+
+    // bench.render(nb::templates::htmlBoxplot(), std::cout);
+
     return 0;
 }

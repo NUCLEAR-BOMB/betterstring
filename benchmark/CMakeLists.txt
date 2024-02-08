@@ -16,7 +16,6 @@ FetchContent_MakeAvailable(nanobench fmt)
 
 add_executable(betterstring-benchmark
     "main.cpp"
-    "samples.hpp"
     "benchmarks.hpp"
 )
 target_link_libraries(betterstring-benchmark PRIVATE fmt::fmt nanobench betterstring)
