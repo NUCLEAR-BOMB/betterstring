@@ -92,6 +92,7 @@ vec_last:
     vpcmpeqb ymm1, ymm0, YMMWORD PTR [rcx + rdx - 32] ; load last 32 bytes
     vpmovmskb r8, ymm1
 
+    ; clear overlapping bits
     neg dl                  ; rdx = 32 - rdx
     shrx r8d, r8d, edx
     shlx r8d, r8d, edx
