@@ -221,20 +221,19 @@ compare_small:
     cmp rdx, 1
     jbe one_or_less
 
+    movzx r9d, r8b
+    vmovd xmm0, r9d
+    vpbroadcastb ymm0, xmm0
+
     mov r9, rcx
     and r9, PAGE_SIZE - 1
     cmp r9, PAGE_SIZE - 32  ; check if next 32 byte does cross page boundary
     jg page_cross
 
-    movzx r9d, r8b
-    vmovd xmm0, r9d
-    vpbroadcastb ymm0, xmm0
-
     vpcmpeqb ymm1, ymm0, YMMWORD PTR [rcx]
     vpmovmskb r9, ymm1
-    xor r8, r8              ; clear all 64 bits from garbage
-    bzhi r8d, r9d, edx
-    bsr r8d, r8d            ; get offset to matching character
+    bzhi r8, r9, rdx
+    bsr r8, r8              ; get offset to matching character
     lea r8, [r8 + rcx]      ; add offset to string pointer to get pointer to matching character
     ; rax must be 0
     cmovnz rax, r8          ; move pointer to matching character if it was found otherwise leave 0 (nullptr)
@@ -242,18 +241,18 @@ compare_small:
     ret
 
 page_cross:
-    ; just do a simple loop if the string crosses pages
-    cmp r8b, BYTE PTR [rcx + rdx - 1]
-    je page_cross_exit
-    dec rdx
-    jnz page_cross
-    ; rax must be 0
-    ; no ymm register was modified
-    ret
+    lea r8, [rcx + rdx - 32]
+    vpcmpeqb ymm1, ymm0, YMMWORD PTR [r8]
+    vpmovmskb r9, ymm1
 
-page_cross_exit:
-    lea rax, [rcx + rdx - 1]
-    ; no ymm register was modified
+    bsr r9d, r9d
+    lea r9, [r9 + r8]
+    ; rax must be 0
+    cmovz r9, rax           ; if the character was not found in 32 bytes chunk, set r9 to 0
+    cmp r9, rcx
+    cmovae rax, r9          ; if the match is in the range AND the character exists in the chunk, set rax to found location
+
+    vzeroupper
     ret
 
 one_or_less:
