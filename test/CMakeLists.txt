@@ -24,9 +24,10 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2)
 
 target_compile_features(Catch2 PRIVATE cxx_std_17)
-
 target_link_libraries(betterstring-test PRIVATE Catch2::Catch2WithMain)
 set_target_properties(Catch2 PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:Catch2,INTERFACE_INCLUDE_DIRECTORIES>)
+
+target_precompile_headers(betterstring-test PRIVATE <catch2/catch_all.hpp>)
 
 if (DEFINED catch2_SOURCE_DIR)
     list(APPEND CMAKE_MODULE_PATH "${catch2_SOURCE_DIR}/extras")
