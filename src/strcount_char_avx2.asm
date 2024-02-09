@@ -3,12 +3,6 @@ OPTION AVXENCODING:PREFER_VEX
 
 PAGE_SIZE equ 1 SHL 12 ; 4096
 
-SHUFFLE MACRO fp3:REQ, fp2:REQ, fp1:REQ, fp0:REQ
-    EXITM <(fp3 SHL 6) OR (fp2 SHL 4) OR (fp1 SHL 2) OR (fp0)>
-ENDM
-
-; if PAGE_SIZE == 1 then logic when crossing pages is disabled
-
 .code
 
 ; const char* string (rcx) - pointer to string in which to count
@@ -16,7 +10,18 @@ ENDM
 ; char        character (r8b) - character to count
 ; returns: size_t (rax) - number of characters counted
 ;
-; Note: this function uses AVX2 processor extension instructions
+; Note: this function uses AVX2, BMI2, POPCNT processor extensions
+;
+; bs::strcount algorithm:
+;   1. If count <= 32 and next 32 byte does NOT cross page boundary,
+;      count number of matches using YMM register.
+;   2. If count <= 32 and next 32 byte DOES cross page boundary,
+;      load chunk into YMM that starts before string, but ends right at the end of the string,
+;      discard out of bounds matches, and then count the final number of character matches
+;   3. If count <= 128 (32*4), continuously count with 32 byte chunks,
+;      and in the end discard overlapping values.
+;   4. If count > 128 (32*4), use unrolled loop, that processes 128 bytes at single cycle.
+
 betterstring_strcount_char_avx2 PROC
 
     ; int 3
