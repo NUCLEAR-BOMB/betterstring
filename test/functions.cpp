@@ -146,6 +146,7 @@ TEST_CASE("bs::strrfind", "[functions]") {
         str12[4096 - 15] = 'b';
         CHECK(bs::strrfind(str12 + (4096 - 15), 15, 'a') == nullptr);
         CHECK(bs::strrfind(str12 + (4096 - 15), 15, 'b') == (str12 + (4096 - 15)));
+
         page_free(str12);
     }
     SECTION("string") {
@@ -238,6 +239,8 @@ TEST_CASE("bs::strcount", "[functions]") {
         char* const str3 = (char*)page_alloc();
         bs::strfill(str3 + (4096 - 10), 10, 'a');
         CHECK(bs::strcount(str3 + (4096 - 10), 10, 'a') == 10);
+        bs::strfill(str3, 11, 'a');
+        CHECK(bs::strcount(str3, 11, 'a') == 11);
         page_free(str3);
     }
 }

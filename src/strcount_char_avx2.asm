@@ -107,14 +107,14 @@ small:
     cmp rdx, 1
     jbe one_or_less
 
-    mov r9, rcx
-    and r9, PAGE_SIZE - 1
-    cmp r9, PAGE_SIZE - 32  ; check if next 32 byte does cross page boundary
-    jg page_cross
-
     movzx r9d, r8b
     vmovd xmm0, r9d
     vpbroadcastb ymm0, xmm0 ; _mm256_set1_epi8(character)
+
+    mov r9, rcx
+    and r9, PAGE_SIZE - 1
+    cmp r9, PAGE_SIZE - 32  ; check if next 32 byte does cross page boundary
+    jg vec_last
 
     vpcmpeqb ymm1, ymm0, YMMWORD PTR [rcx]
     vpmovmskb r9, ymm1
@@ -124,17 +124,6 @@ small:
     popcnt rax, r8
 
     vzeroupper
-    ret
-
-page_cross:
-    ; iterate in reverse order to save some instructions
-    xor r9, r9
-    cmp r8b, BYTE PTR [rcx + rdx - 1]
-    sete r9b                ; if equal, set 1 to r9 otherwise leave 0
-    add rax, r9
-    dec rdx
-    jnz page_cross
-    ; no ymm register was modified
     ret
 
 one_or_less:
