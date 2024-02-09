@@ -146,7 +146,10 @@ TEST_CASE("bs::strrfind", "[functions]") {
         str12[4096 - 15] = 'b';
         CHECK(bs::strrfind(str12 + (4096 - 15), 15, 'a') == nullptr);
         CHECK(bs::strrfind(str12 + (4096 - 15), 15, 'b') == (str12 + (4096 - 15)));
-
+        bs::strfill(str12, 13, 'A');
+        CHECK(bs::strrfind(str12, 13, 'B') == nullptr);
+        str12[5] = 'B';
+        CHECK(bs::strrfind(str12, 13, 'B') == (str12 + 5));
         page_free(str12);
     }
     SECTION("string") {
