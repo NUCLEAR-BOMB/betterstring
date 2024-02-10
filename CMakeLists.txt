@@ -9,6 +9,8 @@ option(BUILD_FUZZ "" ${PROJECT_IS_TOP_LEVEL})
 option(USE_SANITIZERS "" ${PROJECT_IS_TOP_LEVEL})
 option(INSTALL_BETTERSTRING "" ${PROJECT_IS_TOP_LEVEL})
 
+set(CMAKE_ASM_MASM_COMPILER "ml64.exe")
+
 include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
 
 add_library(betterstring

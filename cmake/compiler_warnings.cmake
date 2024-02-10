@@ -25,7 +25,7 @@ function(target_add_warnings target)
         /wd4574 # 'Identifier' is defined to be '0': did you mean to use '#if identifier'?
 		>)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-        target_compile_options(${target} PRIVATE
+        target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:
         -Wall # Enables all the warnings
         -Wextra # Enables some extra warning flags that are not enabled by -Wall
         -Wpedantic # Issue all the warnings demanded by strict ISO C and ISO C++
@@ -38,6 +38,7 @@ function(target_add_warnings target)
         -Wdouble-promotion # Give a warning when a value of type float is implicitly promoted to double
         -Wold-style-cast # Warn for C style casting
         -Wshadow # Warn whenever a local variable or type declaration shadows another variable
-        )
+        -Wno-old-style-cast # Disable warning for using C-style casts
+        >)
     endif()
 endfunction()

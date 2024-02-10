@@ -5,9 +5,9 @@
 #if BS_COMP_MSVC
     #include <immintrin.h>
     #include <intrin.h>
-#elif BS_COMP_GCC
+#elif BS_COMP_GCC || BS_COMP_CLANG
     #include <cpuid.h>
-    #include <xsaveintrin.h>
+    #include <immintrin.h>
 #endif
 
 #ifdef _XCR_XFEATURE_ENABLED_MASK
@@ -41,16 +41,18 @@ BS_FORCEINLINE
 inline uint64_t xgetbv(unsigned int a) {
     return _xgetbv(a);
 }
-#elif BS_COMP_GCC
+#elif BS_COMP_GCC || BS_COMP_CLANG
 BS_FORCEINLINE
 inline cpuid_t cpuid(uint32_t leaf, uint32_t subleaf) {
     cpuid_t out;
     __cpuid_count(leaf, subleaf, out.eax, out.ebx, out.ecx, out.edx);
     return out;
 }
-[[gnu::target("xsave")]] BS_FORCEINLINE
+BS_FORCEINLINE
 inline uint64_t xgetbv(unsigned int a) {
-    return _xgetbv(a);
+    uint32_t eax = 0, edx = 0;
+    __asm__ __volatile__("xgetbv\n" : "=a"(eax), "=d"(edx) : "c"(a));
+    return ((uint64_t)edx << 32) | eax;
 }
 #endif
 
