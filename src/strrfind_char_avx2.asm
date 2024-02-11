@@ -135,11 +135,13 @@ compare_vec_last:
     vzeroupper
     ret
 
+    align 16
 vzeroupper_return:
     vzeroupper
     ; rax must be 0
     ret
 
+    align 16
 vec_x8_match:
     vmovdqu ymm6, YMMWORD PTR [rsp] ; restore ymm6
     add rsp, 32
@@ -188,35 +190,43 @@ vec_x8_match:
     vzeroupper
     ret
 
+    align 16
 vec_return1:
     lea rax, [r9 + r8 - 32*1]
     vzeroupper
     ret
+    align 16
 vec_return2:
     lea rax, [r9 + r8 - 32*2]
     vzeroupper
     ret
+    align 16
 vec_return3:
     lea rax, [r9 + r8 - 32*3]
     vzeroupper
     ret
+    align 16
 vec_return4:
     lea rax, [r9 + r8 - 32*4]
     vzeroupper
     ret
+    align 16
 vec_return5:
     lea rax, [r9 + r8 - 32*5]
     vzeroupper
     ret
+    align 16
 vec_return6:
     lea rax, [r9 + r8 - 32*6]
     vzeroupper
     ret
+    align 16
 vec_return7:
     lea rax, [r9 + r8 - 32*7]
     vzeroupper
     ret
 
+    align 16
 compare_small:
     cmp rdx, 1
     jbe one_or_less
@@ -240,6 +250,7 @@ compare_small:
     vzeroupper
     ret
 
+    align 16
 page_cross:
     lea r8, [rcx + rdx - 32]
     vpcmpeqb ymm1, ymm0, YMMWORD PTR [r8]
@@ -255,6 +266,7 @@ page_cross:
     vzeroupper
     ret
 
+    align 16
 one_or_less:
     jb return_nullptr
     cmp r8b, BYTE PTR [rcx]

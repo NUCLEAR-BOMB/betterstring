@@ -109,6 +109,7 @@ vzeroupper_return:
     vzeroupper
     ret
 
+    align 16
 small:
     cmp rdx, 1
     jbe one_or_less
@@ -120,7 +121,7 @@ small:
     mov r9, rcx
     and r9, PAGE_SIZE - 1
     cmp r9, PAGE_SIZE - 32  ; check if next 32 byte does cross page boundary
-    jg vec_last
+    ja vec_last
 
     vpcmpeqb ymm1, ymm0, YMMWORD PTR [rcx]
     vpmovmskb r9, ymm1
@@ -132,6 +133,7 @@ small:
     vzeroupper
     ret
 
+    align 16
 one_or_less:
     jb return_nullptr
     cmp r8b, BYTE PTR [rcx]
