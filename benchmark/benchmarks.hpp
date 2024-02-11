@@ -24,15 +24,17 @@ constexpr std::array<std::remove_cv_t<T>, N> to_array(T (&&a)[N]) {
 }
 
 inline void benchmark_strrfind_character(ankerl::nanobench::Bench& bench) {
-    std::vector<char> homogeneous_string(1 << 20, 'a');
-
     bench.title("bs::strrfind (character)");
+
+    std::vector<char> homogeneous_string(1 << 20, 'a');
     for (std::size_t i = 0; i <= 20; ++i) {
         const std::size_t string_len = 1 << i;
         if (string_len > homogeneous_string.size()) { throw std::logic_error("Sample length exceeds allocated capacity"); }
 
+        bench.context("length", fmt::format("{}", string_len));
         bench.run(fmt::format("length {}", string_len), [&]() {
-            auto result = bs::strrfind(homogeneous_string.data(), string_len, 'b');
+            // auto result = bs::strrfind(homogeneous_string.data(), string_len, 'b');
+            auto result = std::find(std::reverse_iterator{homogeneous_string.data() + string_len}, std::reverse_iterator{homogeneous_string.data()}, 'b');
             bench.doNotOptimizeAway(result);
         });
     }
@@ -85,10 +87,34 @@ inline void benchmark_strcount_ch(ankerl::nanobench::Bench& bench) {
         const std::size_t string_len = 1 << i;
         if (string_len > homogeneous_string.size()) { throw std::logic_error("Sample length exceeds allocated capacity"); }
 
+        bench.context("length", fmt::format("{}", string_len));
         bench.run(fmt::format("length {}", string_len), [&]() {
             std::size_t result = bs::strcount(homogeneous_string.data(), string_len, 'a');
+            // std::size_t result = std::count(homogeneous_string.data(), homogeneous_string.data() + string_len, 'a');
             bench.doNotOptimizeAway(result);
         });
+    }
+}
+
+#if BS_COMP_MSVC
+    #pragma function (strlen)
+#endif
+
+inline void benchmark_strlen(ankerl::nanobench::Bench& bench) {
+    bench.title("bs::strlen");
+
+    std::vector<char> string((1 << 21) + 1, 'X');
+
+    for (std::size_t i = 0; i <= 21; ++i) {
+        const std::size_t string_len = 1 << i;
+
+        string[string_len] = '\0';
+        bench.context("length", fmt::format("{}", string_len));
+        bench.run(fmt::format("length {}", string_len), [&]() {
+            std::size_t result = bs::strlen(string.data());
+            bench.doNotOptimizeAway(result);
+        });
+        string[string_len] = 'X';
     }
 }
 
