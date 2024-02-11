@@ -100,7 +100,6 @@ vec_last:
     ; clear overlapping bits
     neg dl                  ; rdx = 32 - rdx
     shrx r8d, r8d, edx
-    shlx r8d, r8d, edx
 
     popcnt r9, r8
     add rax, r9
