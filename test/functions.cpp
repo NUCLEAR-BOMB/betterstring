@@ -18,6 +18,28 @@ TEST_CASE("bs::strlen", "[functions]") {
     CHECK(bs::strlen(L"test string") == 11);
 
     CHECK(bs::strlen("test\0string") == 4);
+    CHECK(bs::strlen("01234567890123456789012345678901") == 32);
+    CHECK(bs::strlen("012345678901234567890123456789012345678901234567890123456789") == 60);
+
+    char str1[32*8+1];
+    bs::strfill(str1, 32*8, 'A');
+    str1[32*8] = '\0';
+    CHECK(bs::strlen(str1) == 32 * 8);
+
+    char str2[32*10+1];
+    bs::strfill(str2, 32*10, 'A');
+    str2[32*10] = '\0';
+    CHECK(bs::strlen(str2) == 32*10);
+
+    char* const str3 = (char*)page_alloc();
+    bs::strfill(str3, 14, 'B');
+    str3[14] = '\0';
+    CHECK(bs::strlen(str3) == 14);
+
+    bs::strfill(str3 + (4096 - 10), 9, 'C');
+    str3[4096 - 1] = '\0';
+    CHECK(bs::strlen(str3 + (4096 - 10)) == 9);
+    page_free(str3);
 }
 
 TEST_CASE("bs::strcopy", "[functions]") {

@@ -73,23 +73,21 @@ constexpr auto array_size(const T& x) noexcept {
     }
 }
 
+namespace detail {
+    extern "C" std::size_t betterstring_strlen_avx2(const char*);
+}
+
 template<class T>
 constexpr std::size_t strlen(const T* const str) noexcept {
     static_assert(is_character<T>);
     BS_VERIFY(str != nullptr, "str is null pointer");
-    if constexpr (std::is_same_v<T, char>) {
-#if BS_HAS_BUILTIN(__builtin_strlen) || defined(_MSC_VER)
-        return __builtin_strlen(str);
-#endif
-    } else
-#if BS_HAS_BUILTIN(__builtin_wcslen) || defined(_MSC_VER)
-    if constexpr (std::is_same_v<T, wchar_t>) {
-        return __builtin_wcslen(str);
-    } else
-#endif
-    {
+
     if (!detail::is_constant_evaluated()) {
         if constexpr (std::is_same_v<T, char>) {
+            using detail::cpu_features;
+            if (cpu_features.value & (cpu_features.AVX2 + cpu_features.BMI2)) {
+                return detail::betterstring_strlen_avx2(str);
+            }
             return std::strlen(str);
         } else if constexpr (std::is_same_v<T, wchar_t>) {
             return std::wcslen(str);
@@ -98,7 +96,6 @@ constexpr std::size_t strlen(const T* const str) noexcept {
     std::size_t i = 0;
     while (str[i] != T()) ++i;
     return i;
-    }
 }
 
 template<class T>

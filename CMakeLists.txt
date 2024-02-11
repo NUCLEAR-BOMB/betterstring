@@ -29,6 +29,7 @@ add_library(betterstring
 
     "src/strrfind_char_avx2.asm"
     "src/strcount_char_avx2.asm"
+    "src/strlen_avx2.asm"
 )
 set_target_properties(betterstring PROPERTIES LINKER_LANGUAGE CXX)
 
