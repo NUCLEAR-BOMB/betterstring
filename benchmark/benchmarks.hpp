@@ -5,6 +5,7 @@
 #include <type_traits>
 #include <vector>
 #include <stdexcept>
+#include <new>
 #include <nanobench.h>
 
 #include <betterstring/functions.hpp>
@@ -12,18 +13,9 @@
 
 #include <fmt/format.h>
 
-template<class T, std::size_t N, std::size_t... I>
-constexpr auto to_array_impl(T (&&a)[N], std::index_sequence<I...>)
-    -> std::array<std::remove_cv_t<T>, N> {
-    return {{std::move(a[I])...}};
-}
- 
-template<class T, std::size_t N>
-constexpr std::array<std::remove_cv_t<T>, N> to_array(T (&&a)[N]) {
-    return to_array_impl(std::move(a), std::make_index_sequence<N>{});
-}
+#include "add_benchmark_macro.hpp"
 
-inline void benchmark_strrfind_character(ankerl::nanobench::Bench& bench) {
+ADD_BENCHMARK("strrfind_ch") {
     bench.title("bs::strrfind (character)");
 
     std::vector<char> homogeneous_string(1 << 20, 'a');
@@ -33,14 +25,42 @@ inline void benchmark_strrfind_character(ankerl::nanobench::Bench& bench) {
 
         bench.context("length", fmt::format("{}", string_len));
         bench.run(fmt::format("length {}", string_len), [&]() {
-            // auto result = bs::strrfind(homogeneous_string.data(), string_len, 'b');
-            auto result = std::find(std::reverse_iterator{homogeneous_string.data() + string_len}, std::reverse_iterator{homogeneous_string.data()}, 'b');
+            auto result = bs::strrfind(homogeneous_string.data(), string_len, 'b');
             bench.doNotOptimizeAway(result);
         });
     }
 }
+ADD_BENCHMARK("strrfind_ch_aligned") {
+    if (args.size() == 0) {
+        fmt::println("pass the alignment size argument (first)");
+        return;
+    }
+    const auto aligment_arg = bs::parse<std::size_t>(args[0].data(), args[0].size());
+    if (aligment_arg.has_error()) {
+        fmt::println("bad number formatting");
+        return;
+    }
+    const std::align_val_t aligment{aligment_arg.value()};
+    bench.title(fmt::format("bs::strrfind (character) (alignment={})", std::size_t(aligment)));
 
-inline void benchmark_parse_u8(ankerl::nanobench::Bench& bench) {
+    const size_t full_string_size = 1 << 20;
+    char* const string = (char*)::operator new[](full_string_size, aligment);
+    bs::strfill(string, full_string_size, 'a');
+
+    for (std::size_t i = 0; i <= 20; ++i) {
+        const std::size_t string_len = 1 << i;
+
+        bench.context("length", fmt::format("{}", string_len));
+        bench.run(fmt::format("length {}", string_len), [&]() {
+            auto result = bs::strrfind(string, string_len, 'b');
+            bench.doNotOptimizeAway(result);
+        });
+    }
+
+    ::operator delete[](string, aligment);
+}
+
+ADD_BENCHMARK("parse_u8") {
     for (std::size_t i = 0; i <= 3; ++i) {
         bench.run(fmt::format("parse<uint8_t> ({})", i), [&]() {
             auto result = bs::parse<uint8_t>("123", i);
@@ -48,7 +68,7 @@ inline void benchmark_parse_u8(ankerl::nanobench::Bench& bench) {
         });
     }
 }
-inline void benchmark_parse_u16(ankerl::nanobench::Bench& bench) {
+ADD_BENCHMARK("parse_u16") {
     bench.title("bs::parse<uint16_t>");
 
     for (std::size_t i = 0; i <= 5; ++i) {
@@ -58,7 +78,7 @@ inline void benchmark_parse_u16(ankerl::nanobench::Bench& bench) {
         });
     }
 }
-inline void benchmark_parse_u32(ankerl::nanobench::Bench& bench) {
+ADD_BENCHMARK("parse_u32") {
     bench.title("bs::parse<uint32_t>");
 
     for (std::size_t i = 0; i <= 10; ++i) {
@@ -68,7 +88,7 @@ inline void benchmark_parse_u32(ankerl::nanobench::Bench& bench) {
         });
     }
 }
-inline void benchmark_parse_u64(ankerl::nanobench::Bench& bench) {
+ADD_BENCHMARK("parse_u64") {
     bench.title("bs::parse<uint64_t>");
 
     for (std::size_t i = 0; i <= 20; ++i) {
@@ -79,7 +99,7 @@ inline void benchmark_parse_u64(ankerl::nanobench::Bench& bench) {
     }
 }
 
-inline void benchmark_strcount_ch(ankerl::nanobench::Bench& bench) {
+ADD_BENCHMARK("strcount_ch") {
     bench.title("bs::strcount (character)");
 
     std::vector<char> homogeneous_string(1 << 21, 'a');
@@ -100,7 +120,7 @@ inline void benchmark_strcount_ch(ankerl::nanobench::Bench& bench) {
     #pragma function (strlen)
 #endif
 
-inline void benchmark_strlen(ankerl::nanobench::Bench& bench) {
+ADD_BENCHMARK("strlen") {
     bench.title("bs::strlen");
 
     std::vector<char> string((1 << 21) + 1, 'X');
@@ -117,4 +137,3 @@ inline void benchmark_strlen(ankerl::nanobench::Bench& bench) {
         string[string_len] = 'X';
     }
 }
-

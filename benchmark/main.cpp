@@ -3,6 +3,8 @@
 
 #include <cstdint>
 #include <charconv>
+#include <map>
+#include <functional>
 
 #include "benchmarks.hpp"
 #include "html_boxplot.hpp"
@@ -28,36 +30,23 @@ int main(int argc, char* argv[]) {
         fmt::println("warning: failed to set thread priority class");
     }
 #endif // _WIN32
-
-    if (argc <= 1) {
-        fmt::println("select the benchmark name: "
-            "[strrfind_ch,strcount_ch,strlen,parse_u8,parse_u16,parse_u32,parse_u64]");
-        return -1;
-    }
     nb::Bench bench;
 
     using namespace std::chrono_literals;
     bench.minEpochTime(260ms).warmup(100'000);
 
     const bs::string_view benchmark_name{argv[1], bs::strlen(argv[1])};
-    if (benchmark_name == "strrfind_ch") {
-        benchmark_strrfind_character(bench);
-    } else if (benchmark_name == "strcount_ch") {
-        benchmark_strcount_ch(bench);
-    } else if (benchmark_name == "strlen") {
-        benchmark_strlen(bench);
-    } else if (benchmark_name == "parse_u8") {
-        benchmark_parse_u8(bench);
-    } else if (benchmark_name == "parse_u16") {
-        benchmark_parse_u16(bench);
-    } else if (benchmark_name == "parse_u32") {
-        benchmark_parse_u32(bench);
-    } else if (benchmark_name == "parse_u64") {
-        benchmark_parse_u64(bench);
-    } else {
+    std::optional benchmark_fn = register_benchmark::get_function(benchmark_name);
+    if (!benchmark_fn.has_value()) {
         fmt::println("unknown benchmark name: {}", benchmark_name.data());
         return 1;
     }
+    std::vector<bs::string_view<>> args;
+    args.reserve(argc);
+    for (std::size_t i = 2; i < argc; ++i) {
+        args.push_back(bs::string_view{argv[i], bs::strlen(argv[i])});
+    }
+    (*benchmark_fn)(bench, args);
 
     bench.render(html_boxplot_template, std::cout);
 
