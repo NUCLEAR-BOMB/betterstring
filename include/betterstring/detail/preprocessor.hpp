@@ -129,6 +129,18 @@
     #define BS_NOINLINE
 #endif
 
+#if BS_COMP_MSVC
+    #define BS_NO_UNIQUE_ADDRESS [[msvc::no_unique_address]]
+#else
+    #define BS_NO_UNIQUE_ADDRESS [[no_unique_address]]
+#endif
+
+#if BS_HAS_BUILTIN(__builtin_constant_p)
+    #define BS_BUILTIN_CONSTANT_P(expr) __builtin_constant_p(expr)
+#else
+    #define BS_BUILTIN_CONSTANT_P(expr) (false)
+#endif
+
 #ifndef NDEBUG
     #if BS_COMP_CLANG || BS_COMP_GCC
         #define BS_VERIFY(expression, message) \
