@@ -168,5 +168,14 @@ TEST_CASE(".reserve_exact", "[string]") {
     CHECK(str.capacity() == 100);
 }
 
+TEST_CASE(".clear", "[string]") {
+    bs::string str{"test string", 11};
+    CHECK(str.size() == 11);
+    CHECK(str == "test string");
+    str.clear();
+    CHECK(str.size() == 0);
+    CHECK(str == "");
+}
+
 
 }

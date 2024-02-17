@@ -322,6 +322,10 @@ public:
         reserve_exact(size() + additional_cap);
     }
 
+    constexpr void clear() noexcept {
+        rep.set_size(0);
+    }
+
     constexpr iterator begin() noexcept { return data(); }
     constexpr const_iterator begin() const noexcept { return data(); }
     constexpr iterator end() noexcept { return data() + size(); }
