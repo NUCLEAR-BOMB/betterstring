@@ -232,5 +232,23 @@ TEST_CASE("operator[]", "[string]") {
     }
 }
 
+TEST_CASE(".back", "[string]") {
+    bs::string str{"1234", 4};
+    CHECK(str.back() == '4');
+    str = "123";
+    CHECK(str.back() == '3');
+    str = "1";
+    CHECK(str.back() == '1');
+}
+
+TEST_CASE(".front", "[string]") {
+    bs::string str{"1234", 4};
+    CHECK(str.front() == '1');
+    str = "234";
+    CHECK(str.front() == '2');
+    str = "4";
+    CHECK(str.front() == '4');
+}
+
 
 }

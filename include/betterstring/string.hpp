@@ -257,20 +257,6 @@ public:
         return *this;
     }
 
-    constexpr pointer data() noexcept {
-        return rep.get_pointer();
-    }
-    constexpr const_pointer data() const noexcept {
-        return rep.get_pointer();
-    }
-
-    constexpr size_type size() const noexcept {
-        return rep.get_size();
-    }
-    constexpr size_type capacity() const noexcept {
-        return rep.get_capacity();
-    }
-
     constexpr void reserve(const size_type new_req_cap) {
         const size_type old_cap = capacity();
         if (new_req_cap <= old_cap) { return; }
@@ -356,6 +342,20 @@ public:
         }
     }
 
+    constexpr pointer data() noexcept {
+        return rep.get_pointer();
+    }
+    constexpr const_pointer data() const noexcept {
+        return rep.get_pointer();
+    }
+
+    constexpr size_type size() const noexcept {
+        return rep.get_size();
+    }
+    constexpr size_type capacity() const noexcept {
+        return rep.get_capacity();
+    }
+
     constexpr iterator begin() noexcept { return data(); }
     constexpr const_iterator begin() const noexcept { return data(); }
     constexpr iterator end() noexcept { return data() + size(); }
@@ -370,6 +370,23 @@ public:
     constexpr reference operator[](const Int index) noexcept {
         BS_VERIFY((index + Int(size())) >= 0 && index < Int(size()), "index is out of range");
         return data()[index < 0 ? index + size() : index];
+    }
+
+    constexpr const_reference front() const noexcept {
+        BS_VERIFY(size() >= 1, "cannot access the first element from an empty string");
+        return data()[0];
+    }
+    constexpr reference front() noexcept {
+        BS_VERIFY(size() >= 1, "cannot access the first element from an empty string");
+        return data()[0];
+    }
+    constexpr const_reference back() const noexcept {
+        BS_VERIFY(size() >= 1, "cannot access the last element from an empty string");
+        return data()[size() - 1];
+    }
+    constexpr reference back() noexcept {
+        BS_VERIFY(size() >= 1, "cannot access the last element from an empty string");
+        return data()[size() - 1];
     }
 
     constexpr allocator_type get_allocator() const noexcept {
