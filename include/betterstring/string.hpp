@@ -344,6 +344,51 @@ public:
         }
     }
 
+    constexpr void pop_back() noexcept {
+        BS_VERIFY(size() >= 1, "removing character from already empty string");
+        rep.set_size(rep.get_size() - 1);
+    }
+
+    constexpr void append(const const_pointer str, const size_type str_len) {
+        const size_type old_size = size();
+        const size_type new_size = old_size + str_len;
+        if (new_size <= capacity()) {
+            traits_type::move(data() + size(), str, str_len);
+            rep.set_size(new_size);
+            return;
+        }
+        if (rep.is_long()) {
+            const size_type new_cap = calculate_capacity(new_size);
+            const pointer new_data = allocate(new_cap);
+            traits_type::copy(new_data, rep.get_long_pointer(), old_size);
+            traits_type::copy(new_data + old_size, str, str_len);
+            deallocate(rep.get_long_pointer(), rep.get_long_capacity());
+            rep.set_long_pointer(new_data);
+            rep.set_long_capacity(new_cap);
+            rep.set_long_size(new_size);
+        } else {
+            const size_type new_cap = calculate_capacity(new_size);
+            const pointer new_data = allocate(new_cap);
+            traits_type::copy(new_data, rep.get_short_pointer(), old_size);
+            traits_type::copy(new_data + old_size, str, str_len);
+            rep.set_long_state();
+            rep.set_long_pointer(new_data);
+            rep.set_long_capacity(new_cap);
+            rep.set_long_size(new_size);
+        }
+    }
+    template<class string_view_like, std::enable_if_t<
+        detail::is_string_view_convertible<traits_type, string_view_like>
+        && !std::is_convertible_v<string_view_like, const_pointer>
+    , int> = 0>
+    constexpr void append(const string_view_like& t) {
+        const self_string_view str_view = t;
+        append(str_view.data(), str_view.size());
+    }
+    constexpr void append(const const_pointer nt_str) {
+        append(nt_str, detail::strlen_elision(nt_str));
+    }
+
     constexpr pointer data() noexcept {
         return rep.get_pointer();
     }

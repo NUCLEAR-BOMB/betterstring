@@ -193,6 +193,16 @@ TEST_CASE(".push_back", "[string]") {
     CHECK(str == "12341234123412341234123412341234ab");
 }
 
+TEST_CASE(".pop_back", "[string]") {
+    bs::string str{"test", 4};
+    str.pop_back();
+    CHECK(str.back() == 's');
+    str.pop_back();
+    CHECK(str.back() == 'e');
+    str.pop_back();
+    CHECK(str.back() == 't');
+}
+
 TEST_CASE("operator[]", "[string]") {
     SECTION("signed integer index") {
         bs::string str{"abcd", 4};
@@ -283,5 +293,28 @@ TEST_CASE(".at_back", "[string]") {
     CHECK_FALSE(str.at_back().has_value());
 }
 
+TEST_CASE(".append", "[string]") {
+    SECTION("append fixed-size buffer") {
+        bs::string str{"123", 3};
+        str.append("test", 4);
+        CHECK(str == "123test");
+        str.append("very long string!", 17);
+        CHECK(str == "123testvery long string!");
+        str.append("even more big", 13);
+        CHECK(str == "123testvery long string!even more big");
+    }
+    SECTION("append string view like") {
+        bs::string str{"string", 6};
+        str.append(bs::string_view{" test 123"});
+        CHECK(str == "string test 123");
+    }
+    SECTION("append static C-string") {
+        bs::string str;
+        str.append("hello world");
+        CHECK(str == "hello world");
+        str.append("hello!");
+        CHECK(str == "hello worldhello!");
+    }
+}
 
 }
