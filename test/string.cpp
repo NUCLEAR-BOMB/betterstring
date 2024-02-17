@@ -193,5 +193,44 @@ TEST_CASE(".push_back", "[string]") {
     CHECK(str == "12341234123412341234123412341234ab");
 }
 
+TEST_CASE("operator[]", "[string]") {
+    SECTION("signed integer index") {
+        bs::string str{"abcd", 4};
+        CHECK(str[0] == 'a');
+        CHECK(str[1] == 'b');
+        CHECK(str[2] == 'c');
+        CHECK(str[3] == 'd');
+
+        CHECK(str[-1] == 'd');
+        CHECK(str[-2] == 'c');
+        CHECK(str[-3] == 'b');
+        CHECK(str[-4] == 'a');
+
+        const bs::string const_str = str;
+        CHECK(const_str[0] == 'a');
+        CHECK(const_str[1] == 'b');
+        CHECK(const_str[2] == 'c');
+        CHECK(const_str[3] == 'd');
+
+        CHECK(const_str[-1] == 'd');
+        CHECK(const_str[-2] == 'c');
+        CHECK(const_str[-3] == 'b');
+        CHECK(const_str[-4] == 'a');
+    }
+    SECTION("unsigned integer index") {
+        bs::string str{"abcd", 4};
+        CHECK(str[0U] == 'a');
+        CHECK(str[1U] == 'b');
+        CHECK(str[2U] == 'c');
+        CHECK(str[3U] == 'd');
+
+        const bs::string const_str = str;
+        CHECK(const_str[0U] == 'a');
+        CHECK(const_str[1U] == 'b');
+        CHECK(const_str[2U] == 'c');
+        CHECK(const_str[3U] == 'd');
+    }
+}
+
 
 }

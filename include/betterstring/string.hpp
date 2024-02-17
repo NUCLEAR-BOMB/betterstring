@@ -361,6 +361,17 @@ public:
     constexpr iterator end() noexcept { return data() + size(); }
     constexpr const_iterator end() const noexcept { return data() + size(); }
 
+    template<class Int, std::enable_if_t<std::is_integral_v<Int>, int> = 0>
+    constexpr const_reference operator[](const Int index) const noexcept {
+        BS_VERIFY((index + Int(size())) >= 0 && index < Int(size()), "index is out of range");
+        return data()[index < 0 ? index + size() : index];
+    }
+    template<class Int, std::enable_if_t<std::is_integral_v<Int>, int> = 0>
+    constexpr reference operator[](const Int index) noexcept {
+        BS_VERIFY((index + Int(size())) >= 0 && index < Int(size()), "index is out of range");
+        return data()[index < 0 ? index + size() : index];
+    }
+
     constexpr allocator_type get_allocator() const noexcept {
         return rep.get_allocator();
     }
