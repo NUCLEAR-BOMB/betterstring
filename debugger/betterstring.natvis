@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+    <Type Name="bs::stringt&lt;*&gt;">
+        <Intrinsic Name="is_long" Expression="rep.rep.short_str.size &amp; (1 &lt;&lt; 7)" />
+        <Intrinsic Name="data" Expression="is_long() ? rep.rep.long_str.data : rep.rep.short_str.data" />
+        <Intrinsic Name="size" Expression="is_long() ? rep.rep.long_str.size : rep.rep.short_str.size" />
+        <Intrinsic Name="capacity" Expression="is_long() ? rep.rep.long_str.capacity &amp; ~(uint64_t(1) &lt;&lt; 63) : rep.short_capacity" />
+        <Intrinsic Name="data_ptr" Expression="uintptr_t(data())" />
+
+        <DisplayString>{data(),[size()]na}</DisplayString>
+        <StringView>data(),[size()]na</StringView>
+        <Expand>
+            <Item Name="[size]" ExcludeView="simple">size()</Item>
+            <Item Name="[capacity]" ExcludeView="simple">capacity()</Item>
+            <Item Name="[data]" ExcludeView="simple">data_ptr(),x</Item>
+            <ArrayItems>
+                <Size>size()</Size>
+                <ValuePointer>data()</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+
+    <Type Name="bs::string_view&lt;*&gt;">
+        <Intrinsic Name="data" Expression="string_data" />
+        <Intrinsic Name="size" Expression="string_size" />
+        <Intrinsic Name="data_ptr" Expression="uintptr_t(data())"/>
+        <DisplayString>{data(),[size()]na}</DisplayString>
+        <StringView>data(),[size()]na</StringView>
+        <Expand>
+            <Item Name="[size]" ExcludeView="simple">size()</Item>
+            <Item Name="[data]" ExcludeView="simple">data_ptr(),x</Item>
+            <ArrayItems>
+                <Size>size()</Size>
+                <ValuePointer>data()</ValuePointer>
+            </ArrayItems>
+        </Expand>
+    </Type>
+
+</AutoVisualizer>

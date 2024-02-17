@@ -55,6 +55,8 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     )
 endif()
 
+target_sources(betterstring PUBLIC "${PROJECT_SOURCE_DIR}/debugger/betterstring.natvis")
+
 if (BUILD_TEST)
     enable_testing()
     add_subdirectory(test)
