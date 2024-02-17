@@ -250,5 +250,38 @@ TEST_CASE(".front", "[string]") {
     CHECK(str.front() == '4');
 }
 
+TEST_CASE(".at", "[string]") {
+    bs::string str{"test string", 11};
+    CHECK(str.at(0) == 't');
+    CHECK(str.at(4U) == ' ');
+    CHECK(str.at(-1) == 'g');
+    CHECK(str.at(-2) == 'n');
+    CHECK(str.at(str.size() - 1) == 'g');
+
+    CHECK_FALSE(str.at(3128) == 'a');
+    CHECK_FALSE(str.at(-123).has_value());
+    CHECK_FALSE(str.at(str.size()) == 'g');
+}
+
+TEST_CASE(".at_front", "[string]") {
+    bs::string str{"test 123", 8};
+    CHECK(str.at_front() == 't');
+    str = "123";
+    CHECK(str.at_front() == '1');
+
+    str.clear();
+    CHECK_FALSE(str.at_front().has_value());
+}
+
+TEST_CASE(".at_back", "[string]") {
+    bs::string str{"hello world", 11};
+    CHECK(str.at_back() == 'd');
+    str = "hello";
+    CHECK(str.at_back() == 'o');
+
+    str.clear();
+    CHECK_FALSE(str.at_back().has_value());
+}
+
 
 }

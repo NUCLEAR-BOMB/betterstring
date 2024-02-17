@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <memory>
 #include <type_traits>
+#include <optional>
 
 #include <betterstring/char_traits.hpp>
 #include <betterstring/type_traits.hpp>
@@ -156,6 +157,7 @@ private:
     detail::string_representation<value_type, size_type, 0> rep;
 
     using self_string_view = bs::string_view<traits_type>;
+    using optional_char = std::optional<value_type>;
 public:
 
     constexpr stringt() noexcept
@@ -372,6 +374,14 @@ public:
         return data()[index < 0 ? index + size() : index];
     }
 
+    template<class Int, std::enable_if_t<std::is_integral_v<Int>, int> = 0>
+    constexpr optional_char at(const Int index) const noexcept {
+        if (index + Int(size()) < 0 || index >= Int(size())) {
+            return {};
+        }
+        return data()[index < 0 ? index + size() : index];
+    }
+
     constexpr const_reference front() const noexcept {
         BS_VERIFY(size() >= 1, "cannot access the first element from an empty string");
         return data()[0];
@@ -386,6 +396,15 @@ public:
     }
     constexpr reference back() noexcept {
         BS_VERIFY(size() >= 1, "cannot access the last element from an empty string");
+        return data()[size() - 1];
+    }
+
+    constexpr optional_char at_front() const noexcept {
+        if (size() == 0) { return {}; }
+        return data()[0];
+    }
+    constexpr optional_char at_back() const noexcept {
+        if (size() == 0) { return {}; }
         return data()[size() - 1];
     }
 
