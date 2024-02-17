@@ -153,10 +153,20 @@ TEST_CASE(".reserve", "[string]") {
     str.reserve(sso_capacity + 1);
     CHECK(str.capacity() > sso_capacity + 1);
     str.reserve(100);
-    CHECK(str.capacity() > 100);
+    CHECK(str.capacity() >= 100);
 }
 
-
+TEST_CASE(".reserve_exact", "[string]") {
+    const size_t sso_capacity = bs::string{}.capacity();
+    bs::string str;
+    CHECK(str.capacity() == sso_capacity);
+    str.reserve_exact(5);
+    CHECK(str.capacity() == sso_capacity);
+    str.reserve_exact(sso_capacity + 1);
+    CHECK(str.capacity() == sso_capacity + 1);
+    str.reserve_exact(100);
+    CHECK(str.capacity() == 100);
+}
 
 
 }

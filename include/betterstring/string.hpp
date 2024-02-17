@@ -293,6 +293,35 @@ public:
         rep.set_long_capacity(new_cap);
     }
 
+    constexpr void reserve_add(const size_type additional_cap) {
+        reserve(size() + additional_cap);
+    }
+
+    constexpr void reserve_exact(const size_type new_cap) {
+        const size_type old_cap = capacity();
+        if (new_cap <= old_cap) { return; }
+
+        const pointer new_data = allocate(new_cap);
+
+        if (!rep.is_long()) {
+            const size_type short_size = rep.get_short_size();
+            traits_type::copy(new_data, rep.get_short_pointer(), short_size);
+            rep.set_long_state();
+            rep.set_long_pointer(new_data);
+            rep.set_long_capacity(new_cap);
+            rep.set_long_size(short_size);
+            return;
+        }
+        traits_type::copy(new_data, rep.get_long_pointer(), rep.get_long_size());
+        deallocate(rep.get_long_pointer(), old_cap);
+        rep.set_long_pointer(new_data);
+        rep.set_long_capacity(new_cap);
+    }
+
+    constexpr void reserve_exact_add(const size_type additional_cap) {
+        reserve_exact(size() + additional_cap);
+    }
+
     constexpr iterator begin() noexcept { return data(); }
     constexpr const_iterator begin() const noexcept { return data(); }
     constexpr iterator end() noexcept { return data() + size(); }
@@ -379,15 +408,19 @@ private:
         }
     }
 
-    static constexpr size_type calculate_capacity(const size_type sz) noexcept {
-        return sz * 2;
+    static constexpr size_type calculate_capacity(const size_type req_cap) noexcept {
+        BS_VERIFY(req_cap != size_type(-1), "exceeded maximum allowed capacity");
+        const size_type new_cap = req_cap * 2;
+        // if overflows
+        if (new_cap < req_cap) { return size_type(-1); }
+        return new_cap;
     }
     [[nodiscard]] constexpr pointer allocate(const size_type cap) noexcept {
-        allocator_type alloc;
+        allocator_type alloc{};
         return alloc_traits::allocate(alloc, cap);
     }
     constexpr void deallocate(const pointer ptr, const size_type cap) noexcept {
-        allocator_type alloc;
+        allocator_type alloc{};
         alloc_traits::deallocate(alloc, ptr, cap);
     }
 };
