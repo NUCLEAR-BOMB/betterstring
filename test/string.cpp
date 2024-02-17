@@ -315,6 +315,16 @@ TEST_CASE(".append", "[string]") {
         str.append("hello!");
         CHECK(str == "hello worldhello!");
     }
+    SECTION("append range") {
+        bs::string str;
+        const char long_str[] = "12345&12345&12345&12345&12345&12345&12345&12345&12345&12345&";
+        str.append(long_str, long_str + 60);
+        CHECK(str == "12345&12345&12345&12345&12345&12345&12345&12345&12345&12345&");
+        str.append(long_str, long_str + 1);
+        CHECK(str == "12345&12345&12345&12345&12345&12345&12345&12345&12345&12345&1");
+        str.append(long_str, long_str);
+        CHECK(str == "12345&12345&12345&12345&12345&12345&12345&12345&12345&12345&1");
+    }
 }
 
 }
