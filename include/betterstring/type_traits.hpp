@@ -1,6 +1,9 @@
 #pragma once
 
 #include <betterstring/detail/preprocessor.hpp>
+#include <cstdint>
+#include <type_traits>
+#include <cstddef>
 
 namespace bs {
 

@@ -98,6 +98,22 @@ constexpr std::size_t strlen(const T* const str) noexcept {
     return i;
 }
 
+namespace detail {
+    template<class T> BS_FORCEINLINE
+    constexpr std::size_t strlen_elision(const T* const str) noexcept {
+        if (!detail::is_constant_evaluated()) {
+            if constexpr (std::is_same_v<T, char>) {
+                return std::strlen(str);
+            } else if constexpr (std::is_same_v<T, wchar_t>) {
+                return std::wcslen(str);
+            }
+        }
+        std::size_t i = 0;
+        while (str[i] != T()) ++i;
+        return i;
+    }
+}
+
 template<class T>
 constexpr void strcopy(T* const dest, const T* const src, const std::size_t count) noexcept {
     static_assert(is_character<T>);

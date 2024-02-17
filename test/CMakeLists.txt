@@ -7,6 +7,7 @@ add_executable(betterstring-test
     "char_traits.cpp"
     "ascii.cpp"
     "parsing.cpp"
+    "string.cpp"
 
     "util.hpp"
 )
