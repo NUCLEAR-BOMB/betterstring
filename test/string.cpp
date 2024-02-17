@@ -177,5 +177,21 @@ TEST_CASE(".clear", "[string]") {
     CHECK(str == "");
 }
 
+TEST_CASE(".push_back", "[string]") {
+    bs::string str;
+    str.push_back('a');
+    CHECK(str == "a");
+    str.push_back('b');
+    CHECK(str == "ab");
+    str.push_back('c');
+    CHECK(str == "abc");
+
+    str = "12341234123412341234123412341234";
+    str.push_back('a');
+    CHECK(str == "12341234123412341234123412341234a");
+    str.push_back('b');
+    CHECK(str == "12341234123412341234123412341234ab");
+}
+
 
 }

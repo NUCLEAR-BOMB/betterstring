@@ -326,6 +326,36 @@ public:
         rep.set_size(0);
     }
 
+    constexpr void push_back(const value_type ch) {
+        if (rep.is_long()) {
+            if (rep.get_long_size() == rep.get_long_capacity()) {
+                const size_type new_cap = calculate_capacity(rep.get_long_size() + 1);
+                const pointer new_data = allocate(new_cap);
+                traits_type::copy(new_data, rep.get_long_pointer(), rep.get_long_size());
+                deallocate(rep.get_long_pointer(), rep.get_long_capacity());
+                rep.set_long_pointer(new_data);
+                rep.set_long_capacity(new_cap);
+            }
+            rep.get_long_pointer()[rep.get_long_size()] = ch;
+            rep.set_long_size(rep.get_long_size() + 1);
+        } else {
+            const size_type short_size = rep.get_short_size();
+            if (rep.get_short_size() == rep.get_short_capacity()) {
+                const size_type new_cap = calculate_capacity(rep.get_short_capacity() + 1);
+                const pointer new_data = allocate(new_cap);
+                traits_type::copy(new_data, rep.get_short_pointer(), rep.get_short_size());
+                rep.set_long_state();
+                rep.set_long_pointer(new_data);
+                rep.set_long_capacity(new_cap);
+                rep.get_long_pointer()[short_size] = ch;
+                rep.set_long_size(short_size + 1);
+            } else {
+                rep.get_short_pointer()[short_size] = ch;
+                rep.set_short_size(short_size + 1);
+            }
+        }
+    }
+
     constexpr iterator begin() noexcept { return data(); }
     constexpr const_iterator begin() const noexcept { return data(); }
     constexpr iterator end() noexcept { return data() + size(); }
