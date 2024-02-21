@@ -21,6 +21,8 @@
 
 namespace nb = ankerl::nanobench;
 
+#pragma function(memcpy)
+
 int main(int argc, char* argv[]) {
 #ifdef _WIN32
     if (!SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS)) {

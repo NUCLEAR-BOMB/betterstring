@@ -15,6 +15,15 @@
 
 #include "add_benchmark_macro.hpp"
 
+template<class T>
+T* aligned_new(const size_t num, const size_t alignment) {
+    return static_cast<T*>(::operator new[](sizeof(T)* num, std::align_val_t{alignment}));
+}
+template<class T>
+void aligned_delete(T* const ptr, const size_t num, const size_t alignment) {
+    ::operator delete[](ptr, num, std::align_val_t{alignment});
+}
+
 ADD_BENCHMARK("strrfind_ch") {
     bench.title("bs::strrfind (character)");
 
@@ -40,11 +49,11 @@ ADD_BENCHMARK("strrfind_ch_aligned") {
         fmt::println("bad number formatting");
         return;
     }
-    const std::align_val_t aligment{aligment_arg.value()};
+    const size_t aligment{aligment_arg.value()};
     bench.title(fmt::format("bs::strrfind (character) (alignment={})", std::size_t(aligment)));
 
     const size_t full_string_size = 1 << 20;
-    char* const string = (char*)::operator new[](full_string_size, aligment);
+    char* const string = aligned_new<char>(full_string_size, aligment);
     bs::strfill(string, full_string_size, 'a');
 
     for (std::size_t i = 0; i <= 20; ++i) {
@@ -57,7 +66,7 @@ ADD_BENCHMARK("strrfind_ch_aligned") {
         });
     }
 
-    ::operator delete[](string, aligment);
+    aligned_delete(string, full_string_size, aligment);
 }
 
 ADD_BENCHMARK("parse_u8") {
@@ -137,3 +146,55 @@ ADD_BENCHMARK("strlen") {
         string[string_len] = 'X';
     }
 }
+
+ADD_BENCHMARK("strlen_aligned") {
+    if (args.size() == 0) {
+        fmt::println("pass the alignment size argument (first)");
+        return;
+    }
+    const auto aligment_arg = bs::parse<std::size_t>(args[0].data(), args[0].size());
+    if (aligment_arg.has_error()) {
+        fmt::println("bad number formatting");
+        return;
+    }
+    const std::size_t aligment{aligment_arg.value()};
+    bench.title(fmt::format("bs::strlen (alignment={})", aligment));
+
+    const size_t full_string_size = (1 << 21) + 1;
+    char* const string = aligned_new<char>(full_string_size, aligment);
+    bs::strfill(string, full_string_size, 'X');
+
+    for (std::size_t i = 0; i <= 21; ++i) {
+        const std::size_t string_len = 1 << i;
+
+        string[string_len] = '\0';
+        bench.context("length", fmt::format("{}", string_len));
+        bench.run(fmt::format("length {}", string_len), [&]() {
+            std::size_t result = bs::strlen(string);
+            bench.doNotOptimizeAway(result);
+        });
+        string[string_len] = 'X';
+    }
+
+    aligned_delete(string, full_string_size, aligment);
+}
+
+ADD_BENCHMARK("strfindn_ch") {
+    bench.title("bs::strfindn (character)");
+
+    std::vector<char> string((1 << 21) + 1, 'X');
+
+    for (std::size_t i = 0; i <= 21; ++i) {
+        const std::size_t string_len = 1 << i;
+
+        string[string_len] = 'Y';
+        bench.context("length", fmt::format("{}", string_len));
+        bench.run(fmt::format("length {}", string_len), [&]() {
+            char* result = bs::strfindn(string.data(), string_len, 'X');
+            bench.doNotOptimizeAway(result);
+        });
+        string[string_len] = 'X';
+    }
+}
+
+
