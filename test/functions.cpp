@@ -270,4 +270,89 @@ TEST_CASE("bs::strcount", "[functions]") {
     }
 }
 
+TEST_CASE("bs::strfindn", "[functions]") {
+    SECTION("character") {
+        const char* str1 = "aaaaaBaaa";
+        CHECK(bs::strfindn(str1, 9, 'a') == &str1[5]);
+        const char* str2 = "00000000010000";
+        CHECK(bs::strfindn(str2, 9, '0') == nullptr);
+        CHECK(bs::strfindn(str2, 10, '0') == &str2[9]);
+
+        const char* str3 = "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeE";
+        CHECK(bs::strfindn(str3, 32, 'e') == &str3[31]);
+        CHECK(bs::strfindn(str3, 31, 'e') == nullptr);
+        const char* str4 = "Eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
+        CHECK(bs::strfindn(str4, 32, 'e') == &str4[0]);
+        const char* str5 = "eeeeeeeeeeeeeeeEeeeeeeeeeeeeeeee";
+        CHECK(bs::strfindn(str5, 32, 'e') == &str5[15]);
+
+        const char* str6 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaab";
+        CHECK(bs::strfindn(str6, 33, 'a') == &str6[32]);
+        CHECK(bs::strfindn(str6, 32, 'a') == nullptr);
+        const char* str7 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaa";
+        CHECK(bs::strfindn(str7, 46, 'a') == &str7[38]);
+        CHECK(bs::strfindn(str7, 33, 'a') == nullptr);
+
+        char str8[70+1]{};
+        bs::strfill(str8, 70, 'a');
+        CHECK(bs::strfindn(str8, 70, 'a') == nullptr);
+        str8[69] = 'b';
+        CHECK(bs::strfindn(str8, 70, 'a') == &str8[69]);
+        CHECK(bs::strfindn(str8, 64, 'a') == nullptr);
+        str8[63] = 'b';
+        CHECK(bs::strfindn(str8, 64, 'a') == &str8[63]);
+        str8[33] = 'b';
+        CHECK(bs::strfindn(str8, 64, 'a') == &str8[33]);
+        CHECK(bs::strfindn(str8, 32, 'a') == nullptr);
+
+        alignas(32) char str9[160+1]{};
+        bs::strfill(str9, 160, '0');
+        CHECK(bs::strfindn(str9, 160, '0') == nullptr);
+        CHECK(bs::strfindn(str9, 65, '0') == nullptr);
+        str9[159] = '2';
+        CHECK(bs::strfindn(str9, 160, '0') == &str9[159]);
+        CHECK(bs::strfindn(str9, 159, '0') == nullptr);
+        str9[127] = '1';
+        CHECK(bs::strfindn(str9, 160, '0') == &str9[127]);
+        CHECK(bs::strfindn(str9, 126, '0') == nullptr);
+
+        alignas(32) char str10[287+1]{};
+        bs::strfill(str10, 287, '.');
+        CHECK(bs::strfindn(str10, 287, '.') == nullptr);
+        CHECK(bs::strfindn(str10, 255, '.') == nullptr);
+        str10[286] = ':';
+        CHECK(bs::strfindn(str10, 287, '.') == &str10[286]);
+        CHECK(bs::strfindn(str10, 285, '.') == nullptr);
+        str10[200] = ',';
+        CHECK(bs::strfindn(str10, 287, '.') == &str10[200]);
+        CHECK(bs::strfindn(str10, 201, '.') == &str10[200]);
+        CHECK(bs::strfindn(str10, 200, '.') == nullptr);
+
+        char* const str11 = (char*)page_alloc();
+        bs::strfill(str11, 5, 'a');
+        CHECK(bs::strfindn(str11, 5, 'a') == nullptr);
+        str11[4] = 'b';
+        CHECK(bs::strfindn(str11, 5, 'a') == &str11[4]);
+
+        bs::strfill(str11 + (4096 - 32), 32, 'A');
+        CHECK(bs::strfindn(str11 + (4096 - 32), 32, 'A') == nullptr);
+        str11[4096 - 1] = 'B';
+        CHECK(bs::strfindn(str11 + (4096 - 32), 32, 'A') == &str11[4096 - 1]);
+        str11[4096 - 32] = 'B';
+        CHECK(bs::strfindn(str11 + (4096 - 32), 32, 'A') == &str11[4096 - 32]);
+
+        bs::strfill(str11 + (4096 - 10), 10, 'X');
+        CHECK(bs::strfindn(str11 + (4096 - 10), 10, 'X') == nullptr);
+        str11[4096 - 1] = 'Y';
+        CHECK(bs::strfindn(str11 + (4096 - 10), 10, 'X') == &str11[4096 - 1]);
+        str11[4096 - 10] = 'Y';
+        CHECK(bs::strfindn(str11 + (4096 - 10), 10, 'X') == &str11[4096 - 10]);
+
+        CHECK(bs::strfindn(str11 + (4096 - 5), 0, 'X') == nullptr);
+        CHECK(bs::strfindn(str11 + 4096, 0, 'X') == nullptr);
+
+        page_free(str11);
+    }
+}
+
 }

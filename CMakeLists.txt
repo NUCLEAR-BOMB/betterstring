@@ -31,12 +31,10 @@ add_library(betterstring
     "src/strrfind_char_avx2.asm"
     "src/strcount_char_avx2.asm"
     "src/strlen_avx2.asm"
+    "src/strfindn_char_avx2.asm"
 )
-set_target_properties(betterstring PROPERTIES LINKER_LANGUAGE CXX)
 
 target_compile_options(betterstring PRIVATE $<$<COMPILE_LANGUAGE:ASM_MASM>:/Cp>)
-
-target_add_warnings(betterstring)
 
 if (NOT PROJECT_IS_TOP_LEVEL)
     set(include_as_system "SYSTEM")
@@ -55,7 +53,10 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     )
 endif()
 
-target_sources(betterstring PUBLIC "${PROJECT_SOURCE_DIR}/debugger/betterstring.natvis")
+target_sources(betterstring PUBLIC
+        "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/debugger/betterstring.natvis>"
+        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_DATADIR}/debugger/betterstring.natvis>"
+)
 
 if (BUILD_TEST)
     enable_testing()

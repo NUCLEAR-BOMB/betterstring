@@ -444,4 +444,30 @@ constexpr std::size_t strcount(const T* str, const std::size_t count, const deta
     return result;
 }
 
+namespace detail {
+    extern "C" const char* betterstring_strfindn_char_avx2(const char*, std::size_t, char);
+}
+
+template<class T>
+constexpr T* strfindn(T* str, std::size_t count, detail::type_identity_t<T> ch) noexcept {
+    using type = std::remove_const_t<T>;
+    static_assert(is_character<type>);
+
+    if (!detail::is_constant_evaluated()) {
+        if constexpr (std::is_same_v<type, char>) {
+            using detail::cpu_features;
+            if (cpu_features.value & (cpu_features.AVX2 + cpu_features.BMI2)) {
+                return const_cast<char*>(detail::betterstring_strfindn_char_avx2(str, count, ch));
+            }
+        }
+    }
+
+    while (count != 0) {
+        if (*str != ch) { return str; }
+        ++str;
+        --count;
+    }
+    return nullptr;
+}
+
 }
