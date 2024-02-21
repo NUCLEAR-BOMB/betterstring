@@ -23,7 +23,7 @@ function(target_add_warnings target)
         /wd4868 # 'file(line_number)' compiler may not enforce left-to-right evaluation order in braced initializer list
         /wd5267 # definition of implicit copy constructor/assignment operator for 'type' is deprecated because it has a user-provided assignment operator/copy constructor
         /wd4574 # 'Identifier' is defined to be '0': did you mean to use '#if identifier'?
-		>)
+        >)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
         target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:
         -Wall # Enables all the warnings
@@ -39,6 +39,18 @@ function(target_add_warnings target)
         -Wold-style-cast # Warn for C style casting
         -Wshadow # Warn whenever a local variable or type declaration shadows another variable
         -Wno-old-style-cast # Disable warning for using C-style casts
+        -Wno-c++98-compat
+        -Wno-pre-c++17-compat
+        -Wno-pre-c++14-compat
+        -Wno-unsafe-buffer-usage
+        -Wno-ctad-maybe-unsupported
+        -Wno-c++98-compat-bind-to-temporary-copy
+        -Wno-global-constructors
+        -Wno-c++98-compat-pedantic
+        -Wno-zero-as-null-pointer-constant
+        -Wno-shadow-field-in-constructor
+        -Wno-sign-conversion
+        -Wno-self-assign-overloaded
         >)
     endif()
 endfunction()
