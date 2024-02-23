@@ -8,9 +8,7 @@
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     if (Size == 0) { return -1; }
 
-    const size_t needle_len = (Data[0] / 2) <= Size ? (Data[0] / 2) : Size;
-    // if (needle_len > 2) { return -1; }
-    // if (needle_len != 4) { return -1; }
+    const size_t needle_len = (Data[0] % 5) <= Size ? (Data[0] % 5) : Size;
 
     const char* const needle = reinterpret_cast<const char*>(Data);
 
