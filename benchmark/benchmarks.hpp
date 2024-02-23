@@ -187,13 +187,42 @@ ADD_BENCHMARK("strfindn_ch") {
     for (std::size_t i = 0; i <= 21; ++i) {
         const std::size_t string_len = 1 << i;
 
-        string[string_len] = 'Y';
+        string[string_len - 1] = 'Y';
         bench.context("length", fmt::format("{}", string_len));
         bench.run(fmt::format("length {}", string_len), [&]() {
             char* result = bs::strfindn(string.data(), string_len, 'X');
             bench.doNotOptimizeAway(result);
         });
-        string[string_len] = 'X';
+        string[string_len - 1] = 'X';
+    }
+}
+
+ADD_BENCHMARK("strfirst_of") {
+    if (args.size() == 0) {
+        fmt::println("pass the character sequence length argument (first)");
+        return;
+    }
+    const auto char_seq_len = bs::parse<std::size_t>(args[0].data(), args[0].size());
+    if (char_seq_len.has_error()) {
+        fmt::println("bad number formatting");
+        return;
+    }
+
+    bench.title(fmt::format("bs::strfirst_of (seq length={})", char_seq_len.value()));
+
+    std::vector<char> string(1 << 21, 'X');
+    std::vector<char> char_seq(char_seq_len.value(), 'Y');
+
+    for (std::size_t i = 0; i <= 21; ++i) {
+        const std::size_t string_len = 1 << i;
+
+        string[string_len - 1] = 'Y';
+        bench.context("length", fmt::format("{}", string_len));
+        bench.run(fmt::format("length {}", string_len), [&]() {
+            char* result = bs::strfirst_of(string.data(), string_len, char_seq.data(), char_seq.size());
+            bench.doNotOptimizeAway(result);
+        });
+        string[string_len - 1] = 'X';
     }
 }
 
