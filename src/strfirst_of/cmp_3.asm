@@ -186,13 +186,11 @@ cmp_3_vec_loop_last:
 
     align 16
 cmp_3_last_vec:
-    vpcmpeqb ymm4, ymm0, YMMWORD PTR [rcx + rdx - 32]
-    vpcmpeqb ymm5, ymm1, YMMWORD PTR [rcx + rdx - 32]
-    vpor ymm4, ymm4, ymm5
+    vpcmpeqb ymm3, ymm0, YMMWORD PTR [rcx + rdx - 32]
+    vpcmpeqb ymm4, ymm1, YMMWORD PTR [rcx + rdx - 32]
     vpcmpeqb ymm5, ymm2, YMMWORD PTR [rcx + rdx - 32]
-    vpor ymm4, ymm4, ymm5
-    vpcmpeqb ymm5, ymm3, YMMWORD PTR [rcx + rdx - 32]
-    vpor ymm4, ymm4, ymm5
+    vpor ymm3, ymm3, ymm4
+    vpor ymm4, ymm3, ymm5
     vpmovmskb eax, ymm4
     tzcnt r10d, eax
     xor rax, rax
