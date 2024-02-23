@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     nb::Bench bench;
 
     using namespace std::chrono_literals;
-    bench.minEpochTime(260ms).warmup(100'000);
+    bench.minEpochTime(240ms);
 
     const bs::string_view benchmark_name{argv[1], bs::strlen(argv[1])};
     std::optional benchmark_fn = register_benchmark::get_function(benchmark_name);
