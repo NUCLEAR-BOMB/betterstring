@@ -8,7 +8,7 @@ DEBUGBREAK equ <int 3>
 PAGE_SIZE equ 1 SHL 12 ; 4096
 
 ; const char* string (rcx) - pointer to string to compare
-; size_t      count (rdx) - lenght of string to compare
+; size_t      count (rdx) - length of string to compare
 ; char        character (r8b) - character to compare with
 ;
 ; this function uses AVX2 processor extension instructions 
