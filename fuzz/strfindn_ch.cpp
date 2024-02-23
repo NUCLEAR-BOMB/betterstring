@@ -40,22 +40,16 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     if (result == nullptr) {
         for (size_t i = 0; i < str_len; ++i) {
             if (str[i] != search_for) {
-                __debugbreak();
-                bs::strfindn(str, str_len, search_for);
                 std::abort();
             }
         }
     } else {
         if (*result == search_for) {
-            __debugbreak();
-            bs::strfindn(str, str_len, search_for);
             std::abort();
         }
 
         for (auto it = str; it != result; ++it) {
             if (*it != search_for) {
-                __debugbreak();
-                bs::strfindn(str, str_len, search_for);
                 std::abort();
             }
         }
