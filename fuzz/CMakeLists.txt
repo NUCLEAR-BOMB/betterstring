@@ -16,6 +16,7 @@ add_fuzzer(strcount_ch_fuzz strcount_ch.cpp)
 add_fuzzer(parse_fuzz parse.cpp)
 add_fuzzer(strlen_fuzz strlen.cpp)
 add_fuzzer(strfindn_ch_fuzz strfindn_ch.cpp)
+add_fuzzer(strfirst_of_fuzz strfirst_of.cpp)
 
 include(ProcessorCount)
 ProcessorCount(cores_number)
