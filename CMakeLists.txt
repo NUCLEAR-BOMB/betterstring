@@ -32,6 +32,8 @@ add_library(betterstring
     "src/strcount_char_avx2.asm"
     "src/strlen_avx2.asm"
     "src/strfindn_char_avx2.asm"
+
+    "src/strfirst_of_avx2.asm"
 )
 
 target_compile_options(betterstring PRIVATE $<$<COMPILE_LANGUAGE:ASM_MASM>:/Cp>)

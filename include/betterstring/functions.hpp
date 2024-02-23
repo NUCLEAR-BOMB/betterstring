@@ -470,4 +470,34 @@ constexpr T* strfindn(T* str, std::size_t count, detail::type_identity_t<T> ch) 
     return nullptr;
 }
 
+namespace detail {
+    extern "C" const char* betterstring_strfirst_of_avx2(const char*, std::size_t, const char*, std::size_t);
+}
+
+template<class T>
+constexpr T* strfirst_of(T* str, std::size_t count, const detail::type_identity_t<T>* needle, std::size_t needle_size) noexcept {
+    using type = std::remove_const_t<T>;
+    static_assert(is_character<type>);
+
+    if (!detail::is_constant_evaluated()) {
+        if constexpr (std::is_same_v<type, char>) {
+            using detail::cpu_features;
+            if (cpu_features.value & (cpu_features.AVX2 + cpu_features.BMI2)) {
+                return const_cast<char*>(detail::betterstring_strfirst_of_avx2(str, count, needle, needle_size));
+            }
+        }
+    }
+
+    while (count != 0) {
+        std::size_t i = 0;
+        while (i < needle_size) {
+            if (*str == needle[i]) { return str; }
+            ++i;
+        }
+        ++str;
+        --count;
+    }
+    return nullptr;
+}
+
 }
