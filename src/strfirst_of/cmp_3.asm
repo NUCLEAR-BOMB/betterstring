@@ -4,8 +4,15 @@
 ; const char* needle (r8) - pointer to character sequence
 ; size_t      needle_size (r9) - lenght of the character sequence
 
-    align 16
-cmp_3:
+CMP_3_COMPARE_YMM MACRO out_reg:REQ, load_loc:REQ
+    vpcmpeqb ymm3, ymm0, load_loc
+    vpcmpeqb ymm4, ymm1, load_loc
+    vpcmpeqb ymm5, ymm2, load_loc
+    vpor ymm3, ymm3, ymm4
+    vpor ymm4, ymm3, ymm5
+    vpmovmskb out_reg, ymm4
+ENDM
+
     movzx r9d, BYTE PTR [r8 + 0]
     vmovd xmm0, r9d
     vpbroadcastb ymm0, xmm0 ; _mm256_set1_epi8(needle[0])
@@ -24,12 +31,7 @@ cmp_3:
     cmp r10, PAGE_SIZE-32  ; check if next 32 byte does cross page boundary
     jg cmp_3_page_cross
 
-    vpcmpeqb ymm3, ymm0, YMMWORD PTR [rcx]
-    vpcmpeqb ymm4, ymm1, YMMWORD PTR [rcx]
-    vpcmpeqb ymm5, ymm2, YMMWORD PTR [rcx]
-    vpor ymm3, ymm3, ymm4
-    vpor ymm4, ymm3, ymm5
-    vpmovmskb eax, ymm4
+    CMP_3_COMPARE_YMM eax, YMMWORD PTR [rcx]
     tzcnt r10d, eax
     xor rax, rax            ; set rax to 0 in case that string does not contain a character
     cmp r10d, edx           ; if string does not contain a character or it is outside the string
@@ -41,12 +43,7 @@ cmp_3:
 
     align 16
 cmp_3_page_cross:
-    vpcmpeqb ymm3, ymm0, YMMWORD PTR [rcx + rdx - 32]
-    vpcmpeqb ymm4, ymm1, YMMWORD PTR [rcx + rdx - 32]
-    vpcmpeqb ymm5, ymm2, YMMWORD PTR [rcx + rdx - 32]
-    vpor ymm3, ymm3, ymm4
-    vpor ymm4, ymm3, ymm5
-    vpmovmskb r9d, ymm4
+    CMP_3_COMPARE_YMM r9d, YMMWORD PTR [rcx + rdx - 32]
     neg dl
     shrx r9d, r9d, edx
     tzcnt r9d, r9d
@@ -60,45 +57,25 @@ cmp_3_page_cross:
 
     align 16
 cmp_3_large:
-    vpcmpeqb ymm3, ymm0, YMMWORD PTR [rcx + 32*0]
-    vpcmpeqb ymm4, ymm1, YMMWORD PTR [rcx + 32*0]
-    vpcmpeqb ymm5, ymm2, YMMWORD PTR [rcx + 32*0]
-    vpor ymm3, ymm3, ymm4
-    vpor ymm4, ymm3, ymm5
-    vpmovmskb eax, ymm4
+    CMP_3_COMPARE_YMM eax, YMMWORD PTR [rcx + 32*0]
     test eax, eax
     jnz cmp_3_return_vec1
 
     cmp rdx, 32*2
     jbe cmp_3_last_vec
-    vpcmpeqb ymm3, ymm0, YMMWORD PTR [rcx + 32*1]
-    vpcmpeqb ymm4, ymm1, YMMWORD PTR [rcx + 32*1]
-    vpcmpeqb ymm5, ymm2, YMMWORD PTR [rcx + 32*1]
-    vpor ymm3, ymm3, ymm4
-    vpor ymm4, ymm3, ymm5
-    vpmovmskb eax, ymm4
+    CMP_3_COMPARE_YMM eax, YMMWORD PTR [rcx + 32*1]
     test eax, eax
     jnz cmp_3_return_vec2
 
     cmp rdx, 32*3
     jbe cmp_3_last_vec
-    vpcmpeqb ymm3, ymm0, YMMWORD PTR [rcx + 32*2]
-    vpcmpeqb ymm4, ymm1, YMMWORD PTR [rcx + 32*2]
-    vpcmpeqb ymm5, ymm2, YMMWORD PTR [rcx + 32*2]
-    vpor ymm3, ymm3, ymm4
-    vpor ymm4, ymm3, ymm5
-    vpmovmskb eax, ymm4
+    CMP_3_COMPARE_YMM eax, YMMWORD PTR [rcx + 32*2]
     test eax, eax
     jnz cmp_3_return_vec3
 
     cmp rdx, 32*4
     jbe cmp_3_last_vec
-    vpcmpeqb ymm3, ymm0, YMMWORD PTR [rcx + 32*3]
-    vpcmpeqb ymm4, ymm1, YMMWORD PTR [rcx + 32*3]
-    vpcmpeqb ymm5, ymm2, YMMWORD PTR [rcx + 32*3]
-    vpor ymm3, ymm3, ymm4
-    vpor ymm4, ymm3, ymm5
-    vpmovmskb eax, ymm4
+    CMP_3_COMPARE_YMM eax, YMMWORD PTR [rcx + 32*3]
     test eax, eax
     jnz cmp_3_return_vec4
 
@@ -107,8 +84,7 @@ cmp_3_large:
     cmp rdx, 32*4
     jbe cmp_3_vec_loop_last
 
-    sub rsp, 16
-    vmovdqu XMMWORD PTR [rsp], xmm6
+    PUSH_XMM xmm6
 
     align 16
 cmp_3_vec_loop:
@@ -145,53 +121,32 @@ cmp_3_vec_loop:
     cmp rdx, 32*4
     ja cmp_3_vec_loop
 
-    vmovdqu xmm6, XMMWORD PTR [rsp]
-    add rsp, 16
+    POP_XMM xmm6
 
     align 16
 cmp_3_vec_loop_last:
 
     cmp rdx, 32*1
     jbe cmp_3_last_vec
-    vpcmpeqb ymm3, ymm0, YMMWORD PTR [rcx + 32*0]
-    vpcmpeqb ymm4, ymm1, YMMWORD PTR [rcx + 32*0]
-    vpcmpeqb ymm5, ymm2, YMMWORD PTR [rcx + 32*0]
-    vpor ymm3, ymm3, ymm4
-    vpor ymm4, ymm3, ymm5
-    vpmovmskb eax, ymm4
+    CMP_3_COMPARE_YMM eax, YMMWORD PTR [rcx + 32*0]
     test eax, eax
     jnz cmp_3_return_vec1
 
     cmp rdx, 32*2
     jbe cmp_3_last_vec
-    vpcmpeqb ymm3, ymm0, YMMWORD PTR [rcx + 32*1]
-    vpcmpeqb ymm4, ymm1, YMMWORD PTR [rcx + 32*1]
-    vpcmpeqb ymm5, ymm2, YMMWORD PTR [rcx + 32*1]
-    vpor ymm3, ymm3, ymm4
-    vpor ymm4, ymm3, ymm5
-    vpmovmskb eax, ymm4
+    CMP_3_COMPARE_YMM eax, YMMWORD PTR [rcx + 32*1]
     test eax, eax
     jnz cmp_3_return_vec2
 
     cmp rdx, 32*3
     jbe cmp_3_last_vec
-    vpcmpeqb ymm3, ymm0, YMMWORD PTR [rcx + 32*2]
-    vpcmpeqb ymm4, ymm1, YMMWORD PTR [rcx + 32*2]
-    vpcmpeqb ymm5, ymm2, YMMWORD PTR [rcx + 32*2]
-    vpor ymm3, ymm3, ymm4
-    vpor ymm4, ymm3, ymm5
-    vpmovmskb eax, ymm4
+    CMP_3_COMPARE_YMM eax, YMMWORD PTR [rcx + 32*2]
     test eax, eax
     jnz cmp_3_return_vec3
 
     align 16
 cmp_3_last_vec:
-    vpcmpeqb ymm3, ymm0, YMMWORD PTR [rcx + rdx - 32]
-    vpcmpeqb ymm4, ymm1, YMMWORD PTR [rcx + rdx - 32]
-    vpcmpeqb ymm5, ymm2, YMMWORD PTR [rcx + rdx - 32]
-    vpor ymm3, ymm3, ymm4
-    vpor ymm4, ymm3, ymm5
-    vpmovmskb eax, ymm4
+    CMP_3_COMPARE_YMM eax, YMMWORD PTR [rcx + rdx - 32]
     tzcnt r10d, eax
     xor rax, rax
     cmp r10d, 32
@@ -204,42 +159,21 @@ cmp_3_last_vec:
 
     align 16
 cmp_3_vec_loop_return:
-    vmovdqu xmm6, XMMWORD PTR [rsp]
-    add rsp, 16
+    POP_XMM xmm6
 
-    vpcmpeqb ymm3, ymm0, YMMWORD PTR [rcx + 32*0]
-    vpcmpeqb ymm4, ymm1, YMMWORD PTR [rcx + 32*0]
-    vpcmpeqb ymm5, ymm2, YMMWORD PTR [rcx + 32*0]
-    vpor ymm3, ymm3, ymm4
-    vpor ymm4, ymm3, ymm5
-    vpmovmskb eax, ymm4
+    CMP_3_COMPARE_YMM eax, YMMWORD PTR [rcx + 32*0]
     test eax, eax
     jnz cmp_3_return_vec1
 
-    vpcmpeqb ymm3, ymm0, YMMWORD PTR [rcx + 32*1]
-    vpcmpeqb ymm4, ymm1, YMMWORD PTR [rcx + 32*1]
-    vpcmpeqb ymm5, ymm2, YMMWORD PTR [rcx + 32*1]
-    vpor ymm3, ymm3, ymm4
-    vpor ymm4, ymm3, ymm5
-    vpmovmskb eax, ymm4
+    CMP_3_COMPARE_YMM eax, YMMWORD PTR [rcx + 32*1]
     test eax, eax
     jnz cmp_3_return_vec2
 
-    vpcmpeqb ymm3, ymm0, YMMWORD PTR [rcx + 32*2]
-    vpcmpeqb ymm4, ymm1, YMMWORD PTR [rcx + 32*2]
-    vpcmpeqb ymm5, ymm2, YMMWORD PTR [rcx + 32*2]
-    vpor ymm3, ymm3, ymm4
-    vpor ymm4, ymm3, ymm5
-    vpmovmskb eax, ymm4
+    CMP_3_COMPARE_YMM eax, YMMWORD PTR [rcx + 32*2]
     test eax, eax
     jnz cmp_3_return_vec3
 
-    vpcmpeqb ymm3, ymm0, YMMWORD PTR [rcx + 32*3]
-    vpcmpeqb ymm4, ymm1, YMMWORD PTR [rcx + 32*3]
-    vpcmpeqb ymm5, ymm2, YMMWORD PTR [rcx + 32*3]
-    vpor ymm3, ymm3, ymm4
-    vpor ymm4, ymm3, ymm5
-    vpmovmskb eax, ymm4
+    CMP_3_COMPARE_YMM eax, YMMWORD PTR [rcx + 32*3]
     tzcnt eax, eax
     lea rax, [rax + rcx + 32*3]
 

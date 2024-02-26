@@ -4,8 +4,6 @@
 ; const char* needle (r8) - pointer to character sequence
 ; size_t      needle_size (r9) - lenght of the character sequence
 
-    align 16
-cmp_2:
     movzx r9d, BYTE PTR [r8 + 0]
     vmovd xmm0, r9d
     vpbroadcastb ymm0, xmm0 ; _mm256_set1_epi8(needle[0])
