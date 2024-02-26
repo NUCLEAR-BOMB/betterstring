@@ -198,6 +198,7 @@ ADD_BENCHMARK("strfindn_ch") {
 }
 
 ADD_BENCHMARK("strfirst_of") {
+    using ankerl::nanobench::Rng;
     if (args.size() == 0) {
         fmt::println("pass the character sequence length argument (first)");
         return;
@@ -211,7 +212,15 @@ ADD_BENCHMARK("strfirst_of") {
     bench.title(fmt::format("bs::strfirst_of (seq length={})", char_seq_len.value()));
 
     std::vector<char> string(1 << 21, 'X');
-    std::vector<char> char_seq(char_seq_len.value(), 'Y');
+
+    std::vector<char> char_seq(char_seq_len.value());
+
+    Rng rng;
+    for (char& ch : char_seq) {
+    random_again:
+        ch = rng.bounded(256);
+        if (ch == string[0]) { goto random_again; }
+    }
 
     for (std::size_t i = 0; i <= 21; ++i) {
         const std::size_t string_len = 1 << i;
