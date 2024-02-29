@@ -4,12 +4,8 @@
 ; const char* needle (r8) - pointer to character sequence
 ; size_t      needle_size (r9) - lenght of the character sequence
 
-    movzx r9d, BYTE PTR [r8 + 0]
-    vmovd xmm0, r9d
-    vpbroadcastb ymm0, xmm0 ; _mm256_set1_epi8(needle[0])
-    movzx r9d, BYTE PTR [r8 + 1]
-    vmovd xmm1, r9d
-    vpbroadcastb ymm1, xmm1 ; _mm256_set1_epi8(needle[1])
+    MM256_SET1_EPI8 ymm0, BYTE PTR [r8 + 0]
+    MM256_SET1_EPI8 ymm1, BYTE PTR [r8 + 1]
 
     cmp rdx, 32
     ja cmp_2_large

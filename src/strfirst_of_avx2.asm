@@ -27,6 +27,16 @@ POP_XMM MACRO regs:VARARG
     add rsp, (16*count)
 ENDM
 
+MM256_SET1_EPI8 MACRO out_reg:REQ, location:REQ
+    ; LOCAL tmp_xmm_reg
+    ; tmp_xmm_reg TEXTEQU @CatStr(xmm, @SubStr(out_reg, 4, 1))
+
+    ; movzx r9d, location
+    ; vmovd tmp_xmm_reg, r9d
+
+    vpbroadcastb out_reg, location
+ENDM
+
 .code
 
 ; const char* string (rcx) - pointer to string to compare
@@ -40,7 +50,6 @@ ENDM
 betterstring_strfirst_of_avx2 PROC
 
 IF 1
-
     test rdx, rdx
     jz cmp_0
 

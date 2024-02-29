@@ -15,18 +15,10 @@ CMP_4_COMPARE_YMM MACRO out_reg:REQ, load_loc:REQ
     vpmovmskb out_reg, ymm4
 ENDM
 
-    movzx r9d, BYTE PTR [r8 + 0]
-    vmovd xmm0, r9d
-    vpbroadcastb ymm0, xmm0 ; _mm256_set1_epi8(needle[0])
-    movzx r9d, BYTE PTR [r8 + 1]
-    vmovd xmm1, r9d
-    vpbroadcastb ymm1, xmm1 ; _mm256_set1_epi8(needle[1])
-    movzx r9d, BYTE PTR [r8 + 2]
-    vmovd xmm2, r9d
-    vpbroadcastb ymm2, xmm2 ; _mm256_set1_epi8(needle[2])
-    movzx r9d, BYTE PTR [r8 + 3]
-    vmovd xmm3, r9d
-    vpbroadcastb ymm3, xmm3 ; _mm256_set1_epi8(needle[3])
+    MM256_SET1_EPI8 ymm0, BYTE PTR [r8 + 0]
+    MM256_SET1_EPI8 ymm1, BYTE PTR [r8 + 1]
+    MM256_SET1_EPI8 ymm2, BYTE PTR [r8 + 2]
+    MM256_SET1_EPI8 ymm3, BYTE PTR [r8 + 3]
 
     cmp rdx, 32
     ja cmp_4_large

@@ -16,22 +16,11 @@ CMP_5_COMPARE_YMM MACRO msk_reg:REQ, load_loc:REQ
     vpor ymm5, ymm9, ymm7
     vpmovmskb msk_reg, ymm5
 ENDM
-
-    movzx r9d, BYTE PTR [r8 + 0]
-    vmovd xmm0, r9d
-    vpbroadcastb ymm0, xmm0 ; _mm256_set1_epi8(needle[0])
-    movzx r9d, BYTE PTR [r8 + 1]
-    vmovd xmm1, r9d
-    vpbroadcastb ymm1, xmm1 ; _mm256_set1_epi8(needle[1])
-    movzx r9d, BYTE PTR [r8 + 2]
-    vmovd xmm2, r9d
-    vpbroadcastb ymm2, xmm2 ; _mm256_set1_epi8(needle[2])
-    movzx r9d, BYTE PTR [r8 + 3]
-    vmovd xmm3, r9d
-    vpbroadcastb ymm3, xmm3 ; _mm256_set1_epi8(needle[3])
-    movzx r9d, BYTE PTR [r8 + 4]
-    vmovd xmm4, r9d
-    vpbroadcastb ymm4, xmm4 ; _mm256_set1_epi8(needle[4])
+    MM256_SET1_EPI8 ymm0, BYTE PTR [r8 + 0]
+    MM256_SET1_EPI8 ymm1, BYTE PTR [r8 + 1]
+    MM256_SET1_EPI8 ymm2, BYTE PTR [r8 + 2]
+    MM256_SET1_EPI8 ymm3, BYTE PTR [r8 + 3]
+    MM256_SET1_EPI8 ymm4, BYTE PTR [r8 + 4]
 
     PUSH_XMM xmm6, xmm7, xmm8, xmm9
 
@@ -47,7 +36,7 @@ ENDM
     tzcnt r10d, eax
     xor rax, rax            ; set rax to 0 in case that string does not contain a character
     cmp r10d, edx           ; if string does not contain a character or it is outside the string
-    lea r10, [r10 + rcx]  ; compute a pointer to a found character
+    lea r10, [r10 + rcx]    ; compute a pointer to a found character
     cmovb rax, r10
 
     POP_XMM xmm6, xmm7, xmm8, xmm9
