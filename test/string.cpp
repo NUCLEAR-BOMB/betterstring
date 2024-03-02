@@ -349,4 +349,45 @@ TEST_CASE(".contains", "[string]") {
     CHECK_FALSE(str.contains("worlda"));
 }
 
+TEST_CASE(".starts_with", "[string]") {
+    bs::string str{"test string"};
+
+    CHECK(str.starts_with('t'));
+    CHECK_FALSE(str.starts_with('e'));
+    CHECK_FALSE(str.starts_with('g'));
+
+    CHECK(str.starts_with("test string"));
+    CHECK(str.starts_with("test"));
+    CHECK(str.starts_with("tes"));
+    CHECK(str.starts_with("t"));
+    CHECK(str.starts_with(""));
+    CHECK_FALSE(str.starts_with("est"));
+
+    bs::string empty_str{};
+    CHECK_FALSE(empty_str.starts_with('a'));
+    CHECK_FALSE(empty_str.starts_with("b"));
+    CHECK_FALSE(empty_str.starts_with("b2"));
 }
+
+TEST_CASE(".ends_with", "[string]") {
+    bs::string str{"sample text"};
+
+    CHECK(str.ends_with('t'));
+    CHECK_FALSE(str.ends_with('x'));
+    CHECK_FALSE(str.ends_with('s'));
+
+    CHECK(str.ends_with("text"));
+    CHECK(str.ends_with("ext"));
+    CHECK(str.ends_with("sample text"));
+    CHECK(str.ends_with(" text"));
+    CHECK_FALSE(str.ends_with("tex"));
+    CHECK_FALSE(str.ends_with("sample"));
+
+    bs::string empty_str{};
+    CHECK_FALSE(empty_str.ends_with('a'));
+    CHECK_FALSE(empty_str.ends_with("b"));
+    CHECK_FALSE(empty_str.ends_with("b2"));
+}
+
+}
+

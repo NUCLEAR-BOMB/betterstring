@@ -385,6 +385,24 @@ public:
         return traits_type::findstr(data(), size(), str.data(), str.size()) != nullptr;
     }
 
+    constexpr bool starts_with(const value_type ch) const noexcept {
+        if (size() == 0) { return false; }
+        return traits_type::eq(data()[0], ch);
+    }
+    constexpr bool starts_with(const self_string_view str) const noexcept {
+        if (size() < str.size()) { return false; }
+        return traits_type::compare(data(), str.data(), str.size()) == 0;
+    }
+
+    constexpr bool ends_with(const value_type ch) const noexcept {
+        if (size() == 0) { return false; }
+        return traits_type::eq(data()[size() - 1], ch);
+    }
+    constexpr bool ends_with(const self_string_view str) const noexcept {
+        if (size() < str.size()) { return false; }
+        return traits_type::compare(data() + (size() - str.size()), str.data(), str.size()) == 0;
+    }
+
     constexpr pointer data() noexcept {
         return rep.get_pointer();
     }
