@@ -93,10 +93,10 @@ TEST_CASE("constructor", "[string]") {
         CHECK(str2 == "abcd"_sv);
     }
     SECTION("from string view like") {
-        bs::string str1{bs::string_view{"string"}};
+        bs::string str1{"string"_sv};
         CHECK(str1 == "string"_sv);
 
-        bs::string str2{bs::string_view{"                                        "}};
+        bs::string str2{"                                        "_sv};
         CHECK(str2 == "                                        "_sv);
     }
 }
@@ -104,7 +104,7 @@ TEST_CASE("constructor", "[string]") {
 TEST_CASE("operator=", "[string]") {
     SECTION("assign from string view like") {
         bs::string str;
-        str = bs::string_view{"test string"};
+        str = "test string"_sv;
         CHECK(str == "test string"_sv);
         str = bs::string_view{"test ", 4};
         CHECK(str == "test"_sv);
@@ -296,7 +296,7 @@ TEST_CASE(".append", "[string]") {
     }
     SECTION("append string view like") {
         bs::string str{"string", 6};
-        str.append(bs::string_view{" test 123"});
+        str.append(" test 123"_sv);
         CHECK(str == "string test 123"_sv);
     }
     SECTION("append range") {

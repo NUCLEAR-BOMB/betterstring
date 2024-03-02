@@ -132,7 +132,7 @@ namespace detail {
 
     template<class Tr, class string_view_like>
     inline constexpr bool is_string_view_convertible =
-        std::is_convertible_v<const string_view_like&, bs::string_view<Tr>>
+        std::is_convertible_v<const string_view_like&, bs::string_viewt<Tr>>
         && !std::is_convertible_v<const string_view_like&, const typename Tr::char_type*>;
 }
 
@@ -156,7 +156,7 @@ public:
 private:
     detail::string_representation<value_type, size_type, 0> rep;
 
-    using self_string_view = bs::string_view<traits_type>;
+    using self_string_view = bs::string_viewt<traits_type>;
     using optional_char = std::optional<value_type>;
 public:
 
@@ -455,8 +455,8 @@ public:
         return rep.get_allocator();
     }
 
-    constexpr operator bs::string_view<traits_type>() const noexcept {
-        return bs::string_view<traits_type>{data(), size()};
+    constexpr operator bs::string_viewt<traits_type>() const noexcept {
+        return bs::string_viewt<traits_type>{data(), size()};
     }
 
 private:

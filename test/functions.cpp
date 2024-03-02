@@ -80,16 +80,16 @@ TEST_CASE("bs::strfind", "[functions]") {
         CHECK(bs::strfind(static_cast<const char*>(nullptr), 0, ' ') == nullptr);
     }
     SECTION("string") {
-        CHECK(bs::strfind(test_str, 11, "string") == &test_str[5]);
-        CHECK(bs::strfind(test_str, 3, "hello") == nullptr);
+        CHECK(bs::strfind(test_str, 11, "string", 6) == &test_str[5]);
+        CHECK(bs::strfind(test_str, 3, "hello", 5) == nullptr);
         CHECK(bs::strfind(test_str, 11, nullptr, 0) == test_str);
-        CHECK(bs::strfind(test_str, 11, "test") == &test_str[0]);
-        CHECK(bs::strfind(test_str, 0, "abc") == nullptr);
-        CHECK(bs::strfind(test_strview, "str") == &test_strview[5]);
-        CHECK(bs::strfind(test_strview, "test string") == &test_strview[0]);
-        CHECK(bs::strfind(test_strview, "test string   ") == nullptr);
-        CHECK(bs::strfind(test_strview, "") == &test_strview[0]);
-        CHECK(bs::strfind(test_strview, " ") == &test_strview[4]);
+        CHECK(bs::strfind(test_str, 11, "test", 4) == &test_str[0]);
+        CHECK(bs::strfind(test_str, 0, "abc", 3) == nullptr);
+        CHECK(bs::strfind(test_strview, "str", 3) == &test_strview[5]);
+        CHECK(bs::strfind(test_strview, "test string", 11) == &test_strview[0]);
+        CHECK(bs::strfind(test_strview, "test string   ", 14) == nullptr);
+        CHECK(bs::strfind(test_strview, "", 0) == &test_strview[0]);
+        CHECK(bs::strfind(test_strview, " ", 1) == &test_strview[4]);
 
         CHECK(bs::strfind(static_cast<char*>(nullptr), 0, "str") == nullptr);
         CHECK(bs::strfind(static_cast<const char*>(nullptr), 0, "") == nullptr);
@@ -180,8 +180,8 @@ TEST_CASE("bs::strrfind", "[functions]") {
         CHECK(bs::strrfind(test_str, 3, "helloworld") == nullptr);
         CHECK(bs::strrfind(test_str, 11, "string") == &test_str[5]);
         CHECK(bs::strrfind(test_str, 0, "123") == nullptr);
-        CHECK(bs::strrfind(test_strview, "st") == &test_strview[5]);
-        CHECK(bs::strrfind(test_strview, " ") == &test_strview[4]);
+        CHECK(bs::strrfind(test_strview, "st", 2) == &test_strview[5]);
+        CHECK(bs::strrfind(test_strview, " ", 1) == &test_strview[4]);
 
         const auto long_string = "!longlonglonglonglonglonglonglong string";
         CHECK(bs::strrfind(long_string, bs::strlen(long_string), "!long") == &long_string[0]);

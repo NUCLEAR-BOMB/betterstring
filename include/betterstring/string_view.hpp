@@ -116,7 +116,7 @@ struct slice {
 };
 
 template<class Traits = char_traits<char>>
-class string_view {
+class string_viewt {
 public:
     using traits_type            = Traits;
     using value_type             = typename Traits::char_type;
@@ -135,28 +135,25 @@ private:
     using signed_size_type = std::make_signed_t<size_type>;
 public:
 
-    constexpr string_view() noexcept : string_data(nullptr), string_size(0) {}
+    constexpr string_viewt() noexcept : string_data(nullptr), string_size(0) {}
 
-    constexpr string_view(const string_view&) noexcept = default;
+    constexpr string_viewt(const string_viewt&) noexcept = default;
 
-    constexpr string_view(const const_pointer str, const size_type count)
+    constexpr string_viewt(const const_pointer str, const size_type count)
         : string_data(str), string_size(count) {
         BS_VERIFY(count == 0 || str != nullptr, "null pointer with non-zero size");
     }
 
-    constexpr string_view(const const_pointer ntstr) noexcept
-        : string_data(ntstr), string_size(detail::strlen_elision(ntstr)) {}
-
     template<class Begin, class End = Begin, std::enable_if_t<
         !std::is_convertible_v<End, size_type>
     , int> = 0>
-    constexpr string_view(Begin first, End last) noexcept(noexcept(last - first))
+    constexpr string_viewt(Begin first, End last) noexcept(noexcept(last - first))
         : string_data(detail::to_address(first))
         , string_size(static_cast<size_type>(last - first)) {}
 
-    constexpr string_view(std::nullptr_t) = delete;
+    constexpr string_viewt(std::nullptr_t) = delete;
 
-    constexpr string_view& operator=(const string_view&) noexcept = default;
+    constexpr string_viewt& operator=(const string_viewt&) noexcept = default;
 
     constexpr const_iterator begin() const noexcept { return data(); }
     constexpr const_iterator end() const noexcept { return data() + size(); }
@@ -172,10 +169,15 @@ public:
     constexpr const_reverse_iterator crbegin() const noexcept { return rbegin(); }
     constexpr const_reverse_iterator crend() const noexcept { return rend(); }
 
-    template<class Idx, std::enable_if_t<std::is_integral_v<Idx>, int> = 0>
-    constexpr const_reference operator[](const Idx index) const noexcept {
-        BS_VERIFY(detail::cmp_less(index, size()) && detail::cmp_greater_equal(index, -ssize()), "out of range");
-        return data()[index >= 0 ? index : size() + index];
+    template<class Int, std::enable_if_t<std::is_integral_v<Int>, int> = 0>
+    constexpr const_reference operator[](const Int index) const noexcept {
+        BS_VERIFY((index + Int(size())) >= 0 && index < Int(size()), "index is out of range");
+        return data()[index < 0 ? index + size() : index];
+    }
+    template<class Int, std::enable_if_t<std::is_integral_v<Int>, int> = 0>
+    constexpr reference operator[](const Int index) noexcept {
+        BS_VERIFY((index + Int(size())) >= 0 && index < Int(size()), "index is out of range");
+        return data()[index < 0 ? index + size() : index];
     }
 
     constexpr const_reference front() const noexcept {
@@ -188,10 +190,9 @@ public:
     }
 
     BS_CONST_FN constexpr const_pointer data() const noexcept { return string_data; }
-    BS_CONST_FN constexpr const_pointer dataend() const noexcept { return data() + size(); }
+    BS_CONST_FN constexpr const_pointer data_end() const noexcept { return data() + size(); }
 
     BS_CONST_FN constexpr size_type size() const noexcept { return string_size; }
-    BS_CONST_FN constexpr signed_size_type ssize() const noexcept { return static_cast<signed_size_type>(string_size); }
     BS_CONST_FN constexpr size_type length() const noexcept { return size(); }
 
     BS_CONST_FN constexpr size_type max_size() const noexcept { return static_cast<size_type>(-1); }
@@ -212,45 +213,43 @@ private:
     struct slice_end_tag {};
 public:
 
-    template<class Idx1, class Idx2, std::enable_if_t<std::is_integral_v<Idx1> && std::is_integral_v<Idx2>, int> = 0>
-    constexpr string_view operator()(const Idx1 start, const Idx2 finish) const noexcept {
-        using namespace bs::detail;
-        BS_VERIFY(cmp_less_equal(start, size()) && cmp_greater_equal(start, -ssize()), "slice start index is out of range");
-        BS_VERIFY(cmp_less_equal(finish, size()) && cmp_greater_equal(finish, -ssize()), "slice end index is out of range");
-        const size_type start_idx = start >= 0 ? start : size() + start;
-        const size_type finish_idx = finish >= 0 ? finish : size() + finish;
-        return string_view(data() + start_idx, finish_idx - start_idx);
+    template<class Int1, class Int2, std::enable_if_t<
+        std::is_integral_v<Int1> && std::is_integral_v<Int2>
+    , int> = 0>
+    constexpr string_viewt operator()(const Int1 start, const Int2 finish) const noexcept {
+        BS_VERIFY((start + Int1(size())) >= 0 && start <= Int1(size()), "start index is out of range");
+        BS_VERIFY((finish + Int2(size())) >= 0 && finish <= Int2(size()), "finish index is out of range");
+        const size_type start_index = start < 0 ? start + size() : start;
+        const size_type finish_index = finish < 0 ? finish + size() : finish;
+        return string_viewt{data() + start_index, finish_index - start_index};
     }
-    template<class Idx, class SliceEndTag = slice_end_tag, std::enable_if_t<std::is_same_v<SliceEndTag, slice_end_tag> && std::is_integral_v<Idx>, int> = 0>
-    constexpr string_view operator()(const Idx start, const SliceEndTag) const noexcept {
-        using namespace bs::detail;
-        BS_VERIFY(cmp_less_equal(start, size()) && cmp_greater_equal(start, -ssize()), "slice start index is out of range");
-        const size_type start_idx = start >= 0 ? start : size() + start;
-        return string_view(data() + start_idx, size() - start_idx);
+    template<class Int1, class SliceEnd = slice_end_tag, std::enable_if_t<
+        std::is_integral_v<Int1> && std::is_same_v<SliceEnd, slice_end_tag>
+    , int> = 0>
+    constexpr string_viewt operator()(const Int1 start, const SliceEnd) const noexcept {
+        BS_VERIFY((start + Int1(size())) >= 0 && start <= Int1(size()), "start index is out of range");
+        const size_type start_index = start < 0 ? start + size() : start;
+        return string_viewt{data() + start_index, size() - start_index};
     }
-
-    constexpr string_view operator[](const slice sl) const noexcept {
-        BS_VERIFY(sl.start <= ssize() && sl.start >= -ssize(), "slice start index is out of range");
-        BS_VERIFY(sl.stop <= ssize() && sl.stop >= -ssize(), "slice end index is out of range");
-        const auto start_idx = sl.start >= 0 ? sl.start : size() + sl.start;
-        const auto finish_idx = sl.stop >= 0 ? sl.stop : size() + sl.stop;
-        return string_view(data() + start_idx, finish_idx - start_idx);
-    }
-
-    BS_CONST_FN constexpr size_type idx(const const_pointer ptr) const noexcept {
-        return static_cast<size_type>(ptr - data());
+    constexpr string_viewt operator[](const bs::slice slice) const noexcept {
+        using sidx_t = std::ptrdiff_t;
+        BS_VERIFY((slice.start + sidx_t(size())) >= 0 && slice.start <= sidx_t(size()), "slice start index is out of range");
+        BS_VERIFY((slice.stop + sidx_t(size())) >= 0 && slice.stop <= sidx_t(size()), "slice stop index is out of range");
+        const size_type start_index = slice.start < 0 ? slice.start + size() : slice.start;
+        const size_type finish_index = slice.stop < 0 ? slice.stop + size() : slice.stop;
+        return string_viewt{data() + start_index, finish_index - start_index};
     }
 
-    constexpr string_view substr(const size_type position) const noexcept {
+    constexpr string_viewt substr(const size_type position) const noexcept {
         BS_VERIFY(position <= size(), "the start position of the substring exceeds the length of the string");
         return (*this)(position, size());
     }
-    constexpr string_view substr(const size_type position, const size_type count) const noexcept {
+    constexpr string_viewt substr(const size_type position, const size_type count) const noexcept {
         BS_VERIFY(position <= size(), "the start position of the substring exceeds the length of the string");
         return (*this)(position, position + count);
     }
 
-    constexpr bool starts_with(const string_view str) const noexcept {
+    constexpr bool starts_with(const string_viewt str) const noexcept {
         if (size() < str.size()) return false;
         return traits_type::compare(data(), str.data(), str.size()) == 0;
     }
@@ -258,7 +257,7 @@ public:
         return !empty() && traits_type::eq(front(), ch);
     }
 
-    constexpr bool ends_with(const string_view str) const noexcept {
+    constexpr bool ends_with(const string_viewt str) const noexcept {
         if (size() < str.size()) return false;
         return traits_type::compare(data() + (size() - str.size()), str.data(), str.size()) == 0;
     }
@@ -278,10 +277,10 @@ private:
     }
 public:
 
-    constexpr this_find_result find(const string_view str, const size_type start = 0) const noexcept {
+    constexpr this_find_result find(const string_viewt str, const size_type start = 0) const noexcept {
         return this->find(str, start, size());
     }
-    constexpr this_find_result find(const string_view str, const size_type start, const size_type end) const noexcept {
+    constexpr this_find_result find(const string_viewt str, const size_type start, const size_type end) const noexcept {
         BS_VERIFY(end <= size(), "end is out of range");
         return make_find_r(traits_type::findstr(data() + start, end - start, str.data(), str.size()), end);
     }
@@ -295,11 +294,11 @@ public:
         return make_find_r(traits_type::find(data() + start, end - start, ch), end);
     }
 
-    constexpr this_find_result find(const string_view str, const const_pointer start) const noexcept {
-        return this->find(str, idx(start), size());
+    constexpr this_find_result find(const string_viewt str, const const_pointer start) const noexcept {
+        return this->find(str, size_type(start - data()), size());
     }
     constexpr this_find_result find(const value_type ch, const const_pointer start) const noexcept {
-        return this->find(ch, idx(start), size());
+        return this->find(ch, size_type(start - data()), size());
     }
 
     constexpr this_find_result rfind(const value_type ch) const noexcept {
@@ -311,10 +310,10 @@ public:
         return make_find_r(traits_type::rfind(data() + end, start - end, ch), end);
     }
 
-    constexpr this_find_result rfind(const string_view str) const noexcept {
+    constexpr this_find_result rfind(const string_viewt str) const noexcept {
         return this->rfind(str, size(), 0);
     }
-    constexpr this_find_result rfind(const string_view str, const size_type start, const size_type end = 0) const noexcept {
+    constexpr this_find_result rfind(const string_viewt str, const size_type start, const size_type end = 0) const noexcept {
         BS_VERIFY(start <= size(), "start is out of range");
         return make_find_r(traits_type::rfindstr(data() + end, start - end, str.data(), str.size()), end);
     }
@@ -322,7 +321,7 @@ public:
     constexpr this_find_result find_first_of(const value_type ch) const noexcept {
         return this->find(ch);
     }
-    constexpr this_find_result find_first_of(const string_view str) const noexcept {
+    constexpr this_find_result find_first_of(const string_viewt str) const noexcept {
         detail::char_bitmap<value_type> bitmap;
         if (!bitmap.mark(str.data(), str.data() + str.size())) {
             for (auto match_try = data(); match_try != data() + size(); ++match_try) {
@@ -341,7 +340,7 @@ public:
     constexpr this_find_result find_last_of(const value_type ch) const noexcept {
         return this->rfind(ch);
     }
-    constexpr this_find_result find_last_of(const string_view str) const noexcept {
+    constexpr this_find_result find_last_of(const string_viewt str) const noexcept {
         detail::char_bitmap<value_type> bitmap;
         if (!bitmap.mark(str.data(), str.data() + str.size())) {
             for (auto match_try = data() + size() - 1; match_try != data() - 1; --match_try) {
@@ -360,15 +359,15 @@ public:
     constexpr bool contains(const value_type ch) const noexcept {
         return traits_type::find(data(), size(), ch) != nullptr;
     }
-    constexpr bool contains(const string_view str) const noexcept {
+    constexpr bool contains(const string_viewt str) const noexcept {
         return traits_type::findstr(data(), size(), str.data(), str.size()) != nullptr;
     }
 
-    constexpr splited_string<string_view, string_view> split(const string_view separator) const noexcept {
-        return splited_string<string_view, string_view>(*this, separator);
+    constexpr splited_string<string_viewt, string_viewt> split(const string_viewt separator) const noexcept {
+        return splited_string<string_viewt, string_viewt>(*this, separator);
     }
-    constexpr splited_string<string_view, value_type> split(const value_type character) const noexcept {
-        return splited_string<string_view, value_type>(*this, character);
+    constexpr splited_string<string_viewt, value_type> split(const value_type character) const noexcept {
+        return splited_string<string_viewt, value_type>(*this, character);
     }
 
     constexpr size_type count(const value_type ch) const noexcept {
@@ -381,7 +380,7 @@ public:
         }
         BS_UNREACHABLE();
     }
-    constexpr size_type count(const string_view str) const noexcept {
+    constexpr size_type count(const string_viewt str) const noexcept {
         if (str.empty()) return this->size() + 1;
 
         size_type result = 0;
@@ -396,7 +395,7 @@ public:
 
 private:
     template<class Fn>
-    constexpr string_view strip_impl(Fn match_fn) const noexcept {
+    constexpr string_viewt strip_impl(Fn match_fn) const noexcept {
         const auto* left_it = data();
         for (;; ++left_it) {
             if (left_it == data() + size() || !match_fn(*left_it)) break;
@@ -407,33 +406,33 @@ private:
                 if (!match_fn(*right_it) || right_it == left_it) break;
             }
         }
-        return string_view(left_it, right_it + 1);
+        return string_viewt{left_it, right_it + 1};
     }
     template<class Fn>
-    constexpr string_view lstrip_impl(Fn match_fn) const noexcept {
+    constexpr string_viewt lstrip_impl(Fn match_fn) const noexcept {
         for (const auto* it = data();; ++it) {
             if (it == data() + size() || !match_fn(*it)) {
-                return string_view(it, data() + size());
+                return string_viewt{it, data() + size()};
             }
         }
         BS_UNREACHABLE();
     }
     template<class Fn>
-    constexpr string_view rstrip_impl(Fn match_fn) const noexcept {
+    constexpr string_viewt rstrip_impl(Fn match_fn) const noexcept {
         for (const auto* it = data() + size() - 1;; --it) {
             if (!match_fn(*it) || it == data()) {
-                return string_view(data(), it + 1);
+                return string_viewt(data(), it + 1);
             }
         }
         BS_UNREACHABLE();
     }
 
     template<class StripFn>
-    constexpr string_view strip_impl2(StripFn strip_fn, const value_type strip_ch) const noexcept {
+    constexpr string_viewt strip_impl2(StripFn strip_fn, const value_type strip_ch) const noexcept {
         return strip_fn([&](auto ch) { return ch == strip_ch; });
     }
     template<class StripFn>
-    constexpr string_view strip_impl2(StripFn strip_fn, const string_view chs) const noexcept {
+    constexpr string_viewt strip_impl2(StripFn strip_fn, const string_viewt chs) const noexcept {
         detail::char_bitmap<value_type> bitmap;
         bitmap.mark(chs.data(), chs.data() + chs.size());
         if (!bitmap.mark(chs.data(), chs.data() + chs.size())) {
@@ -447,8 +446,8 @@ private:
         });
     }
     template<class StripFn>
-    constexpr string_view strip_impl2(StripFn strip_fn) const noexcept {
-        constexpr string_view strip_chs = "\t\n\v\f\r ";
+    constexpr string_viewt strip_impl2(StripFn strip_fn) const noexcept {
+        constexpr string_viewt strip_chs{"\t\n\v\f\r ", 6};
         detail::char_bitmap<value_type> bitmap;
 
         if (!bitmap.mark(strip_chs.data(), strip_chs.data() + strip_chs.size())) {
@@ -461,57 +460,57 @@ private:
 
 public:
 
-    constexpr string_view strip(const value_type strip_ch) const noexcept {
+    constexpr string_viewt strip(const value_type strip_ch) const noexcept {
         return strip_impl2([&](auto f) { return strip_impl(f); }, strip_ch);
     }
-    constexpr string_view strip(const string_view chs) const noexcept {
+    constexpr string_viewt strip(const string_viewt chs) const noexcept {
         return strip_impl2([&](auto f) { return strip_impl(f); }, chs);
     }
-    constexpr string_view strip() const noexcept {
+    constexpr string_viewt strip() const noexcept {
         return strip_impl2([&](auto f) { return strip_impl(f); });
     }
 
-    constexpr string_view lstrip(const value_type strip_ch) const noexcept {
+    constexpr string_viewt lstrip(const value_type strip_ch) const noexcept {
         return strip_impl2([&](auto f) { return lstrip_impl(f); }, strip_ch);
     }
-    constexpr string_view lstrip(const string_view chs) const noexcept {
+    constexpr string_viewt lstrip(const string_viewt chs) const noexcept {
         return strip_impl2([&](auto f) { return lstrip_impl(f); }, chs);
     }
-    constexpr string_view lstrip() const noexcept {
+    constexpr string_viewt lstrip() const noexcept {
         return strip_impl2([&](auto f) { return lstrip_impl(f); });
     }
 
-    constexpr string_view rstrip(const value_type strip_ch) const noexcept {
+    constexpr string_viewt rstrip(const value_type strip_ch) const noexcept {
         return strip_impl2([&](auto f) { return rstrip_impl(f); }, strip_ch);
     }
-    constexpr string_view rstrip(const string_view chs) const noexcept {
+    constexpr string_viewt rstrip(const string_viewt chs) const noexcept {
         return strip_impl2([&](auto f) { return rstrip_impl(f); }, chs);
     }
-    constexpr string_view rstrip() const noexcept {
+    constexpr string_viewt rstrip() const noexcept {
         return strip_impl2([&](auto f) { return rstrip_impl(f); });
     }
 
-    constexpr string_view strip_first(const value_type ch) const noexcept {
+    constexpr string_viewt strip_first(const value_type ch) const noexcept {
         if (!starts_with(ch)) return *this;
-        return string_view(data() + 1, size() - 1);
+        return string_viewt(data() + 1, size() - 1);
     }
-    constexpr string_view strip_first(const string_view str) const noexcept {
+    constexpr string_viewt strip_first(const string_viewt str) const noexcept {
         if (!starts_with(str)) return *this;
-        return string_view(data() + str.size(), size() - str.size());
+        return string_viewt(data() + str.size(), size() - str.size());
     }
 
-    constexpr string_view strip_last(const value_type ch) const noexcept {
+    constexpr string_viewt strip_last(const value_type ch) const noexcept {
         if (!ends_with(ch)) return *this;
-        return string_view(data(), size() - 1);
+        return string_viewt(data(), size() - 1);
     }
-    constexpr string_view strip_last(const string_view str) const noexcept {
+    constexpr string_viewt strip_last(const string_viewt str) const noexcept {
         if (!ends_with(str)) return *this;
-        return string_view(data(), size() - str.size());
+        return string_viewt(data(), size() - str.size());
     }
 
     template<class Predicate>
     constexpr bool all_of(Predicate pred) const {
-        for (const value_type* it = data(); it != dataend(); ++it) {
+        for (const value_type* it = data(); it != data_end(); ++it) {
             if (!bool(pred(*it))) {
                 return false;
             }
@@ -520,7 +519,7 @@ public:
     }
     template<class Predicate>
     constexpr bool any_of(Predicate pred) const {
-        for (const value_type* it = data(); it != dataend(); ++it) {
+        for (const value_type* it = data(); it != data_end(); ++it) {
             if (pred(*it)) {
                 return true;
             }
@@ -529,7 +528,7 @@ public:
     }
     template<class Predicate>
     constexpr bool none_of(Predicate pred) const {
-        for (const value_type* it = data(); it != dataend(); ++it) {
+        for (const value_type* it = data(); it != data_end(); ++it) {
             if (pred(*it)) {
                 return false;
             }
@@ -538,29 +537,29 @@ public:
     }
 
 private:
-    static constexpr int trait_cmp(const string_view l, const string_view r) noexcept {
+    static constexpr int trait_cmp(const string_viewt l, const string_viewt r) noexcept {
         if (l.size() > r.size()) return 1;
         if (l.size() < r.size()) return -1;
         return Traits::compare(l.data(), r.data(), l.size());
     }
 public:
 
-    friend constexpr bool operator==(const string_view l, const string_view r) noexcept {
+    friend constexpr bool operator==(const string_viewt l, const string_viewt r) noexcept {
         return trait_cmp(l, r) == 0;
     }
-    friend constexpr bool operator!=(const string_view l, const string_view r) noexcept {
+    friend constexpr bool operator!=(const string_viewt l, const string_viewt r) noexcept {
         return trait_cmp(l, r) != 0;
     }
-    friend constexpr bool operator>(const string_view l, const string_view r) noexcept {
+    friend constexpr bool operator>(const string_viewt l, const string_viewt r) noexcept {
         return trait_cmp(l, r) > 0;
     }
-    friend constexpr bool operator>=(const string_view l, const string_view r) noexcept {
+    friend constexpr bool operator>=(const string_viewt l, const string_viewt r) noexcept {
         return trait_cmp(l, r) >= 0;
     }
-    friend constexpr bool operator<(const string_view l, const string_view r) noexcept {
+    friend constexpr bool operator<(const string_viewt l, const string_viewt r) noexcept {
         return trait_cmp(l, r) < 0;
     }
-    friend constexpr bool operator<=(const string_view l, const string_view r) noexcept {
+    friend constexpr bool operator<=(const string_viewt l, const string_viewt r) noexcept {
         return trait_cmp(l, r) <= 0;
     }
 
@@ -575,56 +574,57 @@ private:
     size_type string_size;
 };
 
-using wstring_view = string_view<char_traits<wchar_t>>;
-using u16string_view = string_view<char_traits<char16_t>>;
-using u32string_view = string_view<char_traits<char32_t>>;
+template<class Tr>
+constexpr void strcopy(typename Tr::char_type* const dest, const std::size_t dest_len, const string_viewt<Tr> src) noexcept {
+    bs::strcopy(dest, dest_len, src.data(), src.size());
+}
+template<class Tr>
+constexpr int strcomp(const string_viewt<Tr> left, const string_viewt<Tr> right) noexcept {
+    return bs::strcomp(left.data(), left.size(), right.data(), right.size());
+}
+template<class Tr>
+constexpr auto strfind(const string_viewt<Tr> str, const typename Tr::char_type ch) noexcept
+    -> const typename Tr::char_type* {
+    return bs::strfind(str.data(), str.size(), ch);
+}
+template<class Tr>
+constexpr auto strfind(const string_viewt<Tr> haystack, const string_viewt<Tr> needle) noexcept
+    -> const typename Tr::char_type* {
+    return bs::strfind(haystack.data(), haystack.size(), needle.data(), needle.size());
+}
+template<class Tr>
+constexpr auto strfind(const string_viewt<Tr> haystack, const typename Tr::char_type* needle, const std::size_t needle_len) noexcept
+    -> const typename Tr::char_type* {
+    return bs::strfind(haystack.data(), haystack.size(), needle, needle_len);
+}
+template<class Tr>
+constexpr auto strrfind(const string_viewt<Tr> haystack, const string_viewt<Tr> needle) noexcept
+    -> const typename Tr::char_type* {
+    return bs::strrfind(haystack.data(), haystack.size(), needle.data(), needle.size());
+}
+template<class Tr>
+constexpr auto strrfind(const string_viewt<Tr> haystack, const typename Tr::char_type* needle, const std::size_t needle_len) noexcept
+    -> const typename Tr::char_type* {
+    return bs::strrfind(haystack.data(), haystack.size(), needle, needle_len);
+}
+template<class Tr>
+constexpr auto strrfind(const string_viewt<Tr> str, const typename Tr::char_type ch) noexcept
+    -> const typename Tr::char_type* {
+    return bs::strrfind(str.data(), str.size(), ch);
+}
+
+
+
+using string_view = string_viewt<char_traits<char>>;
+using wstring_view = string_viewt<char_traits<wchar_t>>;
+using u16string_view = string_viewt<char_traits<char16_t>>;
+using u32string_view = string_viewt<char_traits<char32_t>>;
 #if BS_HAS_CHAR8_T
 using u8string_view = string_view<char_traits<char8_t>>;
 #endif
 
-template<class Traits>
-constexpr void strcopy(typename Traits::char_type* const dest, const std::size_t dest_size, const string_view<Traits> src) noexcept {
-    bs::strcopy(dest, dest_size, src.data(), src.size());
-}
-
-template<class Traits>
-constexpr int strcomp(const string_view<Traits> left, const string_view<Traits> right) noexcept {
-    return bs::strcomp(left.data(), left.size(), right.data(), right.size());
-}
-
-template<class Traits>
-[[nodiscard]] constexpr auto strfind(
-    const string_view<Traits> str, const typename Traits::char_type ch
-) noexcept -> const typename Traits::char_type* {
-    return bs::strfind(str.data(), str.size(), ch);
-}
-
-template<class Traits>
-constexpr auto strrfind(
-    const string_view<Traits> str, const typename Traits::char_type ch
-) noexcept -> const typename Traits::char_type* {
-    return bs::strrfind(str.data(), str.size(), ch);
-}
-
-template<class Traits>
-constexpr auto strfind(const string_view<Traits> haystack, const string_view<detail::type_identity_t<Traits>> needle) noexcept
-    -> const typename Traits::char_type* {
-    return bs::strfind(haystack.data(), haystack.size(), needle.data(), needle.size());
-}
-
-template<class Traits>
-constexpr auto strrfind(const string_view<Traits> haystack, const string_view<detail::type_identity_t<Traits>> needle) noexcept
-    -> const typename Traits::char_type* {
-    return bs::strrfind(haystack.data(), haystack.size(), needle.data(), needle.size());
-}
-
-template<class Traits>
-constexpr void strmove(typename Traits::char_type* const dest, const std::size_t dest_size, const string_view<Traits> src) noexcept {
-    bs::strmove(dest, dest_size, src.data(), src.size());
-}
-
 inline namespace literals {
-    constexpr bs::string_view<> operator ""_sv(const char* const str, const std::size_t len) noexcept {
+    constexpr bs::string_view operator ""_sv(const char* const str, const std::size_t len) noexcept {
         return bs::string_view(str, len);
     }
     constexpr bs::wstring_view operator ""_sv(const wchar_t* const str, const std::size_t len) noexcept {
