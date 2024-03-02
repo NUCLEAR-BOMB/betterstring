@@ -47,17 +47,12 @@ TEST_CASE("constructor", "[string]") {
         str = "long long long long long long long long string";
         bs::string str2{str};
         CHECK(str2 == "long long long long long long long long string");
-
-        bs::string str3{str3};
-        CHECK(str3 == "");
     }
     SECTION("move construct") {
         bs::string str1{bs::string{"test", 4}};
         CHECK(str1 == "test");
         bs::string str2{bs::string{"long long long long long long long string", 41}};
         CHECK(str2 == "long long long long long long long string");
-        bs::string str3{std::move(str3)};
-        CHECK(str3 == "");
     }
     SECTION("transfer ownership") {
         char* const str_arr1 = new char[5];
