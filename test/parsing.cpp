@@ -110,6 +110,41 @@ TEST_CASE("uint64", "[parsing]") {
     CHECK(bs::parse<uint64_t>("143489732497312498241", 21) == bs::parse_error::too_long);
 }
 
+enum class Color {
+    Red,
+    Green,
+    Blue,
+    Black,
+    Brown,
+    Orange,
+    Purple,
+    White,
+};
+
+BS_NOINLINE
+Color foo(const char* str, size_t size) {
+    using namespace bs::literals;
+    
+    static constexpr auto color_parsing_info = []{ return bs::enumeration_parsing_info<Color>({
+        {Color::Red, "Red"_sv},
+        {Color::Black, "Black"_sv},
+        {Color::Brown, "Brown"_sv},
+        {Color::Green, "Green"_sv},
+        {Color::Orange, "Orange"_sv},
+        {Color::Purple, "Purple"_sv},
+        {Color::White, "White"_sv},
+    }); };
+    return bs::parse<Color>(color_parsing_info, str, size);
+}
+
+TEST_CASE("enumeration", "[parsing]") {
+    using namespace bs::literals;
+
+    __debugbreak();
+    Color res = foo("hello", 5);
+    CHECK(res == Color::Black);
+}
+
 }
 
 #if BS_COMP_CLANG

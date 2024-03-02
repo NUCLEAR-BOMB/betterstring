@@ -6,6 +6,7 @@
 #include <exception>
 
 #include <betterstring/detail/parse_unsigned.hpp>
+#include <betterstring/detail/parse_enum.hpp>
 
 namespace bs {
 
