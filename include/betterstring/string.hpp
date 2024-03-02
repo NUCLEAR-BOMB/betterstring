@@ -191,8 +191,10 @@ public:
     template<class string_view_like, std::enable_if_t<
         detail::is_string_view_convertible<traits_type, string_view_like>
     , int> = 0>
+    BS_FORCEINLINE
     explicit constexpr stringt(const string_view_like& t) {
         const self_string_view str_view = t;
+
         init_with_size(str_view.size());
         traits_type::copy(data(), str_view.data(), str_view.size());
     }
@@ -463,6 +465,7 @@ public:
 private:
     using alloc_traits = std::allocator_traits<allocator_type>;
 
+    BS_FORCEINLINE BS_FLATTEN
     constexpr void init_with_size(const size_type count) noexcept {
         if (rep.fits_in_sso(count)) {
             rep.set_short_state();
@@ -475,6 +478,7 @@ private:
             rep.set_long_size(count);
         }
     }
+    BS_FORCEINLINE BS_FLATTEN
     constexpr void init_with_capacity(const size_type cap) noexcept {
         if (rep.fits_in_sso(cap)) {
             rep.set_short_state();
@@ -486,6 +490,7 @@ private:
             rep.set_long_size(0);
         }
     }
+    BS_FORCEINLINE BS_FLATTEN
     constexpr void copy_from_buffer(const value_type* const buf, const size_type buf_len) {
         size_type cap = rep.get_capacity();
         if (cap >= buf_len) {
@@ -509,6 +514,7 @@ private:
             rep.set_long_size(buf_len);
         }
     }
+    BS_FORCEINLINE BS_FLATTEN
     constexpr void copy_from_independent(const value_type* const buf, const size_type buf_len) {
         size_type cap = rep.get_capacity();
         if (cap >= buf_len) {
@@ -552,7 +558,8 @@ private:
 
 template<class Tr>
 constexpr bool operator==(const stringt<Tr>& left, const stringt<Tr>& right) noexcept {
-    return left.size() == right.size() && Tr::compare(left.data(), right.data(), left.size()) == 0;
+    if (left.size() != right.size()) { return false; }
+    return Tr::compare(left.data(), right.data(), left.size()) == 0;
 }
 
 template<class Tr>
