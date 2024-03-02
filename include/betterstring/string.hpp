@@ -382,9 +382,6 @@ public:
         const self_string_view str_view = t;
         append(str_view.data(), str_view.size());
     }
-    constexpr void append(const const_pointer nt_str) {
-        append(nt_str, detail::strlen_elision(nt_str));
-    }
     template<class Begin, class End, std::enable_if_t<!std::is_convertible_v<End, size_type>, int> = 0>
     constexpr void append(Begin first, End last) {
         append(detail::to_address(first), static_cast<size_type>(last - first));

@@ -299,13 +299,6 @@ TEST_CASE(".append", "[string]") {
         str.append(bs::string_view{" test 123"});
         CHECK(str == "string test 123"_sv);
     }
-    SECTION("append static C-string") {
-        bs::string str;
-        str.append("hello world");
-        CHECK(str == "hello world"_sv);
-        str.append("hello!");
-        CHECK(str == "hello worldhello!"_sv);
-    }
     SECTION("append range") {
         bs::string str;
         const char long_str[] = "12345&12345&12345&12345&12345&12345&12345&12345&12345&12345&";
