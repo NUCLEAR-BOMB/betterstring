@@ -187,16 +187,12 @@ TEST_CASE("find", "[string_view]") {
         CHECK(str.find(""_sv) == 0);
         CHECK(str.find(""_sv, 3) == 3);
         CHECK(str.find("string"_sv, 8) == str.size());
-
-        CHECK(str.find("str"_sv, 0, 4) == 4);
-        CHECK(str.find("string"_sv, 5, 11) == 5);
     }
     SECTION("character") {
         CHECK(str.find('t') == 0);
         CHECK(str.find('g') == 10);
         CHECK(str.find('x') == str.size());
         CHECK(str.find('g', 11) == str.size());
-        CHECK(str.find('r', 5, 8) == 7);
 
         CHECK(str.find('t').index() == 0);
         CHECK(str.find('g').index() == 10);
@@ -232,7 +228,6 @@ TEST_CASE("rfind", "[string_view]") {
         CHECK(str.rfind(" "_sv) == 4);
         CHECK(str.rfind("test"_sv, 8) == 0);
         CHECK(str.rfind("string"_sv, 10) == 0);
-        CHECK(str.rfind("st"_sv, str.size(), 4) == 5);
     }
     SECTION("character") {
         CHECK(str.rfind(' ') == 4);
@@ -240,8 +235,6 @@ TEST_CASE("rfind", "[string_view]") {
         CHECK("hello"_sv.rfind('h') == 0);
         CHECK(str.rfind('g') == 10);
         CHECK(str.rfind('t', 3) == 0);
-        CHECK(str.rfind('t', 11, 7) == 7);
-        CHECK(str.rfind(' ', 7, 1) == 4);
     }
 }
 
