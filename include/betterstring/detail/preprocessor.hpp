@@ -38,12 +38,6 @@
     #define BS_OS_WINDOWS 0
 #endif
 
-#if !BS_COMP_MSVC
-    #define BS_IS_COMPILER_SUPPORTS_DYNAMIC_DISPATCH 1
-#else
-    #define BS_IS_COMPILER_SUPPORTS_DYNAMIC_DISPATCH 0
-#endif
-
 #ifdef __has_builtin
     #define BS_HAS_BUILTIN(x) __has_builtin(x)
 #else
