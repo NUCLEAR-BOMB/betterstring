@@ -322,4 +322,15 @@ TEST_CASE("literals", "[string]") {
     CHECK(str2 == "test"_s);
 }
 
+TEST_CASE(".substr", "[string]") {
+    bs::string str = "test string"_s;
+    CHECK(str.substr(0) == str);
+    CHECK(str.substr(1) == "est string"_sv);
+    CHECK(str.substr(5) == "string"_sv);
+
+    CHECK(str.substr(0, 5) == "test "_sv);
+    CHECK(str.substr(0, 11) == "test string"_sv);
+    CHECK(str.substr(1, 10) == "est string"_sv);
+}
+
 }

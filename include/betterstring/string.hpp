@@ -387,6 +387,16 @@ public:
         append(detail::to_address(first), static_cast<size_type>(last - first));
     }
 
+    constexpr self_string_view substr(const size_type position) const noexcept {
+        BS_VERIFY(position <= size(), "the start position of the substring exceeds the length of the string");
+        return self_string_view{data() + position, size() - position};
+    }
+    constexpr self_string_view substr(const size_type position, const size_type count) const noexcept {
+        BS_VERIFY(position <= size(), "the start position of the substring exceeds the length of the string");
+        BS_VERIFY(count - position <= size(), "the length of substring exceeds the length of the string");
+        return self_string_view{data() + position, count};
+    }
+
     constexpr pointer data() noexcept {
         return rep.get_pointer();
     }
