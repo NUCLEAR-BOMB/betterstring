@@ -144,6 +144,12 @@ public:
         BS_VERIFY(count == 0 || str != nullptr, "null pointer with non-zero size");
     }
 
+    template<std::size_t N>
+    constexpr string_viewt(const value_type(&array)[N]) noexcept
+        : string_data(array), string_size(N - 1) { // remove null terminator
+        static_assert(N != 0, "given non-null terminated array");
+    }
+
     template<class Begin, class End = Begin, std::enable_if_t<
         !std::is_convertible_v<End, size_type>
     , int> = 0>
