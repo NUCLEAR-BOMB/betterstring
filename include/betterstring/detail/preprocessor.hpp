@@ -32,6 +32,20 @@
     #define BS_COMP_MSVC  0
 #endif
 
+#if defined(_MSVC_LANG)
+    #if _MSVC_LANG >= 202002L
+        #define BS_CXX20 1
+    #else
+        #define BS_CXX20 0
+    #endif
+#else
+    #if __cplusplus >= 202002L
+        #define BS_CXX20 1
+    #else
+        #define BS_CXX20 0
+    #endif
+#endif
+
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
     #define BS_OS_WINDOWS 1
 #else
