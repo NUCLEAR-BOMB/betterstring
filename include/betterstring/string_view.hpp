@@ -322,19 +322,7 @@ public:
         return this->find(ch);
     }
     constexpr this_find_result find_first_of(const string_viewt str) const noexcept {
-        detail::char_bitmap<value_type> bitmap;
-        if (!bitmap.mark(str.data(), str.data() + str.size())) {
-            for (auto match_try = data(); match_try != data() + size(); ++match_try) {
-                if (traits_type::find(str.data(), str.size(), *match_try) != nullptr) {
-                    return make_find_r(match_try);
-                }
-            }
-            return make_find_r(nullptr);
-        }
-        for (size_type i = 0; i < size(); ++i) {
-            if (bitmap.match(data()[i])) return make_find_r(i);
-        }
-        return make_find_r(nullptr);
+        return make_find_r(traits_type::first_of(data(), size(), str.data(), str.size()));
     }
 
     constexpr this_find_result find_last_of(const value_type ch) const noexcept {
