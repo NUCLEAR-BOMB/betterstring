@@ -21,6 +21,9 @@ TEST_CASE("constructor", "[string]") {
         bs::string long_str{"long string long string long string", 35};
         CHECK(long_str.size() == 35);
         CHECK(long_str == "long string long string long string"_sv);
+
+        bs::string short_str2{"\0test\0string\0", 13};
+        CHECK(short_str2 == "\0test\0string\0"_sv);
     }
     SECTION("filled") {
         auto short_str = bs::string::filled('a', 5);
@@ -30,6 +33,10 @@ TEST_CASE("constructor", "[string]") {
         auto long_str = bs::string::filled('X', 50);
         CHECK(long_str.size() == 50);
         CHECK(long_str == "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"_sv);
+
+        auto nt_str = bs::string::filled('\0', 10);
+        CHECK(nt_str.size() == 10);
+        CHECK(nt_str == "\0\0\0\0\0\0\0\0\0\0"_sv);
     }
     SECTION("with capacity") {
         auto short_str = bs::string::with_capacity(10);
@@ -95,19 +102,6 @@ TEST_CASE("constructor", "[string]") {
 }
 
 TEST_CASE("operator=", "[string]") {
-    SECTION("assign from C-string") {
-        bs::string str;
-        str = "test string"_sv;
-        CHECK(str == "test string"_sv);
-        str = ""_sv;
-        CHECK(str == ""_sv);
-        str = "long string long string long string long string"_sv;
-        CHECK(str == "long string long string long string long string"_sv);
-        str = "long string long string long string long"_sv;
-        CHECK(str == "long string long string long string long"_sv);
-        str = "small string"_sv;
-        CHECK(str == "small string"_sv);
-    }
     SECTION("assign from string view like") {
         bs::string str;
         str = bs::string_view{"test string"};
