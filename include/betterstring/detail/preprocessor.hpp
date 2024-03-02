@@ -49,7 +49,7 @@
 #if BS_CXX20
     #define BS_CONSTEXPR_CXX20 constexpr
 #else
-    #define BS_CONSTEXPR_CXX20
+    #define BS_CONSTEXPR_CXX20 inline
 #endif
 
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
