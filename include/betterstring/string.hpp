@@ -240,11 +240,6 @@ public:
         return *this;
     }
 
-    constexpr stringt& operator=(const value_type* const nt_str) {
-        copy_from_independent(nt_str, detail::strlen_elision(nt_str));
-        return *this;
-    }
-
     constexpr stringt& operator=(const stringt& str) {
         if (this == &str) { return *this; }
         copy_from_independent(str.data(), str.size());
@@ -497,7 +492,7 @@ private:
             traits_type::move(rep.get_pointer(), buf, buf_len);
             rep.set_size(buf_len);
         } else if (!rep.is_long()) {
-            const size_type new_cap = calculate_capacity(cap);
+            const size_type new_cap = calculate_capacity(buf_len);
             const pointer new_data = allocate(new_cap);
             traits_type::copy(new_data, buf, buf_len);
             rep.set_long_state();
@@ -559,29 +554,11 @@ template<class Tr>
 constexpr bool operator==(const stringt<Tr>& left, const stringt<Tr>& right) noexcept {
     return left.size() == right.size() && Tr::compare(left.data(), right.data(), left.size()) == 0;
 }
-template<class Tr>
-constexpr bool operator==(const stringt<Tr>& left, const typename Tr::char_type* const right) noexcept {
-    return left.size() == detail::strlen_elision(right) && Tr::compare(left.data(), right, left.size()) == 0;
-}
-template<class Tr>
-constexpr bool operator==(const typename Tr::char_type* const left, const stringt<Tr>& right) noexcept {
-    return right.size() == detail::strlen_elision(left) && Tr::compare(left, right.data(), right.size()) == 0;
-}
 
 template<class Tr>
 constexpr bool operator!=(const stringt<Tr>& left, const stringt<Tr>& right) noexcept {
     return !(left == right);
 }
-template<class Tr, std::size_t N>
-constexpr bool operator!=(const stringt<Tr>& left, const typename Tr::char_type(&right)[N]) noexcept {
-    return !(left == right);
-}
-template<class Tr, std::size_t N>
-constexpr bool operator!=(const typename Tr::char_type(&left)[N], const stringt<Tr>& right) noexcept {
-    return !(left == right);
-}
-
-
 
 using string = stringt<char_traits<char>>;
 
