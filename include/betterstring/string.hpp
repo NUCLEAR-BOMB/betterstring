@@ -129,11 +129,6 @@ namespace detail {
             return is_long() ? get_long_pointer() : get_short_pointer();
         }
     };
-
-    template<class Tr, class string_view_like>
-    inline constexpr bool is_string_view_convertible =
-        std::is_convertible_v<const string_view_like&, bs::string_viewt<Tr>>
-        && !std::is_convertible_v<const string_view_like&, const typename Tr::char_type*>;
 }
 
 template<class Traits>
@@ -188,13 +183,8 @@ public:
         traits_type::copy(data(), first_ptr, first_size);
     }
 
-    template<class string_view_like, std::enable_if_t<
-        detail::is_string_view_convertible<traits_type, string_view_like>
-    , int> = 0>
     BS_FORCEINLINE
-    explicit constexpr stringt(const string_view_like& t) {
-        const self_string_view str_view = t;
-
+    explicit constexpr stringt(const self_string_view str_view) {
         init_with_size(str_view.size());
         traits_type::copy(data(), str_view.data(), str_view.size());
     }
@@ -233,11 +223,7 @@ public:
         }
     }
 
-    template<class string_view_like, std::enable_if_t<
-        detail::is_string_view_convertible<traits_type, string_view_like>
-    , int> = 0>
-    constexpr stringt& operator=(const string_view_like& t) {
-        const self_string_view str_view = t;
+    constexpr stringt& operator=(const self_string_view str_view) {
         copy_from_buffer(str_view.data(), str_view.size());
         return *this;
     }
@@ -374,12 +360,7 @@ public:
             rep.set_long_size(new_size);
         }
     }
-    template<class string_view_like, std::enable_if_t<
-        detail::is_string_view_convertible<traits_type, string_view_like>
-        && !std::is_convertible_v<string_view_like, const_pointer>
-    , int> = 0>
-    constexpr void append(const string_view_like& t) {
-        const self_string_view str_view = t;
+    constexpr void append(const self_string_view str_view) {
         append(str_view.data(), str_view.size());
     }
     template<class Begin, class End, std::enable_if_t<!std::is_convertible_v<End, size_type>, int> = 0>
@@ -395,6 +376,13 @@ public:
         BS_VERIFY(position <= size(), "the start position of the substring exceeds the length of the string");
         BS_VERIFY(count - position <= size(), "the length of substring exceeds the length of the string");
         return self_string_view{data() + position, count};
+    }
+
+    constexpr bool contains(const value_type ch) const noexcept {
+        return traits_type::find(data(), size(), ch) != nullptr;
+    }
+    constexpr bool contains(const self_string_view str) const noexcept {
+        return traits_type::findstr(data(), size(), str.data(), str.size()) != nullptr;
     }
 
     constexpr pointer data() noexcept {
@@ -568,11 +556,32 @@ constexpr bool operator==(const stringt<Tr>& left, const stringt<Tr>& right) noe
     if (left.size() != right.size()) { return false; }
     return Tr::compare(left.data(), right.data(), left.size()) == 0;
 }
+template<class Tr, std::size_t N>
+constexpr bool operator==(const stringt<Tr>& left, const typename Tr::char_type(&right)[N]) noexcept {
+    static_assert(N != 0, "given non-null terminated array");
+    if (left.size() != (N - 1)) { return false; }
+    return Tr::compare(left.data(), right, (N - 1)) == 0;
+}
+template<class Tr, std::size_t N>
+constexpr bool operator==(const typename Tr::char_type(&left)[N], const stringt<Tr>& right) noexcept {
+    static_assert(N != 0, "given non-null terminated array");
+    if (right.size() != (N - 1)) { return false; }
+    return Tr::compare(left, right.size(), (N - 1)) == 0;
+}
 
 template<class Tr>
 constexpr bool operator!=(const stringt<Tr>& left, const stringt<Tr>& right) noexcept {
     return !(left == right);
 }
+template<class Tr, std::size_t N>
+constexpr bool operator!=(const stringt<Tr>& left, const typename Tr::char_type(&right)[N]) noexcept {
+    return !(left == right);
+}
+template<class Tr, std::size_t N>
+constexpr bool operator!=(const typename Tr::char_type(&left)[N], const stringt<Tr>& right) noexcept {
+    return !(left == right);
+}
+
 
 using string = stringt<char_traits<char>>;
 
