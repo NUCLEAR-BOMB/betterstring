@@ -59,6 +59,9 @@ public:
     static constexpr const char_type* find(const char_type* const str, const std::size_t count, const char_type& ch) noexcept {
         return bs::strfind(str, count, ch);
     }
+    static constexpr const char_type* find_not(const char_type* const str, const std::size_t count, const char_type& ch) noexcept {
+        return bs::strfindn(str, count, ch);
+    }
     static constexpr const char_type* findstr(const char_type* const str, const std::size_t count, const char_type* const substr, const std::size_t substr_len) noexcept {
         return bs::strfind(str, count, substr, substr_len);
     }
