@@ -322,4 +322,17 @@ TEST_CASE(".append", "[string]") {
     }
 }
 
+TEST_CASE("literals", "[string]") {
+    using namespace bs::literals;
+
+    bs::string str = "test string"_s;
+    CHECK(str == "test string");
+
+    CHECK("test"_s == "test");
+    CHECK_FALSE(("hello world"_s) == "hello");
+
+    auto str2 = "test"_s;
+    CHECK(str2 == "test"_s);
+}
+
 }

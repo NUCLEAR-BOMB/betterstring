@@ -587,6 +587,11 @@ using string = stringt<char_traits<char>>;
 
 
 
+inline namespace literals {
+    BS_CONSTEXPR_CXX20 bs::string operator ""_s(const char* const str, const std::size_t length) {
+        return bs::string{str, length};
+    }
+}
 
 
 }
