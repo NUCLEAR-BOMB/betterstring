@@ -46,6 +46,12 @@
     #endif
 #endif
 
+#if BS_CXX20
+    #define BS_CONSTEXPR_CXX20 constexpr
+#else
+    #define BS_CONSTEXPR_CXX20
+#endif
+
 #if defined(WIN32) || defined(_WIN32) || defined(_WIN64) || defined(__WIN32__) || defined(__TOS_WIN__) || defined(__WINDOWS__)
     #define BS_OS_WINDOWS 1
 #else
