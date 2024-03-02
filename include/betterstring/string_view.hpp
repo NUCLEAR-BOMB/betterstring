@@ -49,8 +49,8 @@ class find_result {
 public:
     using size_type = std::size_t;
 
-    constexpr find_result(const CharT* string_data, const size_type string_size, const CharT* find_ptr) noexcept
-        : string_data(string_data), string_size(string_size), find_ptr(find_ptr) {}
+    constexpr find_result(const CharT* string_data_, const size_type string_size_, const CharT* find_ptr_) noexcept
+        : string_data(string_data_), string_size(string_size_), find_ptr(find_ptr_) {}
 
     constexpr size_type index() const noexcept {
         BS_VERIFY(find_ptr != nullptr, "index() is called when the result is not found");
@@ -106,10 +106,10 @@ private:
 struct slice {
     using index_type = std::ptrdiff_t;
 
-    constexpr slice(const index_type stop) noexcept
-        : start(0), stop(stop) {}
-    constexpr slice(const index_type start, const index_type stop) noexcept
-        : start(start), stop(stop) {}
+    constexpr slice(const index_type stop_) noexcept
+        : start(0), stop(stop_) {}
+    constexpr slice(const index_type start_, const index_type stop_) noexcept
+        : start(start_), stop(stop_) {}
 
     index_type start;
     index_type stop;
@@ -145,7 +145,7 @@ public:
     }
 
     constexpr string_view(const const_pointer ntstr) noexcept
-        : string_data(ntstr), string_size(traits_type::length(ntstr)) {}
+        : string_data(ntstr), string_size(detail::strlen_elision(ntstr)) {}
 
     template<class Begin, class End = Begin, std::enable_if_t<
         !std::is_convertible_v<End, size_type>
@@ -546,17 +546,23 @@ private:
 public:
 
     friend constexpr bool operator==(const string_view l, const string_view r) noexcept {
-        return trait_cmp(l, r) == 0; }
+        return trait_cmp(l, r) == 0;
+    }
     friend constexpr bool operator!=(const string_view l, const string_view r) noexcept {
-        return trait_cmp(l, r) != 0; }
+        return trait_cmp(l, r) != 0;
+    }
     friend constexpr bool operator>(const string_view l, const string_view r) noexcept {
-        return trait_cmp(l, r) > 0; }
+        return trait_cmp(l, r) > 0;
+    }
     friend constexpr bool operator>=(const string_view l, const string_view r) noexcept {
-        return trait_cmp(l, r) >= 0; }
+        return trait_cmp(l, r) >= 0;
+    }
     friend constexpr bool operator<(const string_view l, const string_view r) noexcept {
-        return trait_cmp(l, r) < 0; }
+        return trait_cmp(l, r) < 0;
+    }
     friend constexpr bool operator<=(const string_view l, const string_view r) noexcept {
-        return trait_cmp(l, r) <= 0; }
+        return trait_cmp(l, r) <= 0;
+    }
 
 #ifndef BS_DONT_INCLUDE_STRING
     constexpr operator std::basic_string_view<value_type, traits_type>() const noexcept {
