@@ -265,7 +265,7 @@ public:
         return out;
     }
 
-    ~stringt() noexcept {
+    BS_CONSTEXPR_CXX20 ~stringt() noexcept {
         if (rep.is_long()) {
             deallocate(rep.get_long_pointer(), rep.get_long_capacity());
         }
