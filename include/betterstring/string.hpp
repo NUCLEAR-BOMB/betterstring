@@ -49,7 +49,7 @@ namespace detail {
         }
 
         static constexpr bool fits_in_sso(const Size size) noexcept {
-            return size < short_capacity;
+            return size <= short_capacity;
         }
 
         constexpr Size get_short_size() const noexcept {
@@ -175,12 +175,60 @@ public:
         other.rep = {};
     }
 
-    template<class Begin, class End, std::enable_if_t<!std::is_convertible_v<End, size_type>, int> = 0>
+    template<class Begin, class End, std::enable_if_t<detail::is_input_iterator<Begin> && !std::is_convertible_v<End, size_type>, int> = 0>
     explicit constexpr stringt(Begin first, End last) {
-        const size_type first_size = static_cast<size_type>(last - first);
-        const const_pointer first_ptr = detail::to_address(first);
-        init_with_size(first_size);
-        traits_type::copy(data(), first_ptr, first_size);
+        if constexpr (detail::is_random_access_iterator<Begin>) {
+            const size_type size = static_cast<size_type>(last - first);
+            const const_pointer ptr = detail::to_address(first);
+            init_with_size(size);
+            traits_type::copy(data(), ptr, size);
+        } else if constexpr (detail::is_input_iterator<Begin>) {
+            rep.set_short_state();
+            rep.set_short_size(0);
+
+            std::size_t count = 0;
+            do {
+                if (!(first != last)) {
+                    rep.set_short_size(count);
+                    return;
+                }
+                traits_type::assign(rep.get_short_pointer()[count], *first);
+
+                ++first;
+                ++count;
+            } while (count < rep.get_short_capacity());
+
+            if (!(first != last)) {
+                rep.set_short_size(count);
+                return;
+            }
+
+            size_type alloc_cap = calculate_capacity(count);
+            pointer alloc_data = allocate(alloc_cap);
+            traits_type::copy(alloc_data, rep.get_short_pointer(), count);
+            traits_type::assign(alloc_data[count], *first);
+            ++first;
+            ++count;
+
+            while (first != last) {
+                traits_type::assign(alloc_data[count], *first);
+
+                ++count;
+                if (count >= alloc_cap) {
+                    const size_type new_cap = calculate_capacity(count);
+                    const pointer new_data = allocate(new_cap);
+                    traits_type::copy(new_data, alloc_data, alloc_cap);
+                    deallocate(alloc_data, alloc_cap);
+                    alloc_data = new_data;
+                    alloc_cap = new_cap;
+                }
+                ++first;
+            }
+            rep.set_long_state();
+            rep.set_long_capacity(alloc_cap);
+            rep.set_long_pointer(alloc_data);
+            rep.set_long_size(count);
+        }
     }
 
     BS_FORCEINLINE
@@ -318,10 +366,10 @@ public:
                 rep.set_long_state();
                 rep.set_long_pointer(new_data);
                 rep.set_long_capacity(new_cap);
-                rep.get_long_pointer()[short_size] = ch;
+                traits_type::assign(rep.get_long_pointer()[short_size], ch);
                 rep.set_long_size(short_size + 1);
             } else {
-                rep.get_short_pointer()[short_size] = ch;
+                traits_type::assign(rep.get_short_pointer()[short_size], ch);
                 rep.set_short_size(short_size + 1);
             }
         }

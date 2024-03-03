@@ -1,7 +1,19 @@
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_tostring.hpp>
 
 #include <array>
+#include <sstream>
+#include <iomanip>
 #include <betterstring/string.hpp>
+
+namespace Catch {
+    template<>
+    struct StringMaker<bs::string> {
+        static std::string convert(const bs::string& value) {
+            return '\"' + std::string{value.begin(), value.end()} + '\"';
+        }
+    };
+}
 
 using namespace bs::literals;
 
@@ -47,7 +59,6 @@ TEST_CASE("constructor", "[string]") {
         CHECK(long_str.size() == 0);
         CHECK(long_str.capacity() == 30);
     }
-
     SECTION("copy construct") {
         bs::string str{"test", 4};
         bs::string str1{str};
@@ -98,6 +109,29 @@ TEST_CASE("constructor", "[string]") {
 
         bs::string str2{"                                        "_sv};
         CHECK(str2 == "                                        "_sv);
+    }
+    SECTION("from random access iterator") {
+        const char static_str[] = "test string";
+        bs::string str1{std::begin(static_str), std::end(static_str)};
+        CHECK(str1 == "test string\0");
+
+        std::array<char, 13> array_str{"hello world!"};
+        bs::string str2{array_str.begin(), array_str.end() - 1};
+        CHECK(str2 == "hello world!");
+    }
+    SECTION("from input iterator") {
+        std::istringstream stream_str1{"sample string"};
+        
+        bs::string str1{std::istream_iterator<char>{stream_str1}, std::istream_iterator<char>{}};
+        CHECK(str1 == "samplestring");
+
+        std::istringstream stream_str2{"long sample stringlong sample stringlong sample stringlong sample stringlong sample string"};
+        bs::string str2{std::istream_iterator<char>{stream_str2}, std::istream_iterator<char>{}};
+        CHECK(str2 == "longsamplestringlongsamplestringlongsamplestringlongsamplestringlongsamplestring");
+
+        std::istringstream stream_str3{"01234567890123456789012"};
+        bs::string str3{std::istream_iterator<char>{stream_str3}, std::istream_iterator<char>{}};
+        CHECK(str3 == "01234567890123456789012");
     }
 }
 

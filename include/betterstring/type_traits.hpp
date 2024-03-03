@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <type_traits>
 #include <cstddef>
+#include <iterator>
 
 namespace bs {
 
@@ -50,6 +51,28 @@ namespace detail {
 
     template<class T>
     using type_identity_t = typename type_identity<T>::type;
+
+    template<class T>
+    using iterator_category = typename std::iterator_traits<T>::iterator_category;
+
+    template<class T, class = void>
+    inline constexpr bool is_iterator = false;
+    template<class T>
+    inline constexpr bool is_iterator<T, std::void_t<iterator_category<T>>> = true;
+
+    template<class T, class = void>
+    inline constexpr bool is_random_access_iterator = false;
+    template<class T>
+    inline constexpr bool is_random_access_iterator<T, std::void_t<iterator_category<T>>>
+        = std::is_base_of_v<std::random_access_iterator_tag, iterator_category<T>>;
+
+    template<class T, class = void>
+    inline constexpr bool is_input_iterator = false;
+    template<class T>
+    inline constexpr bool is_input_iterator<T, std::void_t<iterator_category<T>>>
+        = std::is_base_of_v<std::input_iterator_tag, iterator_category<T>>;
+
+
 
     template<class T>
     struct is_character_impl : std::false_type {};
