@@ -409,11 +409,11 @@ public:
         }
     }
     constexpr void append(const self_string_view str_view) {
-        append(str_view.data(), str_view.size());
+        this->append(str_view.data(), str_view.size());
     }
-    template<class Begin, class End, std::enable_if_t<!std::is_convertible_v<End, size_type>, int> = 0>
+    template<class Begin, class End, std::enable_if_t<detail::is_random_access_iterator<Begin> && !std::is_convertible_v<End, size_type>, int> = 0>
     constexpr void append(Begin first, End last) {
-        append(detail::to_address(first), static_cast<size_type>(last - first));
+        this->append(detail::to_address(first), static_cast<size_type>(last - first));
     }
 
     constexpr self_string_view substr(const size_type position) const noexcept {

@@ -342,6 +342,11 @@ TEST_CASE(".append", "[string]") {
         CHECK(str == "12345&12345&12345&12345&12345&12345&12345&12345&12345&12345&1"_sv);
         str.append(long_str, long_str);
         CHECK(str == "12345&12345&12345&12345&12345&12345&12345&12345&12345&12345&1"_sv);
+
+        str = "";
+        std::array<char, 12> array_str{"sample text"};
+        str.append(array_str.begin(), array_str.end());
+        CHECK(str == "sample text\0");
     }
 }
 
