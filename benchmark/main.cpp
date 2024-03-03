@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
         fmt::println("unknown benchmark name: {}", benchmark_name.data());
         return 1;
     }
-    std::vector<bs::string_view<>> args;
+    std::vector<bs::string_view> args;
     args.reserve(argc);
     for (std::size_t i = 2; i < argc; ++i) {
         args.push_back(bs::string_view{argv[i], bs::strlen(argv[i])});
