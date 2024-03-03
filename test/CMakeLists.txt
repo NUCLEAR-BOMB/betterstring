@@ -47,7 +47,7 @@ if (USE_CLANG_TIDY)
     set_target_properties(betterstring-test PROPERTIES EXPORT_COMPILE_COMMANDS TRUE)
     add_clang_tidy_target(NAME clang-tidy
         CONFIG "${PROJECT_SOURCE_DIR}/.clang-tidy"
-        EXTRA_ARG "-std=c++17"
+        EXTRA_ARG "-std=c++17 -Wno-unknown-warning-option"
         USE_COLOR QUIET SHOW_TIME
     )
 endif()
