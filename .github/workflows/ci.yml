@@ -33,6 +33,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4.1.1
 
+    - name: Get CMake and Ninja
+      uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: "3.24.0"
+        ninjaVersion: "latest"
+
     - name: Configure CMake
       run: >
         cmake -B build -G Ninja
