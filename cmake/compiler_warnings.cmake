@@ -3,7 +3,7 @@ include_guard(GLOBAL)
 function(target_add_warnings target)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:
-        /Wall /WX /permissive- /Za
+        /Wall /WX /permissive-
         /wd5027 # 'type': move assignment operator was implicitly defined as deleted
         /wd4626 # 'derived class': assignment operator was implicitly defined as deleted because a base class assignment operator is inaccessible or deleted
         /wd5026 # 'type': move constructor was implicitly defined as deleted
