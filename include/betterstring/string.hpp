@@ -237,13 +237,13 @@ public:
         traits_type::copy(data(), str_view.data(), str_view.size());
     }
 
-    [[nodiscard]] static constexpr stringt filled(const value_type ch, const size_type count) noexcept {
+    [[nodiscard]] static constexpr stringt filled(const value_type ch, const size_type count) {
         stringt out;
         out.init_with_size(count);
         traits_type::assign(out.data(), count, ch);
         return out;
     }
-    [[nodiscard]] static constexpr stringt with_capacity(const size_type cap) noexcept {
+    [[nodiscard]] static constexpr stringt with_capacity(const size_type cap) {
         stringt out;
         out.init_with_capacity(cap);
         return out;
@@ -513,10 +513,6 @@ public:
     constexpr optional_char at_back() const noexcept {
         if (size() == 0) { return {}; }
         return data()[size() - 1];
-    }
-
-    constexpr allocator_type get_allocator() const noexcept {
-        return rep.get_allocator();
     }
 
     constexpr operator bs::string_viewt<traits_type>() const noexcept {
