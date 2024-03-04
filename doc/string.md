@@ -68,7 +68,7 @@ The `<betterstring/string.hpp>` header provides these type aliases for `bs::stri
 - [**`capacity`**](#capacity)
 - [**`begin`**](#begin)
 - [**`end`**](#end)
-- [**`operator`**[]](#operator-1)
+- [**`operator[]`**](#operator-1)
 - [**`at`**](#at)
 - [**`front`**](#front)
 - [**`back`**](#back)
