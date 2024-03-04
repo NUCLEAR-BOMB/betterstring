@@ -264,6 +264,10 @@ public:
         out.rep.set_long_size(size);
         return out;
     }
+    [[nodiscard]] static constexpr stringt from_c_string(const const_pointer c_str) {
+        BS_VERIFY(c_str != nullptr, "c_str is null pointer");
+        return stringt{c_str, traits_type::length(c_str)};
+    }
 
     BS_CONSTEXPR_CXX20 ~stringt() noexcept {
         if (rep.is_long()) {

@@ -133,6 +133,11 @@ TEST_CASE("constructor", "[string]") {
         bs::string str3{std::istream_iterator<char>{stream_str3}, std::istream_iterator<char>{}};
         CHECK(str3 == "01234567890123456789012");
     }
+    SECTION("from c string") {
+        const char* const c_str = "hello world";
+        bs::string str = bs::string::from_c_string(c_str);
+        CHECK(str == "hello world");
+    }
 }
 
 TEST_CASE("operator=", "[string]") {

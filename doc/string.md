@@ -3,8 +3,8 @@
 - [Type Aliases](#type-aliases)
 - [Template Parameters](#template-parameters)
 - [Member Types](#member-types)
-- [Member functions](#member-functions)
-- [Non-member functions](#non-member-functions)
+- [Member Functions](#member-functions)
+- [Non-member Functions](#non-member-functions)
 - [Literals](#literals)
 
 ```cpp
@@ -46,7 +46,7 @@ The `<betterstring/string.hpp>` header provides these type aliases for `bs::stri
 | **`const_iterator`**  | `const value_type*`          |
 | **`traits_type`**     | `Traits`                     |
 
-# Member functions
+# Member Functions
 - [Constructor](#constructor)
 - [Named constructors](#named-constructors)
 - [Destructor](#destructor)
@@ -137,6 +137,15 @@ static constexpr stringt transfer_ownership(pointer ptr, size_type size, size_ty
 Transferes ownership to new string with size of `size` using the provided `ptr` and `cap` without any copying.
 After construction the size of returned string is equal to `size`.
 The memory pointed to by `ptr` must be not deallocated outside the string, `bs::stringt` will automatically deallocate it in its destructor.
+
+```cpp
+static constexpr stringt from_c_string(const_pointer c_str);
+```
+Creates new string from null terminated (also known as C string).
+The contents of the new string are copied from the range [`c_str`, `c_str + traits_type::length(c_str)`).
+
+The **behavior is undefined** if [`c_str`, `c_str +  traits_type::length(c_str)`] range is not a valid range,
+for example, if `c_str` is null pointer.
 
 ## Destructor
 
@@ -446,7 +455,7 @@ constexpr operator bs::string_viewt<traits_type>() const noexcept;
 Returns a `bs::string_viewt<traits_type>` constructed from current string.
 Equivalent to `bs::string_viewt<traits_type>{data(), size()}`.
 
-# Non-member functions
+# Non-member Functions
 - [**`operator==`**](#operator-2)
 - [**`operator!=`**](#operator-3)
 
