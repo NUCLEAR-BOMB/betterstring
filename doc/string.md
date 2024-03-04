@@ -177,8 +177,8 @@ constexpr void reserve(size_type new_req_cap);
 ```
 Changes the capacity of the string.
 
-- If `new_req_cap` is greater then the current capacity, new storage is allocated, and capacity is made at least `new_req_cap`.
-- If `new_req_cap` is less then or equal to the current capacity, there is not effect.
+- If `new_req_cap` is greater than the current capacity, new storage is allocated, and capacity is made at least `new_req_cap`.
+- If `new_req_cap` is less than or equal to the current capacity, there is not effect.
 
 ## reserve_add
 ```cpp
@@ -196,7 +196,7 @@ Changes the capacity of the string to be exactly `new_cap`.
 > [!CAUTION]
 > Consider performance degradation when using this method. Recommended to use `reserve` method instead.
 
-- If `new_cap` is less then or equal to the current capacity, there is not effect.
+- If `new_cap` is less than or equal to the current capacity, there is not effect.
 - If `new_cap` is greater than current capacity, the new capacity will be exactly equal to `new_cap`.
 
 ## reserve_exact_add
@@ -290,7 +290,7 @@ Checks if current string starts with character `ch`.
 constexpr bool starts_with(bs::string_viewt<traits_type> str) const noexcept;
 ```
 Checks if current string starts with the substring `str`.
-`false` when current string length is less then length of the string `str`.
+`false` when current string length is less than length of the string `str`.
 
 ## ends_with
 ```cpp
@@ -303,7 +303,7 @@ Checks if current string ends with the character `ch`.
 constexpr bool ends_with(bs::string_viewt<traits_type> str) const noexcept;
 ```
 Checks if current string ends with the substring `str`.
-`false` when current string length is less then length of the string `str`.
+`false` when current string length is less than length of the string `str`.
 
 ## data
 ```cpp
