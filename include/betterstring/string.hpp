@@ -268,6 +268,7 @@ public:
         BS_VERIFY(c_str != nullptr, "c_str is null pointer");
         return stringt{c_str, traits_type::length(c_str)};
     }
+    static constexpr stringt from_c_string(std::nullptr_t) = delete;
 
     BS_CONSTEXPR_CXX20 ~stringt() noexcept {
         if (rep.is_long()) {
