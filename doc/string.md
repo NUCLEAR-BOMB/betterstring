@@ -140,6 +140,7 @@ The memory pointed to by `ptr` must be not deallocated outside the string, `bs::
 
 ```cpp
 static constexpr stringt from_c_string(const_pointer c_str);
+static constexpr stringt from_c_string(std::nullptr_t) = delete;
 ```
 Creates new string from null terminated (also known as C string).
 The contents of the new string are copied from the range [`c_str`, `c_str + traits_type::length(c_str)`).
