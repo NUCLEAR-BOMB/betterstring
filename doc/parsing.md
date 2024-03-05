@@ -15,7 +15,7 @@ template<class T, class Ch>
 constexpr parse_result<T> parse(const Ch* str, std::size_t count);
 ```
 Tries to parse an number from string [`str`, `str + count`).
-If parsing was successful, you can access resulting value from using method [`.value()`](#value) on returned [`parse_result<T>`](#bsparse_resultt) object.
+If parsing was successful, you can access resulting value from using method [`.value()`](#value) on returned [`bs::parse_result<T>`](#bsparse_resultt) object.
 
 Currently only supports unsigned integers.
 
@@ -65,7 +65,7 @@ Assumed to be inlined, so it is basically zero-cost abstraction over the returne
 constexpr parse_result(bs::parse_error err) noexcept;
 ```
 Constructs `parse_result` in an error state, with error value of `err`.
-See [**`parse_error`**](#bsparse_error).
+See [**`bs::parse_error`**](#bsparse_error).
 
 ```cpp
 constexpr parse_result(T result) noexcept;
@@ -78,7 +78,7 @@ explicit constexpr parse_result(T result, bs::parse_error err) noexcept;
 Constructs `parse_result` in a successful/an error state.
 
 If `err` has the value of `bs::parse_error{}` (default constructor) when `parse_result` is in a successful state with value of `result`; otherwise, ignoring the `result` value, `parse_result` is in an error state (`err` is not `bs::parse_error{}`).
-See [**`parse_error`**](#bsparse_error).
+See [**`bs::parse_error`**](#bsparse_error).
 
 ```cpp
 template<class U>
