@@ -7,7 +7,7 @@ option(USE_CLANG_TIDY "" ${PROJECT_IS_TOP_LEVEL})
 option(BUILD_BENCHMARK "" ${PROJECT_IS_TOP_LEVEL})
 option(BUILD_FUZZ "" ${PROJECT_IS_TOP_LEVEL})
 option(USE_SANITIZERS "" ${PROJECT_IS_TOP_LEVEL})
-option(INSTALL_BETTERSTRING "" ${PROJECT_IS_TOP_LEVEL})
+# option(INSTALL_BETTERSTRING "" ${PROJECT_IS_TOP_LEVEL})
 
 set(CMAKE_ASM_MASM_COMPILER "ml64.exe")
 
@@ -73,6 +73,7 @@ if (BUILD_FUZZ)
     add_subdirectory(fuzz)
 endif()
 
+#[[
 if (INSTALL_BETTERSTRING)
     include(CMakePackageConfigHelpers)
     include(GNUInstallDirs)
@@ -113,3 +114,4 @@ if (INSTALL_BETTERSTRING)
     )
 
 endif()
+#]]
