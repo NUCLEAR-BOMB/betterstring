@@ -114,4 +114,4 @@ if (INSTALL_BETTERSTRING)
     )
 
 endif()
-#]]
+]]
