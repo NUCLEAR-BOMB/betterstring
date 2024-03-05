@@ -1,3 +1,4 @@
+`<betterstring/string.hpp>`
 
 # Table of contents
 - [Type Aliases](#type-aliases)
