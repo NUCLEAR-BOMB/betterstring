@@ -6,8 +6,10 @@
 #include <map>
 #include <functional>
 
-#include "benchmarks.hpp"
 #include "html_boxplot.hpp"
+
+#include "benchmarks/functions.hpp"
+#include "benchmarks/parsing.hpp"
 
 #ifdef _WIN32
     #define WIN32_LEAN_AND_MEAN
@@ -21,8 +23,6 @@
 
 namespace nb = ankerl::nanobench;
 
-#pragma function(memcpy)
-
 int main(int argc, char* argv[]) {
 #ifdef _WIN32
     if (!SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS)) {
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     nb::Bench bench;
 
     using namespace std::chrono_literals;
-    bench.minEpochTime(250ms);
+    bench.minEpochTime(260ms);
 
     const bs::string_view benchmark_name{argv[1], bs::strlen(argv[1])};
     std::optional benchmark_fn = register_benchmark::get_function(benchmark_name);

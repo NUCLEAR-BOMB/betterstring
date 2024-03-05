@@ -16,9 +16,12 @@ FetchContent_MakeAvailable(nanobench fmt)
 
 add_executable(betterstring-benchmark
     "main.cpp"
-    "benchmarks.hpp"
     "html_boxplot.hpp"
     "add_benchmark_macro.hpp"
+    "util.hpp"
+
+    "benchmarks/parsing.hpp"
+    "benchmarks/functions.hpp"
 )
 target_link_libraries(betterstring-benchmark PRIVATE fmt::fmt nanobench betterstring)
 

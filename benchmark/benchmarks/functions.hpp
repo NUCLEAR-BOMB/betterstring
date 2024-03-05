@@ -1,28 +1,11 @@
 #pragma once
 
-#include <array>
-#include <utility>
-#include <type_traits>
-#include <vector>
-#include <stdexcept>
-#include <new>
-#include <nanobench.h>
-
+#include "../add_benchmark_macro.hpp"
 #include <betterstring/functions.hpp>
 #include <betterstring/parsing.hpp>
-
 #include <fmt/format.h>
 
-#include "add_benchmark_macro.hpp"
-
-template<class T>
-T* aligned_new(const size_t num, const size_t alignment) {
-    return static_cast<T*>(::operator new[](sizeof(T)* num, std::align_val_t{alignment}));
-}
-template<class T>
-void aligned_delete(T* const ptr, const size_t num, const size_t alignment) {
-    ::operator delete[](ptr, num, std::align_val_t{alignment});
-}
+#include "../util.hpp"
 
 ADD_BENCHMARK("strrfind_ch") {
     bench.title("bs::strrfind (character)");
@@ -67,45 +50,6 @@ ADD_BENCHMARK("strrfind_ch_aligned") {
     }
 
     aligned_delete(string, full_string_size, aligment);
-}
-
-ADD_BENCHMARK("parse_u8") {
-    for (std::size_t i = 0; i <= 3; ++i) {
-        bench.run(fmt::format("parse<uint8_t> ({})", i), [&]() {
-            auto result = bs::parse<uint8_t>("123", i);
-            bench.doNotOptimizeAway(result);
-        });
-    }
-}
-ADD_BENCHMARK("parse_u16") {
-    bench.title("bs::parse<uint16_t>");
-
-    for (std::size_t i = 0; i <= 5; ++i) {
-        bench.run(fmt::format("parse<uint16_t> ({})", i), [&]() {
-            auto result = bs::parse<uint16_t>("12345", i);
-            bench.doNotOptimizeAway(result);
-        });
-    }
-}
-ADD_BENCHMARK("parse_u32") {
-    bench.title("bs::parse<uint32_t>");
-
-    for (std::size_t i = 0; i <= 10; ++i) {
-        bench.run(fmt::format("parse<uint32_t> ({})", i), [&]() {
-            auto result = bs::parse<uint32_t>("1234567890", i);
-            bench.doNotOptimizeAway(result);
-        });
-    }
-}
-ADD_BENCHMARK("parse_u64") {
-    bench.title("bs::parse<uint64_t>");
-
-    for (std::size_t i = 0; i <= 20; ++i) {
-        bench.run(fmt::format("length {}", i), [&]() {
-            auto result = bs::parse<uint64_t>("12345678901234567890", i);
-            bench.doNotOptimizeAway(result);
-        });
-    }
 }
 
 ADD_BENCHMARK("strcount_ch") {
