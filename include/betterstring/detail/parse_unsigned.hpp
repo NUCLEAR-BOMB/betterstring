@@ -20,18 +20,6 @@ namespace bs {
 
 // 'invalid_argument' should be equal to 1 because the compiler can use the 'set*'
 // instructions instead of using the 'cmov*' instructions to specify an invalid argument error
-// Example:
-//     uint8_t digit = str[0] - '0';
-//     value = digit;
-//     return digit > 9 ? invalid_string : parse_error{};
-// This code should be compiled into similar following assembly instructions:
-//     movzx   r8d, BYTE PTR [rdx]
-//     sub     r8b, 48
-//     mov     BYTE PTR [rcx], r8b
-//     xor     eax, eax
-//     cmp     r8b, 9
-//     seta    al
-//     ret
 enum class parse_error {
     invalid_argument = 1,
     out_of_range = 2,
@@ -41,38 +29,6 @@ enum class parse_error {
 }
 
 namespace bs::detail {
-
-template<class T, class Ch>
-BS_FORCEINLINE parse_error swar_parse_unsigned2(T& value, const Ch* const str) {
-    uint16_t chunk;
-    std::memcpy(&chunk, str, 2);
-
-    const bool is_valid_string = ((chunk & (chunk + 0x0606)) & 0xF0F0) == 0x3030;
-    if (!is_valid_string) { return parse_error::invalid_argument; }
-
-    chunk = ((chunk & 0x0F00) >> 8) + (chunk & 0x000F) * 10;
-
-    value = static_cast<T>(chunk);
-
-    return parse_error{};
-}
-
-template<class T, class Ch>
-BS_FORCEINLINE parse_error swar_parse_unsigned3(T& value, const Ch* const str) {
-    //__debugbreak();
-    uint32_t chunk;
-    std::memcpy(&chunk, str, 3);
-
-    const bool is_valid_string = ((chunk & (chunk + 0x00060606)) & 0x00F0F0F0) == 0x00303030;
-    if (!is_valid_string) { return parse_error::invalid_argument; }
-
-    chunk = ((chunk & 0x000F0F00) >> 8) + (chunk & 0x0000000F) * 10;
-    chunk = (chunk >> 8) + (chunk & 0x000000FF) * 10;
-
-    value = static_cast<T>(chunk);
-
-    return parse_error{};
-}
 
 template<class T, class Ch>
 BS_FORCEINLINE parse_error swar_parse_unsigned4(T& value, const Ch* const str) {
@@ -92,7 +48,7 @@ BS_FORCEINLINE parse_error swar_parse_unsigned4(T& value, const Ch* const str) {
 
 template<class T, class Ch>
 BS_FORCEINLINE parse_error swar_parse_unsigned8(T& value, const Ch* const str) {
-    uint64_t chunk;
+    uint64_t chunk{};
     std::memcpy(&chunk, str, 8);
 
     // Each digit is in ASCII ('0'..'9') has the representing values in the range 0x30..0x39.
@@ -144,7 +100,7 @@ BS_FORCEINLINE parse_error swar_parse_unsigned8(T& value, const Ch* const str) {
     //
     // 0x0009000700050003 + 0x0050003C00280014 = 0x00590043002D0017 (89 67 45 23)
     chunk = ((chunk & 0x0F000F000F000F00) >> 8) + (chunk & 0x000F000F000F000F) * 10;
-
+    
     // Next steps are similar to first one.
     //
     // chunk = 0x00590043002D0017
@@ -157,7 +113,7 @@ BS_FORCEINLINE parse_error swar_parse_unsigned8(T& value, const Ch* const str) {
     //
     // 0x000000590000002D + 0x00001A2C000008FC = 0x00001A8500000929 (6789 2345)
     chunk = ((chunk & 0x00FF000000FF0000) >> 16) + (chunk & 0x000000FF000000FF) * 100;
-
+    
     // chunk = 0x00001A8500000929
     //
     // chunk & 0x0000FFFF00000000 = 0x00001A8500000000
@@ -168,21 +124,9 @@ BS_FORCEINLINE parse_error swar_parse_unsigned8(T& value, const Ch* const str) {
     //
     // 0x0000000000001A85 + 0x000000000165D190 = 0x000000000165EC15 (23456789)
     chunk = ((chunk & 0x0000FFFF00000000) >> 32) + (chunk & 0x000000000000FFFF) * 10000;
-
+    
     value = static_cast<T>(chunk);
-
-    return parse_error{};
-}
-
-template<class T, class Ch>
-BS_FORCEINLINE parse_error simple_parse_unsigned(T& value, const Ch* const str, const std::size_t count) {
-    T tmp = 0;
-    for (std::size_t i = 0; i < count; ++i) {
-        T digit = str[i] - '0';
-        if (digit > 9) { return parse_error::invalid_argument; }
-        tmp = tmp * 10 + digit;
-    }
-    value = tmp;
+    
     return parse_error{};
 }
 
@@ -209,42 +153,34 @@ constexpr parse_error constexpr_parse_unsigned(T& value, const Ch* const str, co
 template<class T, class Ch, std::enable_if_t<sizeof(T) == 1, int> = 0>
 parse_error parse_unsigned(T& value, const Ch* const str, const std::size_t count) {
     constexpr parse_error invalid_string = parse_error::invalid_argument;
-    switch (count)
-    {
-    case 0: return invalid_string;
-    case 1: {
-        // uint8_t(str[0] - '0') > 9 is same as (str[0] - '0') >= '0' && (str[0] - '0') <= '9'.
+
+    if (count == 0) { return invalid_string; }
+    if (count == 1) {
         uint8_t digit = str[0] - '0';
         value = digit;
         return digit > 9 ? invalid_string : parse_error{};
     }
-    case 2: {
-#if 1
-        return swar_parse_unsigned2(value, str);
-#else
+    if (count == 2) {
         uint8_t digit0 = str[0] - '0';
         if (digit0 > 9) { return invalid_string; }
         uint8_t digit1 = str[1] - '0';
         if (digit1 > 9) { return invalid_string; }
         value = digit0 * 10 + digit1;
         return parse_error{};
-#endif
     }
-    case 3: {
+    if (count == 3) {
         uint8_t digit0 = str[0] - '0';
         if (digit0 > 9) { return invalid_string; }
         uint8_t digit1 = str[1] - '0';
         if (digit1 > 9) { return invalid_string; }
         uint8_t digit2 = str[2] - '0';
         if (digit2 > 9) { return invalid_string; }
-        uint16_t sum = (digit0 * 10 + digit1) * 10 + digit2;
+        uint32_t sum = (digit0 * 10 + digit1) * 10 + digit2;
         if (sum > 255) { return parse_error::out_of_range; }
-        value = static_cast<T>(sum);
+        value = static_cast<uint8_t>(sum);
         return parse_error{};
     }
-    default:
-        return parse_error::too_long;
-    }
+    return parse_error::too_long;
 }
 
 template<class T, class Ch, std::enable_if_t<sizeof(T) == 2, int> = 0>
@@ -259,16 +195,12 @@ parse_error parse_unsigned(T& value, const Ch* const str, const std::size_t coun
         return digit > 9 ? invalid_string : parse_error{};
     }
     case 2: {
-#if 1
-        return swar_parse_unsigned2(value, str);
-#else
         uint16_t digit0 = str[0] - '0';
         if (digit0 > 9) { return invalid_string; }
         uint16_t digit1 = str[1] - '0';
         if (digit1 > 9) { return invalid_string; }
         value = digit0 * 10 + digit1;
         return parse_error{};
-#endif
     }
     case 3: {
         uint16_t digit0 = str[0] - '0';
@@ -281,37 +213,33 @@ parse_error parse_unsigned(T& value, const Ch* const str, const std::size_t coun
         return parse_error{};
     }
     case 4: {
-#if 1
         return swar_parse_unsigned4(value, str);
-#else
-        uint16_t digit0 = str[0] - '0';
-        if (digit0 > 9) { return invalid_string; }
-        uint16_t digit1 = str[1] - '0';
-        if (digit1 > 9) { return invalid_string; }
-        uint16_t digit2 = str[2] - '0';
-        if (digit2 > 9) { return invalid_string; }
-        uint16_t digit3 = str[3] - '0';
-        if (digit3 > 9) { return invalid_string; }
-        value = ((digit0 * 10 + digit1) * 10 + digit2) * 10 + digit3;
-        return parse_error{};
-#endif
     }
     case 5: {
-        uint32_t digit0 = str[0] - '0';
-        if (digit0 > 9) { return invalid_string; }
-        uint32_t digit1 = str[1] - '0';
-        if (digit1 > 9) { return invalid_string; }
-        uint32_t digit2 = str[2] - '0';
-        if (digit2 > 9) { return invalid_string; }
-        uint32_t digit3 = str[3] - '0';
-        if (digit3 > 9) { return invalid_string; }
+        uint32_t sum{};
+        auto err = swar_parse_unsigned4(sum, str);
+        if (err == invalid_string) { return invalid_string; }
         uint32_t digit4 = str[4] - '0';
         if (digit4 > 9) { return invalid_string; }
-        uint32_t sum = (((digit0 * 10 + digit1) * 10 + digit2) * 10 + digit3) * 10 + digit4;
-        //uint32_t sum = digit0 * 10000 + digit1 * 1000 + digit2 * 100 + digit3 * 10 + digit4;
+        sum = sum * 10 + digit4;
         if (sum > 65535) { return parse_error::out_of_range; }
-        value = static_cast<T>(sum);
+        value = static_cast<uint16_t>(sum);
         return parse_error{};
+
+        // uint32_t digit0 = str[0] - '0';
+        // if (digit0 > 9) { return invalid_string; }
+        // uint32_t digit1 = str[1] - '0';
+        // if (digit1 > 9) { return invalid_string; }
+        // uint32_t digit2 = str[2] - '0';
+        // if (digit2 > 9) { return invalid_string; }
+        // uint32_t digit3 = str[3] - '0';
+        // if (digit3 > 9) { return invalid_string; }
+        // uint32_t digit4 = str[4] - '0';
+        // if (digit4 > 9) { return invalid_string; }
+        // uint32_t sum = (((digit0 * 10 + digit1) * 10 + digit2) * 10 + digit3) * 10 + digit4;
+        // if (sum > 65535) { return parse_error::out_of_range; }
+        // value = static_cast<uint16_t>(sum);
+        // return parse_error{};
     }
     default:
         return parse_error::too_long;
@@ -330,16 +258,12 @@ parse_error parse_unsigned(T& value, const Ch* const str, const std::size_t coun
         return digit > 9 ? invalid_string : parse_error{};
     }
     case 2: {
-#if 1
-        return swar_parse_unsigned2(value, str);
-#else
         uint32_t digit0 = str[0] - '0';
         if (digit0 > 9) { return invalid_string; }
         uint32_t digit1 = str[1] - '0';
         if (digit1 > 9) { return invalid_string; }
         value = digit0 * 10 + digit1;
         return parse_error{};
-#endif
     }
     case 3: {
         uint32_t digit0 = str[0] - '0';
@@ -352,20 +276,7 @@ parse_error parse_unsigned(T& value, const Ch* const str, const std::size_t coun
         return parse_error{};
     }
     case 4: {
-#if 1
         return swar_parse_unsigned4(value, str);
-#else
-        uint32_t digit0 = str[0] - '0';
-        if (digit0 > 9) { return invalid_string; }
-        uint32_t digit1 = str[1] - '0';
-        if (digit1 > 9) { return invalid_string; }
-        uint32_t digit2 = str[2] - '0';
-        if (digit2 > 9) { return invalid_string; }
-        uint32_t digit3 = str[3] - '0';
-        if (digit3 > 9) { return invalid_string; }
-        value = ((digit0 * 10 + digit1) * 10 + digit2) * 10 + digit3;
-        return parse_error{};
-#endif
     }
     case 5: {
         uint32_t digit0 = str[0] - '0';
@@ -416,76 +327,74 @@ parse_error parse_unsigned(T& value, const Ch* const str, const std::size_t coun
         return parse_error{};
     }
     case 8: {
-#if 1
         return swar_parse_unsigned8(value, str);
-#else
-        uint32_t digit0 = str[0] - '0';
-        if (digit0 > 9) { return invalid_string; }
-        uint32_t digit1 = str[1] - '0';
-        if (digit1 > 9) { return invalid_string; }
-        uint32_t digit2 = str[2] - '0';
-        if (digit2 > 9) { return invalid_string; }
-        uint32_t digit3 = str[3] - '0';
-        if (digit3 > 9) { return invalid_string; }
-        uint32_t digit4 = str[4] - '0';
-        if (digit4 > 9) { return invalid_string; }
-        uint32_t digit5 = str[5] - '0';
-        if (digit5 > 9) { return invalid_string; }
-        uint32_t digit6 = str[6] - '0';
-        if (digit6 > 9) { return invalid_string; }
-        uint32_t digit7 = str[7] - '0';
-        if (digit7 > 9) { return invalid_string; }
-        value = ((((((digit0 * 10 + digit1) * 10 + digit2) * 10 + digit3) * 10 + digit4) * 10 + digit5) * 10 + digit6) * 10 + digit7;
-        return parse_error{};
-#endif
     }
     case 9: {
-        uint32_t digit0 = str[0] - '0';
-        if (digit0 > 9) { return invalid_string; }
-        uint32_t digit1 = str[1] - '0';
-        if (digit1 > 9) { return invalid_string; }
-        uint32_t digit2 = str[2] - '0';
-        if (digit2 > 9) { return invalid_string; }
-        uint32_t digit3 = str[3] - '0';
-        if (digit3 > 9) { return invalid_string; }
-        uint32_t digit4 = str[4] - '0';
-        if (digit4 > 9) { return invalid_string; }
-        uint32_t digit5 = str[5] - '0';
-        if (digit5 > 9) { return invalid_string; }
-        uint32_t digit6 = str[6] - '0';
-        if (digit6 > 9) { return invalid_string; }
-        uint32_t digit7 = str[7] - '0';
-        if (digit7 > 9) { return invalid_string; }
+        auto err = swar_parse_unsigned8(value, str);
+        if (err == invalid_string) { return invalid_string; }
         uint32_t digit8 = str[8] - '0';
         if (digit8 > 9) { return invalid_string; }
-        value = (((((((digit0 * 10 + digit1) * 10 + digit2) * 10 + digit3) * 10 + digit4) * 10 + digit5) * 10 + digit6) * 10 + digit7) * 10 + digit8;
+        value = value * 10 + digit8;
         return parse_error{};
+
+        // uint32_t digit0 = str[0] - '0';
+        // if (digit0 > 9) { return invalid_string; }
+        // uint32_t digit1 = str[1] - '0';
+        // if (digit1 > 9) { return invalid_string; }
+        // uint32_t digit2 = str[2] - '0';
+        // if (digit2 > 9) { return invalid_string; }
+        // uint32_t digit3 = str[3] - '0';
+        // if (digit3 > 9) { return invalid_string; }
+        // uint32_t digit4 = str[4] - '0';
+        // if (digit4 > 9) { return invalid_string; }
+        // uint32_t digit5 = str[5] - '0';
+        // if (digit5 > 9) { return invalid_string; }
+        // uint32_t digit6 = str[6] - '0';
+        // if (digit6 > 9) { return invalid_string; }
+        // uint32_t digit7 = str[7] - '0';
+        // if (digit7 > 9) { return invalid_string; }
+        // uint32_t digit8 = str[8] - '0';
+        // if (digit8 > 9) { return invalid_string; }
+        // value = (((((((digit0 * 10 + digit1) * 10 + digit2) * 10 + digit3) * 10 + digit4) * 10 + digit5) * 10 + digit6) * 10 + digit7) * 10 + digit8;
+        // return parse_error{};
     }
     case 10: {
-        uint32_t digit0 = str[0] - '0';
-        if (digit0 > 9) { return invalid_string; }
-        uint32_t digit1 = str[1] - '0';
-        if (digit1 > 9) { return invalid_string; }
-        uint32_t digit2 = str[2] - '0';
-        if (digit2 > 9) { return invalid_string; }
-        uint32_t digit3 = str[3] - '0';
-        if (digit3 > 9) { return invalid_string; }
-        uint32_t digit4 = str[4] - '0';
-        if (digit4 > 9) { return invalid_string; }
-        uint32_t digit5 = str[5] - '0';
-        if (digit5 > 9) { return invalid_string; }
-        uint32_t digit6 = str[6] - '0';
-        if (digit6 > 9) { return invalid_string; }
-        uint32_t digit7 = str[7] - '0';
-        if (digit7 > 9) { return invalid_string; }
+        uint64_t sum{};
+        auto err = swar_parse_unsigned8(sum, str);
+        if (err != parse_error{}) { return err; }
         uint32_t digit8 = str[8] - '0';
         if (digit8 > 9) { return invalid_string; }
         uint32_t digit9 = str[9] - '0';
         if (digit9 > 9) { return invalid_string; }
-        uint64_t sum = ((((((((digit0 * 10ULL + digit1) * 10ULL + digit2) * 10ULL + digit3) * 10ULL + digit4) * 10ULL + digit5) * 10ULL + digit6) * 10ULL + digit7) * 10ULL + digit8) * 10ULL + digit9;
+        sum = (sum * 10 + digit8) * 10 + digit9;
         if (sum > 4294967295) { return parse_error::out_of_range; }
-        value = static_cast<T>(sum);
+        value = static_cast<uint32_t>(sum);
         return parse_error{};
+
+        // uint32_t digit0 = str[0] - '0';
+        // if (digit0 > 9) { return invalid_string; }
+        // uint32_t digit1 = str[1] - '0';
+        // if (digit1 > 9) { return invalid_string; }
+        // uint32_t digit2 = str[2] - '0';
+        // if (digit2 > 9) { return invalid_string; }
+        // uint32_t digit3 = str[3] - '0';
+        // if (digit3 > 9) { return invalid_string; }
+        // uint32_t digit4 = str[4] - '0';
+        // if (digit4 > 9) { return invalid_string; }
+        // uint32_t digit5 = str[5] - '0';
+        // if (digit5 > 9) { return invalid_string; }
+        // uint32_t digit6 = str[6] - '0';
+        // if (digit6 > 9) { return invalid_string; }
+        // uint32_t digit7 = str[7] - '0';
+        // if (digit7 > 9) { return invalid_string; }
+        // uint32_t digit8 = str[8] - '0';
+        // if (digit8 > 9) { return invalid_string; }
+        // uint32_t digit9 = str[9] - '0';
+        // if (digit9 > 9) { return invalid_string; }
+        // uint64_t sum = ((((((((digit0 * 10ULL + digit1) * 10ULL + digit2) * 10ULL + digit3) * 10ULL + digit4) * 10ULL + digit5) * 10ULL + digit6) * 10ULL + digit7) * 10ULL + digit8) * 10ULL + digit9;
+        // if (sum > 4294967295) { return parse_error::out_of_range; }
+        // value = static_cast<T>(sum);
+        // return parse_error{};
     }
     default:
         return parse_error::too_long;
@@ -504,7 +413,12 @@ parse_error parse_unsigned(T& value, const Ch* const str, const std::size_t coun
         return digit > 9 ? invalid_string : parse_error{};
     }
     case 2: {
-        return swar_parse_unsigned2(value, str);
+        uint64_t digit0 = str[0] - '0';
+        if (digit0 > 9) { return invalid_string; }
+        uint64_t digit1 = str[1] - '0';
+        if (digit1 > 9) { return invalid_string; }
+        value = digit0 * 10 + digit1;
+        return parse_error{};
     }
     case 3: {
         uint64_t digit0 = str[0] - '0';
@@ -520,134 +434,295 @@ parse_error parse_unsigned(T& value, const Ch* const str, const std::size_t coun
         return swar_parse_unsigned4(value, str);
     }
     case 5: {
-        uint64_t digit0 = str[0] - '0';
-        if (digit0 > 9) { return invalid_string; }
-        uint64_t digit1 = str[1] - '0';
-        if (digit1 > 9) { return invalid_string; }
-        uint64_t digit2 = str[2] - '0';
-        if (digit2 > 9) { return invalid_string; }
-        uint64_t digit3 = str[3] - '0';
-        if (digit3 > 9) { return invalid_string; }
+        uint64_t sum{};
+        auto err = swar_parse_unsigned4(sum, str);
+        if (err == invalid_string) { return invalid_string; }
         uint64_t digit4 = str[4] - '0';
         if (digit4 > 9) { return invalid_string; }
-        value = (((digit0 * 10 + digit1) * 10 + digit2) * 10 + digit3) * 10 + digit4;
+        value = sum * 10 + digit4;
         return parse_error{};
+
+        // uint64_t digit0 = str[0] - '0';
+        // if (digit0 > 9) { return invalid_string; }
+        // uint64_t digit1 = str[1] - '0';
+        // if (digit1 > 9) { return invalid_string; }
+        // uint64_t digit2 = str[2] - '0';
+        // if (digit2 > 9) { return invalid_string; }
+        // uint64_t digit3 = str[3] - '0';
+        // if (digit3 > 9) { return invalid_string; }
+        // uint64_t digit4 = str[4] - '0';
+        // if (digit4 > 9) { return invalid_string; }
+        // value = (((digit0 * 10 + digit1) * 10 + digit2) * 10 + digit3) * 10 + digit4;
+        // return parse_error{};
     }
     case 6: {
-        uint64_t digit0 = str[0] - '0';
-        if (digit0 > 9) { return invalid_string; }
-        uint64_t digit1 = str[1] - '0';
-        if (digit1 > 9) { return invalid_string; }
-        uint64_t digit2 = str[2] - '0';
-        if (digit2 > 9) { return invalid_string; }
-        uint64_t digit3 = str[3] - '0';
-        if (digit3 > 9) { return invalid_string; }
+        uint64_t sum{};
+        auto err = swar_parse_unsigned4(sum, str);
+        if (err == invalid_string) { return invalid_string; }
         uint64_t digit4 = str[4] - '0';
         if (digit4 > 9) { return invalid_string; }
         uint64_t digit5 = str[5] - '0';
         if (digit5 > 9) { return invalid_string; }
-        value = ((((digit0 * 10 + digit1) * 10 + digit2) * 10 + digit3) * 10 + digit4) * 10 + digit5;
+        value = (sum * 10 + digit4) * 10 + digit5;
         return parse_error{};
+
+        // uint64_t digit0 = str[0] - '0';
+        // if (digit0 > 9) { return invalid_string; }
+        // uint64_t digit1 = str[1] - '0';
+        // if (digit1 > 9) { return invalid_string; }
+        // uint64_t digit2 = str[2] - '0';
+        // if (digit2 > 9) { return invalid_string; }
+        // uint64_t digit3 = str[3] - '0';
+        // if (digit3 > 9) { return invalid_string; }
+        // uint64_t digit4 = str[4] - '0';
+        // if (digit4 > 9) { return invalid_string; }
+        // uint64_t digit5 = str[5] - '0';
+        // if (digit5 > 9) { return invalid_string; }
+        // value = ((((digit0 * 10 + digit1) * 10 + digit2) * 10 + digit3) * 10 + digit4) * 10 + digit5;
+        // return parse_error{};
     }
     case 7: {
-        uint64_t digit0 = str[0] - '0';
-        if (digit0 > 9) { return invalid_string; }
-        uint64_t digit1 = str[1] - '0';
-        if (digit1 > 9) { return invalid_string; }
-        uint64_t digit2 = str[2] - '0';
-        if (digit2 > 9) { return invalid_string; }
-        uint64_t digit3 = str[3] - '0';
-        if (digit3 > 9) { return invalid_string; }
+        uint64_t sum{};
+        auto err = swar_parse_unsigned4(sum, str);
+        if (err == invalid_string) { return invalid_string; }
         uint64_t digit4 = str[4] - '0';
         if (digit4 > 9) { return invalid_string; }
         uint64_t digit5 = str[5] - '0';
         if (digit5 > 9) { return invalid_string; }
         uint64_t digit6 = str[6] - '0';
         if (digit6 > 9) { return invalid_string; }
-        value = (((((digit0 * 10 + digit1) * 10 + digit2) * 10 + digit3) * 10 + digit4) * 10 + digit5) * 10 + digit6;
+        value = ((sum * 10 + digit4) * 10 + digit5) * 10 + digit6;
         return parse_error{};
+
+        // uint64_t digit0 = str[0] - '0';
+        // if (digit0 > 9) { return invalid_string; }
+        // uint64_t digit1 = str[1] - '0';
+        // if (digit1 > 9) { return invalid_string; }
+        // uint64_t digit2 = str[2] - '0';
+        // if (digit2 > 9) { return invalid_string; }
+        // uint64_t digit3 = str[3] - '0';
+        // if (digit3 > 9) { return invalid_string; }
+        // uint64_t digit4 = str[4] - '0';
+        // if (digit4 > 9) { return invalid_string; }
+        // uint64_t digit5 = str[5] - '0';
+        // if (digit5 > 9) { return invalid_string; }
+        // uint64_t digit6 = str[6] - '0';
+        // if (digit6 > 9) { return invalid_string; }
+        // value = (((((digit0 * 10 + digit1) * 10 + digit2) * 10 + digit3) * 10 + digit4) * 10 + digit5) * 10 + digit6;
+        // return parse_error{};
     }
     case 8: {
         return swar_parse_unsigned8(value, str);
     }
     case 9: {
-        uint64_t digit0 = str[0] - '0';
-        if (digit0 > 9) { return invalid_string; }
-        uint64_t digit1 = str[1] - '0';
-        if (digit1 > 9) { return invalid_string; }
-        uint64_t digit2 = str[2] - '0';
-        if (digit2 > 9) { return invalid_string; }
-        uint64_t digit3 = str[3] - '0';
-        if (digit3 > 9) { return invalid_string; }
-        uint64_t digit4 = str[4] - '0';
-        if (digit4 > 9) { return invalid_string; }
-        uint64_t digit5 = str[5] - '0';
-        if (digit5 > 9) { return invalid_string; }
-        uint64_t digit6 = str[6] - '0';
-        if (digit6 > 9) { return invalid_string; }
-        uint64_t digit7 = str[7] - '0';
-        if (digit7 > 9) { return invalid_string; }
+        uint64_t sum{};
+        auto err = swar_parse_unsigned8(sum, str);
+        if (err == invalid_string) { return invalid_string; }
         uint64_t digit8 = str[8] - '0';
         if (digit8 > 9) { return invalid_string; }
-        value = (((((((digit0 * 10 + digit1) * 10 + digit2) * 10 + digit3) * 10 + digit4) * 10 + digit5) * 10 + digit6) * 10 + digit7) * 10 + digit8;
+        value = sum * 10 + digit8;
         return parse_error{};
+
+        // uint64_t digit0 = str[0] - '0';
+        // if (digit0 > 9) { return invalid_string; }
+        // uint64_t digit1 = str[1] - '0';
+        // if (digit1 > 9) { return invalid_string; }
+        // uint64_t digit2 = str[2] - '0';
+        // if (digit2 > 9) { return invalid_string; }
+        // uint64_t digit3 = str[3] - '0';
+        // if (digit3 > 9) { return invalid_string; }
+        // uint64_t digit4 = str[4] - '0';
+        // if (digit4 > 9) { return invalid_string; }
+        // uint64_t digit5 = str[5] - '0';
+        // if (digit5 > 9) { return invalid_string; }
+        // uint64_t digit6 = str[6] - '0';
+        // if (digit6 > 9) { return invalid_string; }
+        // uint64_t digit7 = str[7] - '0';
+        // if (digit7 > 9) { return invalid_string; }
+        // uint64_t digit8 = str[8] - '0';
+        // if (digit8 > 9) { return invalid_string; }
+        // value = (((((((digit0 * 10 + digit1) * 10 + digit2) * 10 + digit3) * 10 + digit4) * 10 + digit5) * 10 + digit6) * 10 + digit7) * 10 + digit8;
+        // return parse_error{};
     }
     case 10: {
-        uint64_t digit0 = str[0] - '0';
-        if (digit0 > 9) { return invalid_string; }
-        uint64_t digit1 = str[1] - '0';
-        if (digit1 > 9) { return invalid_string; }
-        uint64_t digit2 = str[2] - '0';
-        if (digit2 > 9) { return invalid_string; }
-        uint64_t digit3 = str[3] - '0';
-        if (digit3 > 9) { return invalid_string; }
-        uint64_t digit4 = str[4] - '0';
-        if (digit4 > 9) { return invalid_string; }
-        uint64_t digit5 = str[5] - '0';
-        if (digit5 > 9) { return invalid_string; }
-        uint64_t digit6 = str[6] - '0';
-        if (digit6 > 9) { return invalid_string; }
-        uint64_t digit7 = str[7] - '0';
-        if (digit7 > 9) { return invalid_string; }
+        uint64_t sum{};
+        auto err = swar_parse_unsigned8(sum, str);
+        if (err == invalid_string) { return invalid_string; }
         uint64_t digit8 = str[8] - '0';
         if (digit8 > 9) { return invalid_string; }
         uint64_t digit9 = str[9] - '0';
         if (digit9 > 9) { return invalid_string; }
-        value = ((((((((digit0 * 10 + digit1) * 10 + digit2) * 10 + digit3) * 10 + digit4) * 10 + digit5) * 10 + digit6) * 10 + digit7) * 10 + digit8) * 10 + digit9;
+        value = (sum * 10 + digit8) * 10 + digit9;
+        return parse_error{};
+
+        // uint64_t digit0 = str[0] - '0';
+        // if (digit0 > 9) { return invalid_string; }
+        // uint64_t digit1 = str[1] - '0';
+        // if (digit1 > 9) { return invalid_string; }
+        // uint64_t digit2 = str[2] - '0';
+        // if (digit2 > 9) { return invalid_string; }
+        // uint64_t digit3 = str[3] - '0';
+        // if (digit3 > 9) { return invalid_string; }
+        // uint64_t digit4 = str[4] - '0';
+        // if (digit4 > 9) { return invalid_string; }
+        // uint64_t digit5 = str[5] - '0';
+        // if (digit5 > 9) { return invalid_string; }
+        // uint64_t digit6 = str[6] - '0';
+        // if (digit6 > 9) { return invalid_string; }
+        // uint64_t digit7 = str[7] - '0';
+        // if (digit7 > 9) { return invalid_string; }
+        // uint64_t digit8 = str[8] - '0';
+        // if (digit8 > 9) { return invalid_string; }
+        // uint64_t digit9 = str[9] - '0';
+        // if (digit9 > 9) { return invalid_string; }
+        // value = ((((((((digit0 * 10 + digit1) * 10 + digit2) * 10 + digit3) * 10 + digit4) * 10 + digit5) * 10 + digit6) * 10 + digit7) * 10 + digit8) * 10 + digit9;
+        // return parse_error{};
+    }
+    case 11: {
+        uint64_t sum{};
+        auto err = swar_parse_unsigned8(sum, str);
+        if (err == invalid_string) { return invalid_string; }
+        uint64_t digit8 = str[8] - '0';
+        if (digit8 > 9) { return invalid_string; }
+        uint64_t digit9 = str[9] - '0';
+        if (digit9 > 9) { return invalid_string; }
+        uint64_t digit10 = str[10] - '0';
+        if (digit10 > 9) { return invalid_string; }
+        value = ((sum * 10 + digit8) * 10 + digit9) * 10 + digit10;
+        return parse_error{};
+    }
+    case 12: {
+        uint64_t sum1{};
+        auto err1 = swar_parse_unsigned8(sum1, str);
+        if (err1 == invalid_string) { return invalid_string; }
+        uint64_t sum2{};
+        auto err2 = swar_parse_unsigned4(sum2, str + 8);
+        if (err2 == invalid_string) { return invalid_string; }
+        value = sum1 * 10000 + sum2;
+        return parse_error{};
+    }
+    case 13: {
+        uint64_t sum1{};
+        auto err1 = swar_parse_unsigned8(sum1, str);
+        if (err1 == invalid_string) { return invalid_string; }
+        uint64_t sum2{};
+        auto err2 = swar_parse_unsigned4(sum2, str + 8);
+        if (err2 == invalid_string) { return invalid_string; }
+        uint64_t digit12 = str[12] - '0';
+        if (digit12 > 9) { return invalid_string; }
+        value = (sum1 * 10000 + sum2) * 10 + digit12;
+        return parse_error{};
+    }
+    case 14: {
+        uint64_t sum1{};
+        auto err1 = swar_parse_unsigned8(sum1, str);
+        if (err1 == invalid_string) { return invalid_string; }
+        uint64_t sum2{};
+        auto err2 = swar_parse_unsigned4(sum2, str + 8);
+        if (err2 == invalid_string) { return invalid_string; }
+        uint64_t digit12 = str[12] - '0';
+        if (digit12 > 9) { return invalid_string; }
+        uint64_t digit13 = str[13] - '0';
+        if (digit13 > 9) { return invalid_string; }
+        value = ((sum1 * 10000 + sum2) * 10 + digit12) * 10 + digit13;
+        return parse_error{};
+    }
+    case 15: {
+        uint64_t sum1{};
+        auto err1 = swar_parse_unsigned8(sum1, str);
+        if (err1 == invalid_string) { return invalid_string; }
+        uint64_t sum2{};
+        auto err2 = swar_parse_unsigned4(sum2, str + 8);
+        if (err2 == invalid_string) { return invalid_string; }
+
+        uint32_t digit12 = str[12] - '0';
+        if (digit12 > 9) { return invalid_string; }
+        uint32_t digit13 = str[13] - '0';
+        if (digit13 > 9) { return invalid_string; }
+        uint32_t digit14 = str[14] - '0';
+        if (digit14 > 9) { return invalid_string; }
+        value = (((sum1 * 10000 + sum2) * 10 + digit12) * 10 + digit13) * 10 + digit14;
         return parse_error{};
     }
     case 16: {
-        uint64_t val1;
-        parse_error err1 = swar_parse_unsigned8(val1, str);
+        uint64_t sum1;
+        parse_error err1 = swar_parse_unsigned8(sum1, str);
         if (err1 == invalid_string) { return invalid_string; }
-        uint64_t val2;
-        parse_error err2 = swar_parse_unsigned8(val2, str + 8);
+        uint64_t sum2;
+        parse_error err2 = swar_parse_unsigned8(sum2, str + 8);
         if (err2 == invalid_string) { return invalid_string; }
-        value = val1 * 100000000 + val2;
+        value = sum1 * 100000000 + sum2;
+        return parse_error{};
+    }
+    case 17: {
+        uint64_t sum1;
+        parse_error err1 = swar_parse_unsigned8(sum1, str);
+        if (err1 == invalid_string) { return invalid_string; }
+        uint32_t sum2;
+        parse_error err2 = swar_parse_unsigned8(sum2, str + 8);
+        if (err2 == invalid_string) { return invalid_string; }
+        uint32_t digit16 = str[16] - '0';
+        if (digit16 > 9) { return invalid_string; }
+        value = (sum1 * 100000000 + sum2) * 10 + digit16;
+        return parse_error{};
+    }
+    case 18: {
+        uint64_t sum1;
+        parse_error err1 = swar_parse_unsigned8(sum1, str);
+        if (err1 == invalid_string) { return invalid_string; }
+        uint64_t sum2;
+        parse_error err2 = swar_parse_unsigned8(sum2, str + 8);
+        if (err2 == invalid_string) { return invalid_string; }
+
+        uint32_t digit16 = str[16] - '0';
+        if (digit16 > 9) { return invalid_string; }
+        uint32_t digit17 = str[17] - '0';
+        if (digit17 > 9) { return invalid_string; }
+
+        value = ((sum1 * 100000000 + sum2) * 10 + digit16) * 10 + digit17;
+        return parse_error{};
+    }
+    case 19: {
+        uint64_t sum1;
+        parse_error err1 = swar_parse_unsigned8(sum1, str);
+        if (err1 == invalid_string) { return invalid_string; }
+        uint64_t sum2;
+        parse_error err2 = swar_parse_unsigned8(sum2, str + 8);
+        if (err2 == invalid_string) { return invalid_string; }
+
+        uint32_t digit16 = str[16] - '0';
+        if (digit16 > 9) { return invalid_string; }
+        uint32_t digit17 = str[17] - '0';
+        if (digit17 > 9) { return invalid_string; }
+        uint32_t digit18 = str[18] - '0';
+        if (digit18 > 9) { return invalid_string; }
+
+        value = (((sum1 * 100000000 + sum2) * 10 + digit16) * 10 + digit17) * 10 + digit18;
         return parse_error{};
     }
     case 20: {
-        uint64_t val;
-        parse_error err = simple_parse_unsigned(val, str, 19);
-        if (err == invalid_string) { return invalid_string; }
+        uint64_t sum1;
+        parse_error err1 = swar_parse_unsigned8(sum1, str);
+        if (err1 == invalid_string) { return invalid_string; }
+        uint64_t sum2;
+        parse_error err2 = swar_parse_unsigned8(sum2, str + 8);
+        if (err2 == invalid_string) { return invalid_string; }
+        sum1 = sum1 * 100000000 + sum2;
 
-        uint64_t digit = str[19] - '0';
-        if (digit > 9) { return invalid_string; }
+        uint64_t sum3;
+        parse_error err3 = swar_parse_unsigned4(sum3, str + 16);
+        if (err3 == invalid_string) { return invalid_string; }
 
-        constexpr uint64_t max_val = uint64_t(-1) / 10;
-        constexpr uint64_t max_digit = uint64_t(-1) % 10;
+        constexpr uint64_t first_value = uint64_t(-1) / 10000;
+        constexpr uint64_t last_value = uint64_t(-1) % 10000;
 
-        if (val >= max_val && (val != max_val || digit > max_digit)) {
+        if (sum1 >= first_value && (sum1 != first_value || sum3 > last_value)) {
             return parse_error::out_of_range;
         }
-        value = static_cast<T>(val * 10 + digit);
+        value = sum1 * 10000 + sum3;
         return parse_error{};
     }
-
     default:
-        if (count < 20) {
-            return simple_parse_unsigned(value, str, count);
-        }
         return parse_error::too_long;
     }
 }
