@@ -62,6 +62,7 @@ public:
 };
 
 template<class T, class Ch>
+BS_FORCEINLINE
 constexpr parse_result<T> parse(const Ch* const str, const std::size_t count) {
     if constexpr (std::is_unsigned_v<T>) {
         T result{};
