@@ -36,7 +36,7 @@ enum class parse_error;
 
 **`out_of_range`** - The value in a given string cannot fit in requested type.
 
-**`too_long`** - Given string is too long and cannot fit in requested type.
+**`too_long`** - Given string is too long and cannot fit in requested type. <br>
 Note that leading zeros (`0`) are part of the full number, so even if a number without leading zeros can fit the requested type,
 the function will still return `too_long` if there are enough leading zeros. For example, if we trying to parse a 4-digit number in an unsigned type that can only have maximum 3 digits, the string will be considered "too long".
 
