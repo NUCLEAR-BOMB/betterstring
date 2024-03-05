@@ -14,6 +14,16 @@ static_assert(static_cast<uint8_t>(bs::parse_error::invalid_argument) == 1);
 
 using std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t;
 
+namespace Catch {
+    template<class T>
+    struct StringMaker<bs::parse_result<T>> {
+        static std::string convert(const bs::parse_result<T>& value) {
+            if (value.has_error()) { return "[error]: " + std::to_string(uint8_t(value.error())); }
+            return std::to_string(value.value());
+        }
+    };
+}
+
 namespace {
 
 TEST_CASE("uint8", "[parsing]") {
@@ -104,6 +114,11 @@ TEST_CASE("uint64", "[parsing]") {
 
     CHECK(bs::parse<uint64_t>("10000000000000000002", 20) == 10000000000000000002);
     CHECK(bs::parse<uint64_t>("18446744073709551615", 20) == 18446744073709551615);
+
+    CHECK(bs::parse<uint64_t>("18446744073709560000", 20) == bs::parse_error::out_of_range);
+    CHECK(bs::parse<uint64_t>("18446744073709551616", 20) == bs::parse_error::out_of_range);
+    CHECK(bs::parse<uint64_t>("18446744073709561616", 20) == bs::parse_error::out_of_range);
+
     CHECK(bs::parse<uint64_t>("18446744073709551616", 20) == bs::parse_error::out_of_range);
     CHECK(bs::parse<uint64_t>("18446744073709551625", 20) == bs::parse_error::out_of_range);
 
