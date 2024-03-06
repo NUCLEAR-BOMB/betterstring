@@ -14,7 +14,7 @@
 - [**`bs::strfindn`**](#bsstrfindn)
 - [**`bs::strfirst_of`**](#bsstrfirst_of)
 
-# `bs::cstr`
+## `bs::cstr`
 ```cpp
 template<class T>
 constexpr auto* cstr(T& str) noexcept;
@@ -31,7 +31,7 @@ constexpr auto* cstr(T(&array)[N]) noexcept;
 ```
 Returns `array`.
 
-# `bs::data`
+## `bs::data`
 ```cpp
 template<class T>
 constexpr auto* data(T& str) noexcept;
@@ -49,7 +49,7 @@ constexpr T* data(T(&array)[N]) noexcept;
 ```
 Returns `array`.
 
-# `bs::array_size`
+## `bs::array_size`
 ```cpp
 template<class T>
 constexpr auto array_size(const T& x) noexcept;
@@ -60,7 +60,7 @@ Returns length of the array, or, if it is single character returns `1`.
 - If `x` has the `.size()` method, returns result of this method.
 - Otherwise makes `static_assert` error.
 
-# `bs::strlen`
+## `bs::strlen`
 ```cpp
 template<class T>
 constexpr std::size_t strlen(const T* str) noexcept;
@@ -72,7 +72,7 @@ Returns the length of the null terminated character sequence (not including null
 
 Supports fast implementation only for `char` type with processors having AVX2 and BMI2 processor extensions.
 
-# `bs::strcopy`
+## `bs::strcopy`
 ```cpp
 template<class T>
 constexpr void strcopy(T* dest, const T* src, std::size_t count) noexcept;
@@ -89,7 +89,7 @@ constexpr void strcopy(const T* dest, const T* src, std::size_t) noexcept = dele
 ```
 `dest` cannot be a constant pointer.
 
-# `bs::strcomp`
+## `bs::strcomp`
 ```cpp
 template<class T>
 constexpr int strcomp(const T* left, const T* right, std::size_t count) noexcept;
@@ -121,7 +121,7 @@ Compares character sequence ranges [`left`, `left + left_len`) and [`right`, `ri
 - If `left_len` is less than `right_len`, negative value is returned.
 - Otherwise, if `left_len` is equal to `right_len`, returns the result value of `bs::strcomp(left, right, left_len)`.
 
-# `bs::strfind`
+## `bs::strfind`
 ```cpp
 template<class T>
 constexpr T* strfind(T* str, std::size_t count, T ch) noexcept;
@@ -140,7 +140,7 @@ Specific behavior:
 - If `needle_len` is zero, `haystack` is returned.
 - If `needle_len` is greater than `count`, `nullptr` is returned.
 
-# `bs::strrfind`
+## `bs::strrfind`
 ```cpp
 template<class T>
 constexpr T* strrfind(T* str, std::size_t count, T ch) noexcept;
@@ -161,7 +161,7 @@ Specific behavior:
 - If `needle_len` is zero, `haystack + count` is returned.
 - If `needle_len` is greater than `count`, `nullptr` is returned.
 
-# `bs::strfill`
+## `bs::strfill`
 ```cpp
 template<class T>
 constexpr void strfill(T* dest, std::size_t count, T ch) noexcept;
@@ -171,7 +171,7 @@ Copies the character `ch` into each character of the range [`dest`, `dest + coun
 > [!IMPORTANT]
 > `dest` cannot be a null pointer, even if `count` is zero. 
 
-# `bs::strmove`
+## `bs::strmove`
 ```cpp
 template<class T>
 constexpr void strmove(T* dest, const T* src, std::size_t count) noexcept;
@@ -188,7 +188,7 @@ constexpr void strmove(const T* dest, const T* src, std::size_t) noexcept = dele
 ```
 `dest` cannot be a constant pointer.
 
-# `bs::strcount`
+## `bs::strcount`
 ```cpp
 template<class T>
 constexpr std::size_t strcount(const T* str, std::size_t count, T ch) noexcept;
@@ -197,7 +197,7 @@ Counts number of occurrences of the character `ch` in the range [`str`, `str + c
 
 Supports fast implementation only for `char` type with processors having AVX2, BMI2 and POPCNT processor extensions.
 
-# `bs::strfindn`
+## `bs::strfindn`
 ```cpp
 template<class T>
 constexpr T* strfindn(T* str, std::size_t count, T ch) noexcept;
@@ -205,7 +205,7 @@ constexpr T* strfindn(T* str, std::size_t count, T ch) noexcept;
 Returns a pointer to first occurrence of the character that is **not** `ch` in the range [`str`, `str + count`). \
 If no match is found, `nullptr` is returned.
 
-# `bs::strfirst_of`
+## `bs::strfirst_of`
 ```cpp
 template<class T>
 constexpr T* strfirst_of(T* str, std::size_t count, const T* needle, std::size_t needle_size) noexcept;
