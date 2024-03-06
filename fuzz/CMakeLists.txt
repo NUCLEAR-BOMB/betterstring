@@ -4,7 +4,7 @@ include("${PROJECT_SOURCE_DIR}/cmake/sanitizers.cmake")
 set(fuzz_targets "")
 
 macro(add_fuzzer target_name)
-    add_executable(${target_name} EXCLUDE_FROM_ALL ${ARGN})
+    add_executable(${target_name} ${ARGN})
     target_link_libraries(${target_name} PRIVATE betterstring)
     target_add_sanitizer(${target_name} SANITIZERS Fuzzer Address)
     list(APPEND fuzz_targets ${target_name})
