@@ -4,6 +4,7 @@ include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
 add_executable(betterstring-test
     "string_view.cpp"
     "functions.cpp"
+    "safe_functions.cpp"
     "char_traits.cpp"
     "ascii.cpp"
     "parsing.cpp"

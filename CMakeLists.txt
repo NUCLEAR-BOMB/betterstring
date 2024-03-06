@@ -22,6 +22,7 @@ add_library(betterstring
     "include/betterstring/parsing.hpp"
     "include/betterstring/type_traits.hpp"
     "include/betterstring/string.hpp"
+    "include/betterstring/safe_functions.hpp"
 
     "include/betterstring/detail/preprocessor.hpp"
     "include/betterstring/detail/integer_cmps.hpp"
