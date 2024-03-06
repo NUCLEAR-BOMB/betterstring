@@ -9,6 +9,7 @@ add_executable(betterstring-test
     "ascii.cpp"
     "parsing.cpp"
     "string.cpp"
+    "cpu_dispatch.cpp"
 
     "util.hpp"
 )
