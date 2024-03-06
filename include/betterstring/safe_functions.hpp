@@ -17,7 +17,7 @@ enum class errorc {
     dest_null_pointer = 2,
     src_null_pointer  = 3,
     not_enough_space  = 4,
-    overlaping        = 5,
+    overlapping        = 5,
 };
 
 class error {
@@ -35,7 +35,7 @@ public:
         case errorc::dest_null_pointer: return "destination operand is null pointer with non-zero size";
         case errorc::src_null_pointer: return "source operand is null pointer with non-zero size";
         case errorc::not_enough_space: return "source buffer length is exceeding destination buffer";
-        case errorc::overlaping: return "two memory buffers are overlaping";
+        case errorc::overlapping: return "two memory buffers are overlapping";
         }
         BS_UNREACHABLE();
     }
@@ -67,7 +67,7 @@ constexpr error strcopy(T* const dest, const std::size_t dest_len, const T* cons
     if (dest == nullptr || src == nullptr) { return errorc{}; }
 
     if (detail::is_overlap(dest, dest_len, src, count)) {
-        return errorc::overlaping;
+        return errorc::overlapping;
     }
 
     bs::strcopy(dest, src, count);

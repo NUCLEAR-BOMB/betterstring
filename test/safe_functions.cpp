@@ -43,7 +43,7 @@ TEST_CASE("bs::safe::strcopy", "[safe functions]") {
     CHECK(err6.error_message() != "");
 
     auto err7 = bs::safe::strcopy(buffer, 20, buffer + 5, 5);
-    CHECK(err7 == bs::safe::errorc::overlaping);
+    CHECK(err7 == bs::safe::errorc::overlapping);
 
     auto err8 = bs::safe::strcopy(buffer, 10, buffer + 10, 10);
     CHECK(err8 == bs::safe::errorc{});
