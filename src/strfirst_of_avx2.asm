@@ -53,7 +53,7 @@ IF 1
     test rdx, rdx
     jz cmp_0
 
-    cmp r9, 5
+    cmp r9, 6
     ja cmp_bitmap
 
     lea r10, [cmp_jump_table]
@@ -68,6 +68,7 @@ cmp_jump_table:
     dd cmp_3-cmp_jump_table
     dd cmp_4-cmp_jump_table
     dd cmp_5-cmp_jump_table
+    dd cmp_6-cmp_jump_table
 
     align 16
 cmp_0:
@@ -93,6 +94,10 @@ cmp_4:
     align 16
 cmp_5:
     include strfirst_of/cmp_5.asm
+
+    align 16
+cmp_6:
+    include strfirst_of/cmp_6.asm
 
 cmp_bitmap:
     sub rsp, 256
