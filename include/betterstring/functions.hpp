@@ -145,16 +145,6 @@ template<class T>
 constexpr void strcopy(const T* const, const T* const, const std::size_t) noexcept = delete;
 
 template<class T>
-constexpr void strcopy(T* const dest, const std::size_t dest_size, const T* const src, const std::size_t count) noexcept {
-    bs::strcopy(dest, src, std::min(dest_size, count));
-}
-
-template<class T, std::size_t N>
-constexpr void strcopy(T* const dest, const std::size_t dest_size, const T(&src)[N]) noexcept {
-    bs::strcopy(dest, src, std::min(dest_size, N - 1));
-}
-
-template<class T>
 constexpr int strcomp(const T* const left, const T* const right, const std::size_t count) noexcept {
     static_assert(is_character<T>);
     BS_VERIFY(left != nullptr, "left is null pointer");
@@ -191,10 +181,6 @@ constexpr int strcomp(const T* const left, const std::size_t left_len, const T* 
     if (left_len > right_len) return 1;
     if (left_len < right_len) return -1;
     return bs::strcomp(left, right, left_len);
-}
-template<class T, std::size_t N>
-constexpr int strcomp(const T* const left, const std::size_t left_len, const T(&right)[N]) noexcept {
-    return bs::strcomp(left, left_len, right, N - 1);
 }
 
 template<class T>
@@ -242,11 +228,6 @@ template<class T>
     }
 }
 
-template<class T, std::size_t N>
-constexpr T* strfind(T (&str)[N], const detail::type_identity_t<T> ch) noexcept {
-    return bs::strfind(str, N - 1, ch);
-}
-
 template<class T>
 constexpr T* strfind(T* const haystack, const std::size_t count, const detail::type_identity_t<T>* const needle, const std::size_t needle_len) noexcept {
     if (needle_len > count) return nullptr;
@@ -265,22 +246,6 @@ constexpr T* strfind(T* const haystack, const std::size_t count, const detail::t
         }
     }
     BS_UNREACHABLE();
-}
-
-template<class T, std::size_t N>
-constexpr T* strfind(T* const haystack, const std::size_t count, const detail::type_identity_t<T>(&needle)[N]) noexcept {
-    return strfind(haystack, count, needle, N - 1);
-}
-
-template<class Haystack, class Needle>
-constexpr auto strfind(Haystack& haystack, const Needle& needle) noexcept
-    -> decltype(bs::strfind(haystack.data(), haystack.size(), needle.data(), needle.size())) {
-    return bs::strfind(haystack.data(), haystack.size(), needle.data(), needle.size());
-}
-template<class Haystack, class Needle>
-constexpr auto strfind(Haystack& haystack, const Needle needle) noexcept
-    -> decltype(bs::strfind(haystack.data(), haystack.size(), needle)) {
-    return bs::strfind(haystack.data(), haystack.size(), needle);
 }
 
 namespace detail {
@@ -306,11 +271,6 @@ constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::
         if (match_try == haystack) return nullptr;
     }
     BS_UNREACHABLE();
-}
-
-template<class T, std::size_t N>
-constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::type_identity_t<T>(&needle)[N]) noexcept {
-    return bs::strrfind(haystack, count, needle, N - 1);
 }
 
 namespace detail {
@@ -339,11 +299,6 @@ constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_
         if (str[i - 1] == ch) return str + i - 1;
     }
     return nullptr;
-}
-
-template<class T, std::size_t N>
-constexpr T* strrfind(T (&str)[N], const detail::type_identity_t<T> ch) noexcept {
-    return bs::strrfind(str, N - 1, ch);
 }
 
 template<class T>
@@ -413,11 +368,6 @@ constexpr void strmove(T* const dest, const T* const src, const std::size_t coun
 }
 template<class T>
 constexpr void strmove(const T* const, const T* const, const std::size_t) noexcept = delete;
-
-template<class T>
-constexpr void strmove(T* const dest, const std::size_t dest_size, const T* const src, const std::size_t count) noexcept {
-    return bs::strmove(dest, src, std::min(dest_size, count));
-}
 
 namespace detail {
     extern "C" std::size_t betterstring_strcount_char_avx2(const char*, std::size_t, char);

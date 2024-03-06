@@ -573,47 +573,6 @@ private:
     size_type string_size;
 };
 
-template<class Tr>
-constexpr void strcopy(typename Tr::char_type* const dest, const std::size_t dest_len, const string_viewt<Tr> src) noexcept {
-    bs::strcopy(dest, dest_len, src.data(), src.size());
-}
-template<class Tr>
-constexpr int strcomp(const string_viewt<Tr> left, const string_viewt<Tr> right) noexcept {
-    return bs::strcomp(left.data(), left.size(), right.data(), right.size());
-}
-template<class Tr>
-constexpr auto strfind(const string_viewt<Tr> str, const typename Tr::char_type ch) noexcept
-    -> const typename Tr::char_type* {
-    return bs::strfind(str.data(), str.size(), ch);
-}
-template<class Tr>
-constexpr auto strfind(const string_viewt<Tr> haystack, const string_viewt<Tr> needle) noexcept
-    -> const typename Tr::char_type* {
-    return bs::strfind(haystack.data(), haystack.size(), needle.data(), needle.size());
-}
-template<class Tr>
-constexpr auto strfind(const string_viewt<Tr> haystack, const typename Tr::char_type* needle, const std::size_t needle_len) noexcept
-    -> const typename Tr::char_type* {
-    return bs::strfind(haystack.data(), haystack.size(), needle, needle_len);
-}
-template<class Tr>
-constexpr auto strrfind(const string_viewt<Tr> haystack, const string_viewt<Tr> needle) noexcept
-    -> const typename Tr::char_type* {
-    return bs::strrfind(haystack.data(), haystack.size(), needle.data(), needle.size());
-}
-template<class Tr>
-constexpr auto strrfind(const string_viewt<Tr> haystack, const typename Tr::char_type* needle, const std::size_t needle_len) noexcept
-    -> const typename Tr::char_type* {
-    return bs::strrfind(haystack.data(), haystack.size(), needle, needle_len);
-}
-template<class Tr>
-constexpr auto strrfind(const string_viewt<Tr> str, const typename Tr::char_type ch) noexcept
-    -> const typename Tr::char_type* {
-    return bs::strrfind(str.data(), str.size(), ch);
-}
-
-
-
 using string_view = string_viewt<char_traits<char>>;
 using wstring_view = string_viewt<char_traits<wchar_t>>;
 using u16string_view = string_viewt<char_traits<char16_t>>;
