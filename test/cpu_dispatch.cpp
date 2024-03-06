@@ -9,9 +9,11 @@ TEST_CASE("cpu features", "[cpu_features]") {
     const auto& value = cpu_features.value;
 
     std::vector<bs::string_view> cpu_features_list;
+    // NOLINTBEGIN(readability-implicit-bool-conversion)
     if (value & cpu_features.AVX2) { cpu_features_list.emplace_back("AVX2"); }
     if (value & cpu_features.BMI2) { cpu_features_list.emplace_back("BMI2"); }
     if (value & cpu_features.POPCNT) { cpu_features_list.emplace_back("POPCNT"); }
+    // NOLINTEND(readability-implicit-bool-conversion)
 
     std::fputs("\nCurrent processor supports these extensions: ", stdout);
     for (auto feature_name : cpu_features_list) {
