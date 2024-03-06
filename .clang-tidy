@@ -21,4 +21,5 @@ Checks: >
   -misc-const-correctness,
   -readability-qualified-auto,
   -bugprone-string-literal-with-embedded-nul,
+  -cert-err33-c,
 WarningsAsErrors: '*'
