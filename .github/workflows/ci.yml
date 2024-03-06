@@ -25,6 +25,9 @@ jobs:
     - name: Build
       run: cmake --build build --config ${{ matrix.build.name }}
 
+    - name: Run tests
+      run: cmake --build build --config ${{ matrix.build.name }} --target run-betterstring-test
+
   clang-tidy:
     name: Clang Tidy
     runs-on: ubuntu-latest

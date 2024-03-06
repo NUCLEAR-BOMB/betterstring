@@ -56,4 +56,4 @@ endif()
 add_custom_target(run-betterstring-test VERBATIM
     COMMAND "$<TARGET_FILE:betterstring-test>"
 )
-add_dependencies(run-betterstring-test betterstring-test)
+# dependency will be added automatically
