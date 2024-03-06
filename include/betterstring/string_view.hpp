@@ -563,8 +563,13 @@ public:
     }
 
 #ifndef BS_DONT_INCLUDE_STRING
-    constexpr operator std::basic_string_view<value_type, traits_type>() const noexcept {
-        return std::basic_string_view<value_type, traits_type>(data(), size());
+    template<class Tr>
+    constexpr operator std::basic_string_view<value_type, Tr>() const noexcept {
+        return std::basic_string_view<value_type, Tr>(data(), size());
+    }
+    template<class Tr>
+    explicit constexpr operator std::basic_string<value_type, Tr>() const noexcept {
+        return std::basic_string<value_type, Tr>(data(), size());
     }
 #endif
 
