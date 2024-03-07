@@ -21,20 +21,21 @@ add_fuzzer(strfirst_of_fuzz strfirst_of.cpp)
 include(ProcessorCount)
 ProcessorCount(cores_number)
 
+set(cmake_echo "${CMAKE_COMMAND}" -E echo)
+
 set(fuzz_commands "")
 foreach(fuzz_target IN LISTS fuzz_targets)
-    list(APPEND fuzz_commands COMMAND ${CMAKE_COMMAND}
-        -D executable=$<TARGET_FILE:${fuzz_target}>
-        -D forks=${cores_number}
-        #-D runs=1000000
-        -D time=5
-        -P "${PROJECT_SOURCE_DIR}/fuzz/run_fuzzing.cmake"
+    list(APPEND fuzz_commands
+        COMMAND ${cmake_echo} "| Launching target: '$<TARGET_NAME:${fuzz_target}>', executable: '$<TARGET_FILE:${fuzz_target}>' |"
+        COMMAND "$<TARGET_FILE:${fuzz_target}>" -runs=$<IF:$<CONFIG:Release>,4000000,900000> -fork=${cores_number}
     )
 endforeach()
 
-add_custom_target(betterstring-fuzz
+add_custom_target(run-betterstring-fuzz
+    COMMAND ${cmake_echo} "| Starting fuzzers using '${cores_number}' cores number |"
     ${fuzz_commands}
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR} VERBATIM
-    SOURCES "run_fuzzing.cmake"
+    COMMAND ${cmake_echo} "| Stopping fuzzers |"
+    WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
+    VERBATIM
 )
-add_dependencies(betterstring-fuzz ${fuzz_targets})
+set_target_properties(run-betterstring-fuzz PROPERTIES RULE_LAUNCH_CUSTOM "\"${CMAKE_COMMAND}\" -E time")
