@@ -72,7 +72,7 @@ public:
         return bs::strrfind(str, count, substr, substr_len);
     }
     static constexpr const char_type* first_of(const char_type* const str, const std::size_t count, const char_type* const needle, const std::size_t needle_len) {
-        return bs::strfirst_of(str, count, needle, needle_len);
+        return bs::strfirstof(str, count, needle, needle_len);
     }
 
 

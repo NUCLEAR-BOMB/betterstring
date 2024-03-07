@@ -421,11 +421,11 @@ constexpr T* strfindn(T* str, std::size_t count, detail::type_identity_t<T> ch) 
 }
 
 namespace detail {
-    extern "C" const char* betterstring_strfirst_of_avx2(const char*, std::size_t, const char*, std::size_t);
+    extern "C" const char* betterstring_strfirstof_avx2(const char*, std::size_t, const char*, std::size_t);
 }
 
 template<class T>
-constexpr T* strfirst_of(T* str, std::size_t count, const detail::type_identity_t<T>* needle, std::size_t needle_size) noexcept {
+constexpr T* strfirstof(T* str, std::size_t count, const detail::type_identity_t<T>* needle, std::size_t needle_size) noexcept {
     using type = std::remove_const_t<T>;
     static_assert(is_character<type>);
 
@@ -433,7 +433,7 @@ constexpr T* strfirst_of(T* str, std::size_t count, const detail::type_identity_
         if constexpr (std::is_same_v<type, char>) {
             using detail::cpu_features;
             if (cpu_features.value & (cpu_features.AVX2 + cpu_features.BMI2)) {
-                return const_cast<char*>(detail::betterstring_strfirst_of_avx2(str, count, needle, needle_size));
+                return const_cast<char*>(detail::betterstring_strfirstof_avx2(str, count, needle, needle_size));
             }
         }
     }

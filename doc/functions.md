@@ -12,7 +12,7 @@
 - [**`bs::strmove`**](#bsstrmove)
 - [**`bs::strcount`**](#bsstrcount)
 - [**`bs::strfindn`**](#bsstrfindn)
-- [**`bs::strfirst_of`**](#bsstrfirst_of)
+- [**`bs::strfirstof`**](#bsstrfirstof)
 
 ## `bs::cstr`
 ```cpp
@@ -205,10 +205,10 @@ constexpr T* strfindn(T* str, std::size_t count, T ch) noexcept;
 Returns a pointer to first occurrence of the character that is **not** `ch` in the range [`str`, `str + count`). \
 If no match is found, `nullptr` is returned.
 
-## `bs::strfirst_of`
+## `bs::strfirstof`
 ```cpp
 template<class T>
-constexpr T* strfirst_of(T* str, std::size_t count, const T* needle, std::size_t needle_size) noexcept;
+constexpr T* strfirstof(T* str, std::size_t count, const T* needle, std::size_t needle_size) noexcept;
 ```
 Returns a pointer to first occurrence of the any character in the sequence [`needle`, `needle + needle_size`) in the range [`str`, `str + count`).
 

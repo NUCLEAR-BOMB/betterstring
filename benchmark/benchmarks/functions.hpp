@@ -141,7 +141,7 @@ ADD_BENCHMARK("strfindn_ch") {
     }
 }
 
-ADD_BENCHMARK("strfirst_of") {
+ADD_BENCHMARK("strfirstof") {
     using ankerl::nanobench::Rng;
     if (args.size() == 0) {
         fmt::println("pass the character sequence length argument (first)");
@@ -172,7 +172,7 @@ ADD_BENCHMARK("strfirst_of") {
         string[string_len - 1] = 'Y';
         bench.context("length", fmt::format("{}", string_len));
         bench.run(fmt::format("length {}", string_len), [&]() {
-            char* result = bs::strfirst_of(string.data(), string_len, char_seq.data(), char_seq.size());
+            char* result = bs::strfirstof(string.data(), string_len, char_seq.data(), char_seq.size());
             bench.doNotOptimizeAway(result);
         });
         string[string_len - 1] = 'X';

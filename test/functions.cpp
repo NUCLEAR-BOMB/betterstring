@@ -350,23 +350,23 @@ TEST_CASE("bs::strfindn", "[functions]") {
     }
 }
 
-TEST_CASE("bs::strfirst_of", "[functions]") {
-    CHECK(bs::strfirst_of("test", 4, nullptr, 0) == nullptr);
+TEST_CASE("bs::strfirstof", "[functions]") {
+    CHECK(bs::strfirstof("test", 4, nullptr, 0) == nullptr);
 
     const char* str1 = "012345";
-    CHECK(bs::strfirst_of(str1, 6, "4", 1) == &str1[4]);
-    CHECK(bs::strfirst_of(str1, 6, "6", 1) == nullptr);
-    CHECK(bs::strfirst_of(str1, 6, "0", 1) == &str1[0]);
+    CHECK(bs::strfirstof(str1, 6, "4", 1) == &str1[4]);
+    CHECK(bs::strfirstof(str1, 6, "6", 1) == nullptr);
+    CHECK(bs::strfirstof(str1, 6, "0", 1) == &str1[0]);
 
     const char* str2 = "abcdefghijklmnopqrstuvwxyz";
-    CHECK(bs::strfirst_of(str2, 26, "ep", 2) == &str2[4]);
-    CHECK(bs::strfirst_of(str2, 26, "qu", 2) == &str2[16]);
-    CHECK(bs::strfirst_of(str2, 26, "zc", 2) == &str2[2]);
-    CHECK(bs::strfirst_of(str2, 26, "op", 2) == &str2[14]);
-    CHECK(bs::strfirst_of(str2, 26, "ba", 2) == &str2[0]);
+    CHECK(bs::strfirstof(str2, 26, "ep", 2) == &str2[4]);
+    CHECK(bs::strfirstof(str2, 26, "qu", 2) == &str2[16]);
+    CHECK(bs::strfirstof(str2, 26, "zc", 2) == &str2[2]);
+    CHECK(bs::strfirstof(str2, 26, "op", 2) == &str2[14]);
+    CHECK(bs::strfirstof(str2, 26, "ba", 2) == &str2[0]);
 
     const char* str3 = "4io8764432kdasjmkde3148158321853271h45iltwergd5q3vbi5vg5rf4jmdg312";
-    CHECK(bs::strfirst_of(str3, 65, "ABC", 3) == nullptr);
+    CHECK(bs::strfirstof(str3, 65, "ABC", 3) == nullptr);
 
     // const char* str3 = "abcdabcdabcdabcdabcdabcdabcdabcdabcd0";
     // CHECK(bs::strfirst_of(str3, 37, "1234567890", 10) == &str3[36]);

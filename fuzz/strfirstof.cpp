@@ -20,7 +20,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     const char* const str = reinterpret_cast<const char*>(Data + needle_len);
 
-    const char* const result = bs::strfirst_of(str, str_len, needle, needle_len);
+    const char* const result = bs::strfirstof(str, str_len, needle, needle_len);
 
     const char* const true_result = std::find_first_of(str, str + str_len, needle, needle + needle_len);
     if (true_result == str + str_len) {

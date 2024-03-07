@@ -47,7 +47,7 @@ ENDM
 ; Finds the position of first character that equal to one of the characters in the character sequence.
 ;
 ; Note that this function uses AVX2 and BMI2 processor extensions.
-betterstring_strfirst_of_avx2 PROC
+betterstring_strfirstof_avx2 PROC
 
 IF 1
     test rdx, rdx
@@ -77,27 +77,27 @@ cmp_0:
 
     align 16
 cmp_1:
-    include strfirst_of/cmp_1.asm
+    include strfirstof/cmp_1.asm
 
     align 16
 cmp_2:
-    include strfirst_of/cmp_2.asm
+    include strfirstof/cmp_2.asm
 
     align 16
 cmp_3:
-    include strfirst_of/cmp_3.asm
+    include strfirstof/cmp_3.asm
 
     align 16
 cmp_4:
-    include strfirst_of/cmp_4.asm
+    include strfirstof/cmp_4.asm
 
     align 16
 cmp_5:
-    include strfirst_of/cmp_5.asm
+    include strfirstof/cmp_5.asm
 
     align 16
 cmp_6:
-    include strfirst_of/cmp_6.asm
+    include strfirstof/cmp_6.asm
 
 cmp_bitmap:
     sub rsp, 256
@@ -158,7 +158,7 @@ ELSE
     cmp r9, 1
     je cmp_1
 
-    include strfirst_of/cmp_any.asm
+    include strfirstof/cmp_any.asm
 
     align 16
 cmp_0:
@@ -167,11 +167,11 @@ cmp_0:
 
     align 16
 cmp_1:
-    include strfirst_of/cmp_1.asm
+    include strfirstof/cmp_1.asm
 
 ENDIF
 
-betterstring_strfirst_of_avx2 ENDP
+betterstring_strfirstof_avx2 ENDP
 
 
 END
