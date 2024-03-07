@@ -213,3 +213,10 @@ constexpr T* strfirstof(T* str, std::size_t count, const T* needle, std::size_t 
 Returns a pointer to first occurrence of the any character in the sequence [`needle`, `needle + needle_size`) in the range [`str`, `str + count`).
 
 Supports fast implementation only for `char` type with processors having AVX2 and BMI2 processor extensions.
+
+## `bs::strfirstnof`
+```cpp
+template<class T>
+constexpr T* strfirstnof(T* str, std::size_t count, const T* needle, std::size_t needle_size) noexcept;
+```
+Returns a pointer to first absence of the any character in the sequence [`needle`, `needle + needle_size`) in the range [`str`, `str + count`).
