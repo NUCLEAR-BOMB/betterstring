@@ -38,4 +38,3 @@ add_custom_target(run-betterstring-fuzz
     WORKING_DIRECTORY "${PROJECT_BINARY_DIR}"
     VERBATIM
 )
-set_target_properties(run-betterstring-fuzz PROPERTIES RULE_LAUNCH_CUSTOM "\"${CMAKE_COMMAND}\" -E time")
