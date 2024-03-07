@@ -372,4 +372,14 @@ TEST_CASE("bs::strfirstof", "[functions]") {
     // CHECK(bs::strfirst_of(str3, 37, "1234567890", 10) == &str3[36]);
 }
 
+TEST_CASE("bs::strfirstnof", "[functions]") {
+    CHECK(bs::strfirstnof("test", 4, nullptr, 0) == nullptr);
+
+    const char* str1 = "hello world";
+    CHECK(bs::strfirstnof(str1, 11, "hello", 5) == &str1[5]);
+    CHECK(bs::strfirstnof(str1, 11, " ", 1) == &str1[0]);
+    CHECK(bs::strfirstnof(str1, 11, "helo wrd", 8) == nullptr);
+    CHECK(bs::strfirstnof(str1, 11, "helo ", 5) == &str1[6]);
+}
+
 }
