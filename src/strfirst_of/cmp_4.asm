@@ -15,6 +15,17 @@ CMP_4_COMPARE_YMM MACRO out_reg:REQ, load_loc:REQ
     vpmovmskb out_reg, ymm4
 ENDM
 
+CMP_4_COMPARE_YMM_LAST MACRO out_reg:REQ, load_loc:REQ
+    vpcmpeqb ymm0, ymm0, load_loc
+    vpcmpeqb ymm1, ymm1, load_loc
+    vpcmpeqb ymm2, ymm2, load_loc
+    vpcmpeqb ymm3, ymm3, load_loc
+    vpor ymm0, ymm0, ymm1
+    vpor ymm2, ymm2, ymm3
+    vpor ymm4, ymm0, ymm2
+    vpmovmskb out_reg, ymm4
+ENDM
+
     MM256_SET1_EPI8 ymm0, BYTE PTR [r8 + 0]
     MM256_SET1_EPI8 ymm1, BYTE PTR [r8 + 1]
     MM256_SET1_EPI8 ymm2, BYTE PTR [r8 + 2]
@@ -28,7 +39,7 @@ ENDM
     cmp r10, PAGE_SIZE-32  ; check if next 32 byte does cross page boundary
     jg cmp_4_page_cross
 
-    CMP_4_COMPARE_YMM eax, YMMWORD PTR [rcx]
+    CMP_4_COMPARE_YMM_LAST eax, YMMWORD PTR [rcx]
     tzcnt r10d, eax
     xor rax, rax            ; set rax to 0 in case that string does not contain a character
     cmp r10d, edx           ; if string does not contain a character or it is outside the string
@@ -40,7 +51,7 @@ ENDM
 
     align 16
 cmp_4_page_cross:
-    CMP_4_COMPARE_YMM r9d, YMMWORD PTR [rcx + rdx - 32]
+    CMP_4_COMPARE_YMM_LAST r9d, YMMWORD PTR [rcx + rdx - 32]
     neg dl
     shrx r9d, r9d, edx
     tzcnt r9d, r9d
@@ -151,7 +162,7 @@ cmp_4_vec_loop_last:
 
     align 16
 cmp_4_last_vec:
-    CMP_4_COMPARE_YMM eax, YMMWORD PTR [rcx + rdx - 32]
+    CMP_4_COMPARE_YMM_LAST eax, YMMWORD PTR [rcx + rdx - 32]
     tzcnt r10d, eax
     xor rax, rax
     cmp r10d, 32
@@ -178,7 +189,7 @@ cmp_4_vec_loop_return:
     test eax, eax
     jnz cmp_4_return_vec3
 
-    CMP_4_COMPARE_YMM eax, YMMWORD PTR [rcx + 32*3]
+    CMP_4_COMPARE_YMM_LAST eax, YMMWORD PTR [rcx + 32*3]
     tzcnt eax, eax
     lea rax, [rax + rcx + 32*3]
 
