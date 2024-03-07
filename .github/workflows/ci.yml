@@ -28,6 +28,9 @@ jobs:
 
     - name: Run tests
       run: cmake --build build --config ${{ matrix.build.name }} --target run-betterstring-test
+      
+    - name: Run fuzzer
+      run: cmake --build build --config ${{ matrix.build.name }} --target run-betterstring-fuzz
 
   clang-tidy:
     name: Clang Tidy
