@@ -14,7 +14,7 @@ jobs:
           - { name: Windows Visual Studio 2022 x64, os: windows-2022 }
         build:
           - { name: Debug }
-          # - { name: Release }
+          - { name: Release }
 
     steps:
     - name: Checkout
