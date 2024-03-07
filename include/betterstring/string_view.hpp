@@ -75,6 +75,7 @@ public:
 
 private:
     using signed_size_type = std::make_signed_t<size_type>;
+    using self_find_result = bs::find_result<const value_type>;
 public:
 
     constexpr string_viewt() noexcept : string_data(nullptr), string_size(0) {}
@@ -212,89 +213,79 @@ public:
     constexpr bool ends_with(const value_type ch) const noexcept {
         return !empty() && traits_type::eq(back(), ch);
     }
-private:
-    using this_find_result = bs::find_result<value_type>;
-    constexpr this_find_result make_find_r(const value_type* const ptr, const size_type end) const noexcept {
-        return this_find_result(data(), end, ptr);
-    }
-    constexpr this_find_result make_find_r(const value_type* const ptr) const noexcept {
-        return this_find_result(data(), size(), ptr);
-    }
-    constexpr this_find_result make_find_r(const size_type index) const noexcept {
-        return this_find_result(data(), size(), data() + index);
-    }
-public:
 
-    constexpr this_find_result find(const value_type ch) const noexcept {
-        return make_find_r(traits_type::find(data(), size(), ch));
+    constexpr self_find_result find(const value_type ch) const noexcept {
+        return { data(), size(), traits_type::find(data(), size(), ch) };
     }
-    constexpr this_find_result find(const string_viewt str) const noexcept {
-        return make_find_r(traits_type::findstr(data(), size(), str.data(), str.size()));
+    constexpr self_find_result find(const string_viewt str) const noexcept {
+        return { data(), size(), traits_type::findstr(data(), size(), str.data(), str.size()) };
     }
-    constexpr this_find_result find(const value_type ch, const size_type start) const noexcept {
+    constexpr self_find_result find(const value_type ch, const size_type start) const noexcept {
         BS_VERIFY(start <= size(), "start is out of range");
-        return make_find_r(traits_type::find(data() + start, size() - start, ch));
+        return { data(), size(), traits_type::find(data() + start, size() - start, ch) };
     }
-    constexpr this_find_result find(const string_viewt str, const size_type start) const noexcept {
+    constexpr self_find_result find(const string_viewt str, const size_type start) const noexcept {
         BS_VERIFY(start <= size(), "start is out of range");
-        return make_find_r(traits_type::findstr(data() + start, size() - start, str.data(), str.size()));
+        return { data(), size(), traits_type::findstr(data() + start, size() - start, str.data(), str.size()) };
     }
-    constexpr this_find_result find(const value_type ch, const const_pointer start) const noexcept {
+    constexpr self_find_result find(const value_type ch, const const_pointer start) const noexcept {
         BS_VERIFY(start >= data() && start <= data_end(), "start is out of range");
-        return make_find_r(traits_type::find(start, size() - (start - data()), ch));
+        return { data(), size(), traits_type::find(start, size() - (start - data()), ch) };
     }
-    constexpr this_find_result find(const string_viewt str, const const_pointer start) const noexcept {
+    constexpr self_find_result find(const string_viewt str, const const_pointer start) const noexcept {
         BS_VERIFY(start >= data() && start <= data_end(), "start is out of range");
-        return make_find_r(traits_type::findstr(start, size() - (start - data()), str.data(), str.size()));
+        return { data(), size(), traits_type::findstr(start, size() - (start - data()), str.data(), str.size()) };
     }
 
-    constexpr this_find_result rfind(const value_type ch) const noexcept {
-        return make_find_r(traits_type::rfind(data(), size(), ch), 0);
+    constexpr self_find_result rfind(const value_type ch) const noexcept {
+        return { data(), 0, traits_type::rfind(data(), size(), ch), };
     }
-    constexpr this_find_result rfind(const string_viewt str) const noexcept {
-        return make_find_r(traits_type::rfindstr(data(), size(), str.data(), str.size()), 0);
+    constexpr self_find_result rfind(const string_viewt str) const noexcept {
+        return { data(), 0, traits_type::rfindstr(data(), size(), str.data(), str.size()) };
     }
-    constexpr this_find_result rfind(const value_type ch, const size_type start) const noexcept {
+    constexpr self_find_result rfind(const value_type ch, const size_type start) const noexcept {
         BS_VERIFY(start <= size(), "start is out of range");
-        return make_find_r(traits_type::rfind(data(), start, ch), 0);
+        return { data(), 0, traits_type::rfind(data(), start, ch) };
     }
-    constexpr this_find_result rfind(const string_viewt str, const size_type start) const noexcept {
+    constexpr self_find_result rfind(const string_viewt str, const size_type start) const noexcept {
         BS_VERIFY(start <= size(), "start is out of range");
-        return make_find_r(traits_type::rfindstr(data(), start, str.data(), str.size()), 0);
+        return { data(), 0, traits_type::rfindstr(data(), start, str.data(), str.size()) };
     }
-    constexpr this_find_result rfind(const value_type ch, const const_pointer start) const noexcept {
+    constexpr self_find_result rfind(const value_type ch, const const_pointer start) const noexcept {
         BS_VERIFY(start >= data() && start <= data_end(), "start is out of range");
-        return make_find_r(traits_type::rfind(data(), (start - data()), ch), 0);
+        return { data(), 0, traits_type::rfind(data(), (start - data()), ch) };
     }
-    constexpr this_find_result rfind(const string_viewt str, const const_pointer start) const noexcept {
+    constexpr self_find_result rfind(const string_viewt str, const const_pointer start) const noexcept {
         BS_VERIFY(start >= data() && start <= data_end(), "start is out of range");
-        return make_find_r(traits_type::rfindstr(start, (start - data()), str.data(), str.size()), 0);
+        return { data(), 0, traits_type::rfindstr(start, (start - data()), str.data(), str.size()) };
     }
 
-    constexpr this_find_result find_first_of(const value_type ch) const noexcept {
+    constexpr self_find_result find_first_of(const value_type ch) const noexcept {
         return this->find(ch);
     }
-    constexpr this_find_result find_first_of(const string_viewt str) const noexcept {
-        return make_find_r(traits_type::first_of(data(), size(), str.data(), str.size()));
+    constexpr self_find_result find_first_of(const string_viewt str) const noexcept {
+        return { data(), size(), traits_type::first_of(data(), size(), str.data(), str.size()) };
     }
 
-    constexpr this_find_result find_last_of(const value_type ch) const noexcept {
+    constexpr self_find_result find_last_of(const value_type ch) const noexcept {
         return this->rfind(ch);
     }
-    constexpr this_find_result find_last_of(const string_viewt str) const noexcept {
+    constexpr self_find_result find_last_of(const string_viewt str) const noexcept {
         detail::char_bitmap<value_type> bitmap;
         if (!bitmap.mark(str.data(), str.data() + str.size())) {
             for (auto match_try = data() + size() - 1; match_try != data() - 1; --match_try) {
                 if (traits_type::find(str.data(), str.size(), *match_try) != nullptr) {
-                    return make_find_r(match_try);
+                    return { data(), size(), match_try };
                 }
             }
-            return make_find_r(nullptr);
+            return { data(), size(), nullptr };
         }
         for (size_type i = size(); i != 0; --i) {
-            if (bitmap.match(data()[i - 1])) return make_find_r(i - 1);
+            if (bitmap.match(data()[i - 1])) {
+                return { data(), size(), data() + i - 1 };
+            }
         }
-        return make_find_r(nullptr);
+        return { data(), size(), nullptr };
     }
 
     constexpr bool contains(const value_type ch) const noexcept {
