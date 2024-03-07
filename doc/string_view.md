@@ -106,11 +106,13 @@ constexpr string_viewt() noexcept;
 ```
 Default constructor.
 After construction `data()` method returns `nullptr` and `size()` method returns `0`.
+<br/><br/>
 
 ```cpp
 constexpr string_viewt(const string_viewt&) noexcept = default;
 ```
 Copy constructor.
+<br/><br/>
 
 ```cpp
 constexpr string_viewt(const_pointer str, size_type count);
@@ -118,6 +120,8 @@ constexpr string_viewt(const_pointer str, size_type count);
 Constructs `bs::string_viewt` from a range [`str`, `str + count`).
 > [!TIP]
 > If `str` is `nullptr` with non-zero `count` assentation will be invoked.
+
+<br/>
 
 ```cpp
 template<std::size_t N>
@@ -129,6 +133,8 @@ Static assertion will be used if `N` is equal to `0`.
 > [!CAUTION]
 > Use this constructor **only** with string literals. The null terminator will be striped away automatically. \
 > If you use this constructor with non-null terminated character arrays, *the last character* will be removed from the string.
+
+<br/>
 
 ```cpp
 template<class Begin, class End = Begin>
@@ -208,6 +214,8 @@ Enabled only when type `Int` is **integer type**.
 > [!NOTE]
 > If a character at the `index` position is outside of the range [`data()`, `data() + size()`), **assertion will be invoked**.
 
+<br/>
+
 ```cpp
 constexpr string_viewt operator[](bs::slice slice) const noexcept;
 ```
@@ -284,7 +292,7 @@ Removes first `count` character by moving the start of the view forward.
 
 ## `remove_suffix`
 ```cpp
-constexpr void remove_suffix(const size_type count) noexcept;
+constexpr void remove_suffix(size_type count) noexcept;
 ```
 Removes last `count` character by moving the end of the view back.
 
@@ -303,6 +311,8 @@ Enabled only when types `Int1` and `Int2` are **integer types**.
 
 > [!NOTE]
 > If `start` or `finish` will point outside of the string, **assertion will be invoked**.
+
+<br/>
 
 ```cpp
 template<class Int1, class SliceEnd = /* implementation defined type */>
@@ -325,6 +335,8 @@ Returns a view of the substring [`position`, `size()`).
 > [!WARNING]
 > If the `position` index will greater than string length, **assertion will be invoked**.
 
+<br/>
+
 ```cpp
 constexpr string_viewt substr(size_type position, size_type count) const noexcept;
 ```
@@ -340,6 +352,8 @@ constexpr bool starts_with(string_viewt str) const noexcept;
 Checks if string starts with the range [`str.data()`, `str.data() + str.size()`). \
 If `str` length is greater than or equal to current string length, `false` is returned.
 
+<br/>
+
 ```cpp
 constexpr bool starts_with(value_type ch) const noexcept;
 ```
@@ -353,6 +367,8 @@ constexpr bool ends_with(string_viewt str) const noexcept
 Checks if string ends with the range [`str.data()`, `str.data() + str.size()`). \
 If `str` length is greater than or equal to current string length, `false` is returned.
 
+<br/>
+
 ```cpp
 constexpr bool ends_with(value_type ch) const noexcept;
 ```
@@ -364,13 +380,15 @@ If string is empty, `false` is returned.
 constexpr bs::find_result<const value_type> find(value_type ch) const noexcept;
 ```
 Returns a position to the first occurrence of the character `ch`.
-<br/><br/>
+
+<br/>
 
 ```cpp
 constexpr bs::find_result<const value_type> find(string_viewt str) const noexcept;
 ```
 Returns a position to the first occurrence of the substring `str`.
-<br/><br/>
+
+<br/>
 
 ```cpp
 constexpr bs::find_result<const value_type> find(value_type ch, size_type start) const noexcept;
@@ -412,20 +430,28 @@ constexpr bs::find_result<const value_type> rfind(value_type ch) const noexcept;
 ```
 Returns a position to the last occurrence of the character `ch` in the string.
 
+<br/>
+
 ```cpp
 constexpr bs::find_result<const value_type> rfind(string_viewt str) const noexcept
 ```
 Returns a position to the last occurrence of the substring `ch` in the string.
+
+<br/>
 
 ```cpp
 constexpr bs::find_result<const value_type> rfind(value_type ch, size_type start) const noexcept;
 ```
 Returns a position to the last occurrence of the character `ch` in the string starting at the `start` position.
 
+<br/>
+
 ```cpp
 constexpr bs::find_result<const value_type> rfind(string_viewt str, size_type start) const noexcept;
 ```
 Returns a position to the last occurrence of the substring `str` in the string starting at the `start` position.
+
+<br/>
 
 ```cpp
 constexpr bs::find_result<const value_type> rfind(value_type ch, const_pointer start) const noexcept;
@@ -433,6 +459,8 @@ constexpr bs::find_result<const value_type> rfind(value_type ch, const_pointer s
 Returns a position to the last occurrence of the character `ch` in starting at the position that `start` points to.
 > [!WARNING]
 > If the `start` is not in the range [`data()`, `data() + size()`), **assertion will be invoked**.
+
+<br/>
 
 ```cpp
 constexpr bs::find_result<const value_type> rfind(string_viewt str, const_pointer start) const noexcept;
@@ -447,6 +475,8 @@ constexpr bs::find_result<const value_type> find_first_of(value_type ch) const n
 ```
 Equivalent to `this->find(ch)`.
 
+<br/>
+
 ```cpp
 constexpr bs::find_result<const value_type> find_first_of(string_viewt str) const noexcept;
 ```
@@ -457,6 +487,8 @@ Returns a position to the first character that equal to any of the characters in
 constexpr bs::find_result<const value_type> find_last_of(value_type ch) const noexcept;
 ```
 Equivalent to `this->rfind(ch)`.
+
+<br/>
 
 ```cpp
 constexpr bs::find_result<const value_type> find_last_of(string_viewt str) const noexcept;
@@ -469,6 +501,8 @@ constexpr bool contains(value_type ch) const noexcept;
 ```
 Checks if current string contains character `ch`.
 
+<br/>
+
 ```cpp
 constexpr bool contains(string_viewt str) const noexcept;
 ```
@@ -480,6 +514,8 @@ constexpr splited_string<string_viewt, string_viewt> split(string_viewt separato
 ```
 Splits current string into a `bs::splited_string` adapter. \
 Equivalent to `bs::splited_string<string_viewt, string_viewt>(*this, separator)`.
+
+<br/>
 
 ```cpp
 constexpr splited_string<string_viewt, value_type> split(value_type character) const noexcept;
@@ -494,6 +530,8 @@ constexpr size_type count(value_type ch) const noexcept;
 Counts number of `ch`.
 Returns a number of occurrences of the character `ch` in the string.
 
+<br/>
+
 ```cpp
 constexpr size_type count(string_viewt str) const noexcept;
 ```
@@ -507,6 +545,8 @@ constexpr string_viewt strip(value_type strip_ch) const noexcept;
 ```
 Removes leading and trailing characters `strip_ch`.
 
+<br/>
+
 ```cpp
 constexpr string_viewt strip(string_viewt chs) const noexcept;
 ```
@@ -518,6 +558,8 @@ constexpr string_viewt lstrip(value_type strip_ch) const noexcept;
 ```
 Removes leading characters `strip_ch`.
 
+<br/>
+
 ```cpp
 constexpr string_viewt lstrip(string_viewt chs) const noexcept;
 ```
@@ -528,6 +570,8 @@ Removes leading characters that is in the character sequence [`chs.data()`, `chs
 constexpr string_viewt rstrip(value_type strip_ch) const noexcept;
 ```
 Removes trailing characters `strip_ch`.
+
+<br/>
 
 ```cpp
 constexpr string_viewt rstrip(string_viewt chs) const noexcept;
@@ -541,6 +585,8 @@ constexpr string_viewt strip_first(value_type ch) const noexcept;
 Removes first character `ch`. \
 If the string starts with character `ch`, it will be removed from the view; otherwise, `*this` is returned.
 
+<br/>
+
 ```cpp
 constexpr string_viewt strip_first(string_viewt str) const noexcept;
 ```
@@ -553,6 +599,8 @@ constexpr string_viewt strip_last(value_type ch) const noexcept;
 ```
 Removes last character `ch`. \
 If the string ends with the character `ch`, it will be removed from the view; otherwise, `*this` is returned.
+
+<br/>
 
 ```cpp
 constexpr string_viewt strip_last(string_viewt str) const noexcept;
@@ -645,20 +693,28 @@ Access to these operators can be gained with either
 - `using namespace bs::literals`, or
 - `using namespace bs`.
 
+<br/>
+
 ```cpp
 constexpr bs::string_view operator ""_sv(const char* str, std::size_t len) noexcept;
 ```
 Returns `bs::string_view{str, len}`.
+
+<br/>
 
 ```cpp
 constexpr bs::wstring_view operator ""_sv(const wchar_t* str, std::size_t len) noexcept;
 ```
 Returns `bs::wstring_view{str, len}`.
 
+<br/>
+
 ```cpp
 constexpr bs::u16string_view operator ""_sv(const char16_t* str, std::size_t len) noexcept;
 ```
 Returns `bs::u16string_view{str, len}`.
+
+<br/>
 
 ```cpp
 constexpr bs::u32string_view operator ""_sv(const char32_t* str, std::size_t len) noexcept;
