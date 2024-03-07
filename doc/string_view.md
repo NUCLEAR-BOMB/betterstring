@@ -364,11 +364,13 @@ If string is empty, `false` is returned.
 constexpr bs::find_result<const value_type> find(value_type ch) const noexcept;
 ```
 Returns a position to the first occurrence of the character `ch`.
+<br/><br/>
 
 ```cpp
 constexpr bs::find_result<const value_type> find(string_viewt str) const noexcept;
 ```
 Returns a position to the first occurrence of the substring `str`.
+<br/><br/>
 
 ```cpp
 constexpr bs::find_result<const value_type> find(value_type ch, size_type start) const noexcept;
@@ -377,6 +379,8 @@ Returns a position to the first occurrence of the character `ch` starting at the
 > [!WARNING]
 > If the `start` is greater than string length, **assertion will be invoked**.
 
+<br/>
+
 ```cpp
 constexpr bs::find_result<const value_type> find(string_viewt str, size_type start) const noexcept;
 ```
@@ -384,12 +388,16 @@ Returns a position to the first occurrence of the substring `str` starting at th
 > [!WARNING]
 > If the `start` is greater than string length, **assertion will be invoked**.
 
+<br/>
+
 ```cpp
 constexpr bs::find_result<const value_type> find(value_type ch, const_pointer start) const noexcept;
 ```
 Returns a position to the first occurrence of the character `ch` starting at the position that `start` points to.
 > [!WARNING]
 > If the `start` is not in the range [`data()`, `data() + size()`), **assertion will be invoked**.
+
+<br/>
 
 ```cpp
 constexpr bs::find_result<const value_type> find(string_viewt str, const_pointer start) const noexcept;
