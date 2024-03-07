@@ -443,4 +443,17 @@ TEST_CASE("none_of", "[string_view]") {
     CHECK_FALSE("test string"_sv.none_of(bs::ascii::is_blank<char>));
 }
 
+TEST_CASE("find_first_not_of", "[string_view]") {
+    const bs::string_view str = "test string";
+    CHECK(str.find_first_not_of('t') == 1);
+    CHECK(str.find_first_not_of('e') == 0);
+    CHECK_FALSE(""_sv.find_first_not_of('a').found());
+
+    CHECK(str.find_first_not_of("test") == 4);
+    CHECK(str.find_first_not_of("tes") == 4);
+    CHECK(str.find_first_not_of("tes ") == 7);
+    CHECK(str.find_first_not_of("").found());
+    CHECK_FALSE(""_sv.find_first_not_of("daksdh,aw").found());
+}
+
 }

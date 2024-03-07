@@ -475,7 +475,7 @@ constexpr T* strfirstnof(T* str, std::size_t count, const detail::type_identity_
     using type = std::remove_const_t<T>;
     static_assert(is_character<type>);
 
-    if (needle_size == 0) { return nullptr; }
+    if (needle_size == 0) { return str; }
 
     if constexpr (std::is_same_v<type, char>) {
         uint8_t bitmap[256]{};
