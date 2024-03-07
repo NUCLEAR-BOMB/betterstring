@@ -16,6 +16,7 @@ Allows easy manipulations of returned result, i.e. convert to index or pointer w
 | Member type     | Definition    |
 | --------------- | ------------- |
 | **`size_type`** | `std::size_t` |
+| **`pointer`**   | `CharT*`      |
 
 ## Member Functions
 - [Constructor](#constructor)
@@ -32,9 +33,9 @@ Allows easy manipulations of returned result, i.e. convert to index or pointer w
 
 ### Constructor
 ```cpp
-constexpr find_result(const CharT* string_data, size_type string_size, const CharT* find_ptr) noexcept;
+constexpr find_result(pointer string_data, size_type string_end, pointer find_ptr) noexcept;
 ```
-Constructs `bs::find_result` using beginning of the string, string length and a pointer to the found location. \
+Constructs `bs::find_result` using beginning of the string, string end and a pointer to the found location. \
 If `find_ptr` is `nullptr`, this means that there is actually no matching character.
 
 ### `index`
@@ -72,7 +73,7 @@ Returns `index_or_end()`.
 
 ### `ptr`
 ```cpp
-constexpr const CharT* ptr() const noexcept;
+constexpr pointer ptr() const noexcept;
 ```
 Returns a pointer to the found location.
 > [!IMPORTANT]
@@ -80,19 +81,19 @@ Returns a pointer to the found location.
 
 ### `ptr_or_end`
 ```cpp
-constexpr const CharT* ptr_or_end() const noexcept;
+constexpr pointer ptr_or_end() const noexcept;
 ```
 Returns a pointer to the matching location, or, if it was not found, past-the-end pointer is returned (a pointer to the beginning of the string plus string length).
 
 ### `ptr_or_null`
 ```cpp
-constexpr const CharT* ptr_or_null() const noexcept;
+constexpr pointer ptr_or_null() const noexcept;
 ```
 Returns a pointer to the matching location, or, if it was not found, `nullptr` is returned.
 
 ### `ptr_or_throw`
 ```cpp
-constexpr const CharT* ptr_or_throw() const;
+constexpr pointer ptr_or_throw() const;
 ```
 Returns a pointer to the matching location. \
 If there is no match, `std::logic_error` exception is thrown.
