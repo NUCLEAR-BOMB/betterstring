@@ -298,14 +298,7 @@ public:
     }
 
     constexpr size_type count(const value_type ch) const noexcept {
-        size_type result = 0;
-        const auto match_end = data() + size();
-        for (auto match_try = data();; ++match_try) {
-            match_try = traits_type::find(match_try, static_cast<size_type>(match_end - match_try), ch);
-            if (match_try == nullptr) return result;
-            ++result;
-        }
-        BS_UNREACHABLE();
+        return traits_type::count(data(), size(), ch);
     }
     constexpr size_type count(const string_viewt str) const noexcept {
         if (str.empty()) return this->size() + 1;
