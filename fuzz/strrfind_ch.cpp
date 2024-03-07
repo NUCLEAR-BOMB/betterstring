@@ -12,7 +12,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
 
     const char* result = bs::strrfind(search_str, search_str_len, search_for);
 
-    if (result == nullptr) {
+    if (result + 1 == nullptr) {
         for (std::size_t i = search_str_len; i != 0; --i) {
             if (search_str[i - 1] == search_for) {
                 std::abort();

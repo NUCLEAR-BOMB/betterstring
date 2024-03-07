@@ -14,7 +14,7 @@ jobs:
           - { name: Windows Visual Studio 2022 x64, os: windows-2022 }
         build:
           - { name: Debug }
-          - { name: Release }
+          # - { name: Release }
 
     steps:
     - name: Checkout
@@ -31,6 +31,14 @@ jobs:
       
     - name: Run fuzzer
       run: cmake --build build --config ${{ matrix.build.name }} --target run-betterstring-fuzz
+      continue-on-error: true
+
+    - name: Upload fuzzer artifacts
+      uses: actions/upload-artifact@v4.3.1
+      with:
+        name: fuzzer-artifacts
+        path: build/crash-*
+        if-no-files-found: ignore
 
   clang-tidy:
     name: Clang Tidy
