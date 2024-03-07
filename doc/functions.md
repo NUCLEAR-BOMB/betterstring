@@ -13,6 +13,7 @@
 - [**`bs::strcount`**](#bsstrcount)
 - [**`bs::strfindn`**](#bsstrfindn)
 - [**`bs::strfirstof`**](#bsstrfirstof)
+- [**`bs::strfirstnof`**](#bsstrfirstnof)
 
 ## `bs::cstr`
 ```cpp
