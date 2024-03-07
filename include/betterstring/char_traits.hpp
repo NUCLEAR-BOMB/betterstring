@@ -74,7 +74,9 @@ public:
     static constexpr const char_type* first_of(const char_type* const str, const std::size_t count, const char_type* const needle, const std::size_t needle_len) {
         return bs::strfirstof(str, count, needle, needle_len);
     }
-
+    static constexpr const char_type* first_not_of(const char_type* const str, const std::size_t count, const char_type* const needle, const std::size_t needle_len) {
+        return bs::strfirstnof(str, count, needle, needle_len);
+    }
 
     static constexpr size_type count(const char_type* const str, const size_type str_len, const char_type ch) noexcept {
         return static_cast<size_type>(bs::strcount(str, str_len, ch));
