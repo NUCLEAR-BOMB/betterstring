@@ -351,6 +351,8 @@ TEST_CASE("bs::strfindn", "[functions]") {
 }
 
 TEST_CASE("bs::strfirst_of", "[functions]") {
+    CHECK(bs::strfirst_of("test", 4, nullptr, 0) == nullptr);
+
     const char* str1 = "012345";
     CHECK(bs::strfirst_of(str1, 6, "4", 1) == &str1[4]);
     CHECK(bs::strfirst_of(str1, 6, "6", 1) == nullptr);
