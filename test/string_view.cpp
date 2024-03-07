@@ -278,8 +278,6 @@ TEST_CASE("strip", "[string_view]") {
     CHECK("test string"_sv.strip("tes"_sv) == " string"_sv);
     CHECK(" \thellow\n "_sv.strip(" \t\n"_sv) == "hellow"_sv);
     CHECK("aaaaa"_sv.strip("a"_sv) == ""_sv);
-
-    CHECK("test string"_sv.strip() == "test string"_sv);
 }
 
 TEST_CASE("lstrip", "[string_view]") {
@@ -296,9 +294,6 @@ TEST_CASE("lstrip", "[string_view]") {
         CHECK("test string"_sv.lstrip("t"_sv) == "est string"_sv);
         CHECK("test string"_sv.lstrip("g"_sv) == "test string"_sv);
         CHECK("test string"_sv.lstrip("string"_sv) == "est string"_sv);
-
-        CHECK("test string"_sv.lstrip() == "test string"_sv);
-        CHECK(" \t \ntest"_sv.lstrip() == "test"_sv);
     }
 }
 
@@ -313,9 +308,6 @@ TEST_CASE("rstrip", "[string_view]") {
         CHECK("test string"_sv.rstrip("string"_sv) == "test "_sv);
         CHECK("test string"_sv.rstrip("g"_sv) == "test strin"_sv);
         CHECK("test string"_sv.rstrip("t"_sv) == "test string"_sv);
-
-        CHECK("test string"_sv.rstrip() == "test string"_sv);
-        CHECK(" test \n \v"_sv.rstrip() == " test"_sv);
     }
 }
 

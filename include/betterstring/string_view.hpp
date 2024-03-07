@@ -123,11 +123,6 @@ public:
         BS_VERIFY((index + Int(size())) >= 0 && index < Int(size()), "index is out of range");
         return data()[index < 0 ? index + size() : index];
     }
-    template<class Int, std::enable_if_t<std::is_integral_v<Int>, int> = 0>
-    constexpr reference operator[](const Int index) noexcept {
-        BS_VERIFY((index + Int(size())) >= 0 && index < Int(size()), "index is out of range");
-        return data()[index < 0 ? index + size() : index];
-    }
 
     constexpr const_reference front() const noexcept {
         BS_VERIFY(!empty(), "cannot access the first element from an empty string");
@@ -398,9 +393,6 @@ public:
     constexpr string_viewt strip(const string_viewt chs) const noexcept {
         return strip_impl2([&](auto f) { return strip_impl(f); }, chs);
     }
-    constexpr string_viewt strip() const noexcept {
-        return strip_impl2([&](auto f) { return strip_impl(f); });
-    }
 
     constexpr string_viewt lstrip(const value_type strip_ch) const noexcept {
         return strip_impl2([&](auto f) { return lstrip_impl(f); }, strip_ch);
@@ -408,18 +400,12 @@ public:
     constexpr string_viewt lstrip(const string_viewt chs) const noexcept {
         return strip_impl2([&](auto f) { return lstrip_impl(f); }, chs);
     }
-    constexpr string_viewt lstrip() const noexcept {
-        return strip_impl2([&](auto f) { return lstrip_impl(f); });
-    }
 
     constexpr string_viewt rstrip(const value_type strip_ch) const noexcept {
         return strip_impl2([&](auto f) { return rstrip_impl(f); }, strip_ch);
     }
     constexpr string_viewt rstrip(const string_viewt chs) const noexcept {
         return strip_impl2([&](auto f) { return rstrip_impl(f); }, chs);
-    }
-    constexpr string_viewt rstrip() const noexcept {
-        return strip_impl2([&](auto f) { return rstrip_impl(f); });
     }
 
     constexpr string_viewt strip_first(const value_type ch) const noexcept {
