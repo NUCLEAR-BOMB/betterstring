@@ -39,10 +39,19 @@ public:
 
     constexpr T* allocate(const std::size_t n) {
         if (std::size_t(-1) / sizeof(T) < n) { throw std::bad_array_new_length{}; }
-        return static_cast<T*>(::operator new[](sizeof(T) * n, std::align_val_t{Alignment}));
+
+        if constexpr (Alignment == 1) {
+            return static_cast<T*>(::operator new[](sizeof(T) * n));
+        } else {
+            return static_cast<T*>(::operator new[](sizeof(T) * n, std::align_val_t{Alignment}));
+        }
     }
     constexpr void deallocate(T* const ptr, const std::size_t n) {
-        ::operator delete[](ptr, sizeof(T) * n, std::align_val_t{Alignment});
+        if constexpr (Alignment == 1) {
+            ::operator delete[](ptr, sizeof(T) * n);
+        } else {
+            ::operator delete[](ptr, sizeof(T) * n, std::align_val_t{Alignment});
+        }
     }
 };
 
