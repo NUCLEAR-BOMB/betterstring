@@ -30,15 +30,14 @@ jobs:
       run: cmake --build build --config ${{ matrix.build.name }} --target run-betterstring-test
       
     - name: Run fuzzer
-      id: run-fuzzer
       run: cmake --build build --config ${{ matrix.build.name }} --target run-betterstring-fuzz
 
     - name: Upload fuzzer artifacts
-      if: always() && steps.run-fuzzer.outcome != 'success'
       uses: actions/upload-artifact@v4.3.1
       with:
         name: fuzzer-artifacts
         path: build/crash-*
+        if-no-files-found: ignore
 
   clang-tidy:
     name: Clang Tidy
