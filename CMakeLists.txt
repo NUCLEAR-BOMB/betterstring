@@ -24,6 +24,7 @@ add_library(betterstring
     "include/betterstring/string.hpp"
     "include/betterstring/safe_functions.hpp"
     "include/betterstring/find_result.hpp"
+    "include/betterstring/allocators.hpp"
 
     "include/betterstring/detail/preprocessor.hpp"
     "include/betterstring/detail/integer_cmps.hpp"

@@ -10,6 +10,7 @@ add_executable(betterstring-test
     "parsing.cpp"
     "string.cpp"
     "cpu_dispatch.cpp"
+    "allocators.cpp"
 
     "util.hpp"
 )
