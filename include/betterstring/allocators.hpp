@@ -7,9 +7,18 @@
 
 namespace bs {
 
+namespace detail {
+    template<class T>
+    constexpr bool is_power_of_two(const T x) noexcept {
+        return x != 0 && (x & (x - 1)) == 0;
+    }
+}
+
 template<class T, std::size_t Alignment>
 class aligned_allocator {
 public:
+    static_assert(detail::is_power_of_two(Alignment), "The alignment must be representable to the power of two");
+
     using value_type = T;
     using pointer = T*;
     using const_pointer = const T*;
