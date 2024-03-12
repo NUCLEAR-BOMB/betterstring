@@ -57,13 +57,13 @@ public:
     constexpr void deallocate(T* const ptr, const std::size_t n) {
         if constexpr (Alignment == 1) {
 #ifdef BS_BUILTIN_OPERATOR_DELETE
-            BS_BUILTIN_OPERATOR_DELETE(ptr, sizeof(T) * n);
+            BS_BUILTIN_OPERATOR_DELETE(ptr);
 #else
             ::operator delete[](ptr, sizeof(T) * n);
 #endif
         } else {
 #ifdef BS_BUILTIN_OPERATOR_DELETE
-            BS_BUILTIN_OPERATOR_DELETE(ptr, sizeof(T) * n, std::align_val_t{Alignment});
+            BS_BUILTIN_OPERATOR_DELETE(ptr, std::align_val_t{Alignment});
 #else
             ::operator delete[](ptr, sizeof(T) * n, std::align_val_t{Alignment});
 #endif
