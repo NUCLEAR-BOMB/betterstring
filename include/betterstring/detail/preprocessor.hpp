@@ -149,6 +149,11 @@
     #define BS_NO_UNIQUE_ADDRESS [[no_unique_address]]
 #endif
 
+#if (BS_HAS_BUILTIN(__builtin_operator_new) >= 201802L) && (BS_HAS_BUILTIN(__builtin_operator_delete) >= 201802L)
+    #define BS_BUILTIN_OPERATOR_NEW __builtin_operator_new
+    #define BS_BUILTIN_OPERATOR_DELETE __builtin_operator_delete
+#endif
+
 #if BS_HAS_BUILTIN(__builtin_constant_p)
     #define BS_BUILTIN_CONSTANT_P(expr) __builtin_constant_p(expr)
 #else

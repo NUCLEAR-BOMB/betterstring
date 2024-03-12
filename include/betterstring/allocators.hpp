@@ -41,16 +41,32 @@ public:
         if (std::size_t(-1) / sizeof(T) < n) { throw std::bad_array_new_length{}; }
 
         if constexpr (Alignment == 1) {
+#ifdef BS_BUILTIN_OPERATOR_NEW
+            return static_cast<T*>(BS_BUILTIN_OPERATOR_NEW(sizeof(T) * n));
+#else
             return static_cast<T*>(::operator new[](sizeof(T) * n));
+#endif
         } else {
+#ifdef BS_BUILTIN_OPERATOR_NEW
+            return static_cast<T*>(BS_BUILTIN_OPERATOR_NEW(sizeof(T) * n, std::align_val_t{Alignment}));
+#else
             return static_cast<T*>(::operator new[](sizeof(T) * n, std::align_val_t{Alignment}));
+#endif
         }
     }
     constexpr void deallocate(T* const ptr, const std::size_t n) {
         if constexpr (Alignment == 1) {
+#ifdef BS_BUILTIN_OPERATOR_DELETE
+            BS_BUILTIN_OPERATOR_DELETE(ptr, sizeof(T) * n);
+#else
             ::operator delete[](ptr, sizeof(T) * n);
+#endif
         } else {
+#ifdef BS_BUILTIN_OPERATOR_DELETE
+            BS_BUILTIN_OPERATOR_DELETE(ptr, sizeof(T) * n, std::align_val_t{Alignment});
+#else
             ::operator delete[](ptr, sizeof(T) * n, std::align_val_t{Alignment});
+#endif
         }
     }
 };

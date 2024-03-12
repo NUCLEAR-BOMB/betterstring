@@ -13,7 +13,6 @@ TEST_CASE("aligned_allocator", "[allocators]") {
         auto ptr = alloc.allocate(5);
         CHECK(std::uintptr_t(ptr) % 1 == 0);
         std::fill_n(ptr, 5, 'a');
-
         CHECK(ptr[0] == 'a');
         CHECK(ptr[1] == 'a');
         CHECK(ptr[2] == 'a');
