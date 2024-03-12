@@ -613,13 +613,13 @@ private:
         return new_cap;
     }
     [[nodiscard]] constexpr pointer allocate(const size_type cap) noexcept {
-        static_assert(alloc_traits::is_always_equal());
+        static_assert(alloc_traits::is_always_equal::value);
 
         allocator_type alloc{};
         return alloc_traits::allocate(alloc, cap);
     }
     constexpr void deallocate(const pointer ptr, const size_type cap) noexcept {
-        static_assert(alloc_traits::is_always_equal());
+        static_assert(alloc_traits::is_always_equal::value);
 
         allocator_type alloc{};
         alloc_traits::deallocate(alloc, ptr, cap);
