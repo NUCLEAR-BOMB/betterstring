@@ -228,8 +228,24 @@ template<class T>
     }
 }
 
+namespace detail {
+    extern "C" const char* betterstring_strfind_str_avx2(const char*, std::size_t, const char*, std::size_t);
+}
+
 template<class T>
 constexpr T* strfind(T* const haystack, const std::size_t count, const detail::type_identity_t<T>* const needle, const std::size_t needle_len) noexcept {
+    static_assert(is_character<std::remove_const_t<T>>);
+    using type = std::remove_const_t<T>;
+
+    if (!detail::is_constant_evaluated()) {
+        if constexpr (std::is_same_v<type, char>) {
+            using detail::cpu_features;
+            if (cpu_features.value & (cpu_features.AVX2 + cpu_features.BMI2)) {
+                return const_cast<char*>(detail::betterstring_strfind_str_avx2(haystack, count, needle, needle_len));
+            }
+        }
+    }
+
     if (needle_len > count) return nullptr;
     if (needle_len == 0) return haystack;
 
@@ -246,10 +262,6 @@ constexpr T* strfind(T* const haystack, const std::size_t count, const detail::t
         }
     }
     BS_UNREACHABLE();
-}
-
-namespace detail {
-    const char* strrfind_string_impl(const char*, std::size_t, const char*, std::size_t);
 }
 
 template<class T>
