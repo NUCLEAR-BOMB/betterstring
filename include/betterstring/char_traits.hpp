@@ -30,6 +30,8 @@ public:
     using base::not_eof;
 #endif
 
+    static constexpr std::size_t string_container_alignment = 32;
+
     static constexpr void assign(char_type& dest, const char_type& src) noexcept {
         dest = src;
     }

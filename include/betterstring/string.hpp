@@ -7,6 +7,7 @@
 #include <type_traits>
 #include <optional>
 
+#include <betterstring/allocators.hpp>
 #include <betterstring/char_traits.hpp>
 #include <betterstring/type_traits.hpp>
 #include <betterstring/string_view.hpp>
@@ -137,7 +138,6 @@ public:
     using value_type = typename Traits::char_type;
     using size_type = typename Traits::size_type;
 
-    using allocator_type = std::allocator<value_type>;
 
     using pointer = value_type*;
     using const_pointer = const value_type*;
@@ -147,9 +147,13 @@ public:
     using const_iterator = const value_type*;
 
     using traits_type = Traits;
-
 private:
-    detail::string_representation<value_type, size_type, 0> rep;
+    static constexpr std::size_t container_alignment = traits_type::string_container_alignment;
+public:
+    using allocator_type = bs::aligned_allocator<value_type, container_alignment>;
+private:
+    // alignas(container_alignment) for small string optimization
+    alignas(container_alignment) detail::string_representation<value_type, size_type, 0> rep;
 
     using self_string_view = bs::string_viewt<traits_type>;
     using optional_char = std::optional<value_type>;
@@ -609,10 +613,14 @@ private:
         return new_cap;
     }
     [[nodiscard]] constexpr pointer allocate(const size_type cap) noexcept {
+        static_assert(alloc_traits::is_always_equal());
+
         allocator_type alloc{};
         return alloc_traits::allocate(alloc, cap);
     }
     constexpr void deallocate(const pointer ptr, const size_type cap) noexcept {
+        static_assert(alloc_traits::is_always_equal());
+
         allocator_type alloc{};
         alloc_traits::deallocate(alloc, ptr, cap);
     }

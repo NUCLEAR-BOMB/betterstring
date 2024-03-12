@@ -75,19 +75,24 @@ TEST_CASE("constructor", "[string]") {
         CHECK(str2 == "long long long long long long long string");
     }
     SECTION("transfer ownership") {
-        char* const str_arr1 = new char[5];
+        using alloc_t = typename bs::string::allocator_type;
+        using alloc_traits = std::allocator_traits<alloc_t>;
+
+        alloc_t alloc{};
+
+        char* const str_arr1 = alloc_traits::allocate(alloc, 5);
         auto str = bs::string::transfer_ownership(str_arr1, 5);
         CHECK(str == "");
         str = "test";
         CHECK(str == "test");
 
-        char* const str_arr2 = new char[50];
+        char* const str_arr2 = alloc_traits::allocate(alloc, 50);
         str = bs::string::transfer_ownership(str_arr2, 50);
         CHECK(str == "");
         str = "long long long long long long long";
         CHECK(str == "long long long long long long long");
 
-        char* const str_arr3 = new char[40];
+        char* const str_arr3 = alloc_traits::allocate(alloc, 40);
         bs::strcopy(str_arr3, "hello world", 11);
         str = bs::string::transfer_ownership(str_arr3, 11, 40);
         CHECK(str == "hello world");
@@ -431,6 +436,16 @@ TEST_CASE(".ends_with", "[string]") {
     CHECK_FALSE(empty_str.ends_with('a'));
     CHECK_FALSE(empty_str.ends_with("b"));
     CHECK_FALSE(empty_str.ends_with("b2"));
+}
+
+TEST_CASE("alignment check", "[string]") {
+    constexpr std::size_t required_alignment = bs::string::traits_type::string_container_alignment;
+
+    bs::string str;
+    for (std::size_t i = 0; i < 50; ++i) {
+        str.push_back(char(i * 7));
+        CHECK(std::uintptr_t(str.data()) % required_alignment == 0);
+    }
 }
 
 }
