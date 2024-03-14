@@ -54,19 +54,28 @@ ADD_BENCHMARK("strrfind_ch_aligned") {
 
 ADD_BENCHMARK("strcount_ch") {
     bench.title("bs::strcount (character)");
+    using ankerl::nanobench::Rng;
 
-    std::vector<char> homogeneous_string(1 << 21, 'a');
+    const std::size_t full_string_len = 1 << 21;
+    char* const string = new char[full_string_len];
+
+    Rng rng;
+    for (std::size_t i = 0; i < full_string_len; i += 8) {
+        const uint64_t tmp = rng();
+        std::memcpy(string + i, &tmp, 8);
+    }
+
     for (std::size_t i = 0; i <= 21; ++i) {
         const std::size_t string_len = 1 << i;
-        if (string_len > homogeneous_string.size()) { throw std::logic_error("Sample length exceeds allocated capacity"); }
 
         bench.context("length", fmt::format("{}", string_len));
         bench.run(fmt::format("length {}", string_len), [&]() {
-            std::size_t result = bs::strcount(homogeneous_string.data(), string_len, 'a');
-            // std::size_t result = std::count(homogeneous_string.data(), homogeneous_string.data() + string_len, 'a');
+            std::size_t result = bs::strcount(string, string_len, 'a');
             bench.doNotOptimizeAway(result);
         });
     }
+
+    delete[] string;
 }
 
 #if BS_COMP_MSVC
