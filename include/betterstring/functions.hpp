@@ -477,7 +477,7 @@ constexpr T* strfirstnof(T* str, std::size_t count, const detail::type_identity_
 
     if (needle_size == 0) { return str; }
 
-    if constexpr (std::is_same_v<type, char>) {
+    if (std::is_same_v<type, char> && count >= 25) {
         uint8_t bitmap[256]{};
         do {
             bitmap[uint8_t(*needle)] = 0xFF;
@@ -493,18 +493,17 @@ constexpr T* strfirstnof(T* str, std::size_t count, const detail::type_identity_
             --count;
         }
         return nullptr;
-    } else {
-        while (count != 0) {
-            std::size_t i = 0;
-            while (*str != needle[i]) {
-                ++i;
-                if (i == needle_size) { return str; }
-            }
-            ++str;
-            --count;
-        }
-        return nullptr;
     }
+    while (count != 0) {
+        std::size_t i = 0;
+        while (*str != needle[i]) {
+            ++i;
+            if (i == needle_size) { return str; }
+        }
+        ++str;
+        --count;
+    }
+    return nullptr;
 }
 
 }
