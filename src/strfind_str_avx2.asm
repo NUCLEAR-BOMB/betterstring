@@ -54,15 +54,19 @@ betterstring_strfind_str_avx2 PROC
     ; Fill ymm1 with last character of the needle
     vpbroadcastb ymm1, BYTE PTR [r8 + r9 - 1]
 
-    cmp rdx, 32
+    ; r9 (needle_len) <= rdx (count)
+
+    lea rax, [r9 + 32 - 1]
+    cmp rdx, rax
     ja large_vec
 
     ; Check if haystack (rcx) or haystack + needle_len - 1 (rcx + r9 - 1) are crossing page boundary.
     lea rax, [rcx + r9 - 1]
-    or rax, rcx
     and rax, PAGE_SIZE-1
     cmp rax, PAGE_SIZE-32
     ja cross_page
+
+    ; rdx (count) <= 32
 
     ; +1 cycle: using vmovdqu with vpcmpeqb
     ; vmovdqu ymm3, YMMWORD PTR [...]
@@ -70,24 +74,22 @@ betterstring_strfind_str_avx2 PROC
     vpcmpeqb ymm3, ymm0, YMMWORD PTR [rcx]
     vpcmpeqb ymm4, ymm1, YMMWORD PTR [rcx + r9 - 1]
 
+    sub rdx, r9
+
     mov eax, -1
     bzhi r9d, eax, r9d ; r9d = (1 << r9d) - 1. r9d - needle length
-    vmovdqu ymm2, YMMWORD PTR [r8]
-    dec edx ; decrement for loop
 
-    ; Waits until ymm2 and ymm3 are ready
     ; Merge two resuls into single one
     vpand ymm5, ymm3, ymm4
 
+    vmovdqu ymm2, YMMWORD PTR [r8]
     vpmovmskb eax, ymm5
-    ; Don't need to clear bits that are outside the string, they will be handled in the loop.
-    ; It's saves one cycle (doing parallel cmp in loop vs bzhi).
 loop_less_vec:
     xor r10d, r10d ; prevent false dependency for tzcnt
     tzcnt r10d, eax
     btr eax, r10d ; set eax bit at r10d position to zero
-    cmp r10d, edx
-    jae return_zero
+    cmp r10, rdx
+    ja return_zero
 
     vpcmpeqb ymm0, ymm2, YMMWORD PTR [rcx + r10]
     vpmovmskb r11d, ymm0
@@ -116,17 +118,50 @@ return_haystack_no_vzeroupper:
     ret
 
 cross_page:
-    int 3 ; unimplemented
+    ; mov BYTE PTR [0], 1
+
+    mov rax, rcx
+    sub rax, r9
+    vpcmpeqb ymm3, ymm0, YMMWORD PTR [rax + rdx - 32 + 1]
+    vpcmpeqb ymm4, ymm1, YMMWORD PTR [rcx + rdx - 32]
+
+    add rcx, r9
+
+    vmovdqu ymm2, YMMWORD PTR [r8 + r9 - 32]
+
+    vpand ymm5, ymm3, ymm4
+    sub rdx, r9
+    not rdx
+
+    mov r8, r9
+    neg r8
+    mov eax, -1
+    shlx r8d, eax, r8d
+
+    vpmovmskb eax, ymm5
+    shrx eax, eax, edx
+cross_page_loop_less_vec:
+    test eax, eax
+    jz return_zero
+
+    xor r10d, r10d ; prevent false dependency for tzcnt
+    tzcnt r10d, eax
+    btr eax, r10d ; set eax bit at r10d position to zero
+
+    vpcmpeqb ymm0, ymm2, YMMWORD PTR [rcx + r10 - 32]
+    vpmovmskb r11d, ymm0
+
+    andn r11d, r11d, r8d
+    jnz cross_page_loop_less_vec
+
+    lea rax, [rcx + r10] ; return match position
+    sub rax, r9
+    vzeroupper
+    ret
 
     align 16
 large_vec:
-    int 3 ; not fully implemented
-
-    vpcmpeqb ymm2, ymm0, YMMWORD PTR [rcx]
-    vpcmpeqb ymm3, ymm1, YMMWORD PTR [rcx + r9 - 1]
-    vpand ymm4, ymm2, ymm3
-    vpmovmskb eax, ymm4
-    test eax, eax
+    include strfind_str/vec_needle.asm
 
 betterstring_strfind_str_avx2 ENDP
 
