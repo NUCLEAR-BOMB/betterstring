@@ -124,12 +124,23 @@ TEST_CASE("bs::strfind", "[functions]") {
         CHECK(bs::strfind(page_test_string + (4096 - 32), 32, "iyigderkt", 9) == &page_test_string[4096 - 32 + 0]);
         CHECK(bs::strfind(page_test_string + (4096 - 32), 32, "wqfyrmeyj", 9) == &page_test_string[4096 - 32 + 13]);
         CHECK(bs::strfind(page_test_string + (4096 - 32), 32, "o", 1) == nullptr);
-
+        
         std::memcpy(page_test_string + (4096 - 40), "sdwlfazhjkgyhtgfhafvgmbfatdrjasewerfyhju", 40);
         CHECK(bs::strfind(page_test_string + (4096 - 40), 40, "sdwlf", 5) == &page_test_string[4096 - 40 + 0]);
         CHECK(bs::strfind(page_test_string + (4096 - 40), 40, "hjkgyhtgfhafvgmbfat", 19) == &page_test_string[4096 - 40 + 7]);
         CHECK(bs::strfind(page_test_string + (4096 - 40), 40, "q", 1) == nullptr);
-        // CHECK(bs::strfind(page_test_string + (4096 - 40), 40, "yhju", 4) == &page_test_string[36]);
+        CHECK(bs::strfind(page_test_string + (4096 - 40), 40, "asew", 4) == &page_test_string[4096 - 40 + 29]);
+        CHECK(bs::strfind(page_test_string + (4096 - 40), 40, "yhju", 4) == &page_test_string[4096 - 40 + 36]);
+        
+        std::memcpy(page_test_string + (4096 - 90), "012345678910111213141516171819202122232425262728293031323334353637383940414243444546474849", 90);
+        CHECK(bs::strfind(page_test_string + (4096 - 90), 90, "415161718", 9) == &page_test_string[4096 - 90 + 19]);
+        CHECK(bs::strfind(page_test_string + (4096 - 90), 90, "223", 3) == &page_test_string[4096 - 90 + 35]);
+        CHECK(bs::strfind(page_test_string + (4096 - 90), 90, "3940", 4) == &page_test_string[4096 - 90 + 68]);
+        CHECK(bs::strfind(page_test_string + (4096 - 90), 90, "4142434", 7) == &page_test_string[4096 - 90 + 72]);
+        CHECK(bs::strfind(page_test_string + (4096 - 90), 90, "0414243444546474849", 19) == &page_test_string[4096 - 90 + 71]);
+        CHECK(bs::strfind(page_test_string + (4096 - 90), 90, "01234567891011121314151617181920", 32) == &page_test_string[4096 - 90 + 0]);
+        CHECK(bs::strfind(page_test_string + (4096 - 90), 90, "21222324252627282930313233343536", 32) == &page_test_string[4096 - 90 + 32]);
+        CHECK(bs::strfind(page_test_string + (4096 - 90), 90, "37383940414243444546474849", 26) == &page_test_string[4096 - 90 + 64]);
 
         page_free(page_test_string);
 
