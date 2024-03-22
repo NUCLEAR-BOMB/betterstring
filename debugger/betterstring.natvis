@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    // Copyright 2024.
+    // Distributed under the Boost Software License, Version 1.0.
+    // (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
+-->
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
     <Type Name="bs::stringt&lt;*&gt;">
         <Intrinsic Name="is_long" Expression="rep.rep.short_str.size &amp; (1 &lt;&lt; 7)" />
