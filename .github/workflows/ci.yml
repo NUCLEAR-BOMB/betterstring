@@ -20,6 +20,25 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4.1.1
 
+    - name: Cache CMake dependency source code
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-cmake-dependency-sources
+      with:
+        path: ${{github.workspace}}/build/_deps/*-src
+        key: ${{env.cache-name}}-${{hashFiles('**/CMakeLists.txt', 'cmake/**')}}
+        restore-keys: ${{env.cache-name}}-
+      
+    - name: Cache CMake dependency build directories
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-cmake-dependency-build-directories
+      with:
+        path: |
+          ${{github.workspace}}/build/_deps/*-build
+          ${{github.workspace}}/build/_deps/*-subbuild
+        key: ${{env.cache-name}}-${{matrix.platform.os}}-${{matrix.build.name}}-${{hashFiles('**/CMakeLists.txt', 'cmake/**')}}
+
     - name: Configure CMake
       run: cmake -B build -D CMAKE_BUILD_TYPE=${{ matrix.build.name }} ${{ matrix.platform.flags }}
 
