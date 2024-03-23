@@ -83,7 +83,7 @@ def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 def run_llvm_objdump(file, symbol, cpu):
-    EXTRA_ARGS = ["--disassemble", "--no-addresses", "--no-show-raw-insn",  "--disassembler-color=off", "--disassembler-options=intel"]
+    EXTRA_ARGS = ["--disassemble", "--no-addresses", "--no-show-raw-insn", "--disassembler-options=intel"]
     args = [LLVM_OBJDUMP, *EXTRA_ARGS, file, f"--disassemble-symbols={symbol}"]
 
     if cpu is not None:
@@ -92,7 +92,7 @@ def run_llvm_objdump(file, symbol, cpu):
     return subprocess.run(args, capture_output=True, text=True)
 
 def preprocess_assembly(str):
-    return set(re.findall("^\s+(\S+)", str, flags=re.MULTILINE))
+    return set(re.findall(r"^\s+(\S+)", str, flags=re.MULTILINE))
 
 def check_cpu_features(assembly_str):
     found_features = {}
