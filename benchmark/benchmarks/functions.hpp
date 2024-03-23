@@ -67,19 +67,15 @@ ADD_BENCHMARK("strcount_ch") {
 
     const std::size_t full_string_len = 1 << 21;
     char* const string = new char[full_string_len];
+    std::generate_n(string, full_string_len, [rng = Rng{}]() mutable -> char { return rng(); });
 
-    Rng rng;
-    for (std::size_t i = 0; i < full_string_len; i += 8) {
-        const uint64_t tmp = rng();
-        std::memcpy(string + i, &tmp, 8);
-    }
+    const char count_for = Rng{}();
 
-    for (std::size_t i = 0; i <= 21; ++i) {
-        const std::size_t string_len = 1 << i;
-
+    const std::vector<uint64_t> string_lengths_sequence = generate_length_sequence(21);
+    for (auto [string_len, index] : enumerate{string_lengths_sequence}) {
         bench.context("length", fmt::format("{}", string_len));
-        bench.run(fmt::format("length {}", string_len), [&]() {
-            std::size_t result = bs::strcount(string, string_len, 'a');
+        bench.run(fmt::format("length {} ({}/{})", string_len, index + 1, string_lengths_sequence.size()), [&]() {
+            std::size_t result = bs::strcount(string, string_len, count_for);
             bench.doNotOptimizeAway(result);
         });
     }
