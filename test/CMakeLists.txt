@@ -33,13 +33,6 @@ set_target_properties(Catch2 PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<T
 
 target_compile_definitions(betterstring-test PRIVATE CATCH_CONFIG_FAST_COMPILE)
 
-if (DEFINED catch2_SOURCE_DIR)
-    list(APPEND CMAKE_MODULE_PATH "${catch2_SOURCE_DIR}/extras")
-endif()
-include(CTest)
-include(Catch)
-catch_discover_tests(betterstring-test)
-
 if (USE_SANITIZERS)
     include("${PROJECT_SOURCE_DIR}/cmake/sanitizers.cmake")
     target_add_sanitizer(betterstring-test SANITIZERS Address UndefinedBehavior LIBRARIES Catch2 Catch2WithMain)
