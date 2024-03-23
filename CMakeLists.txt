@@ -15,7 +15,10 @@ if (PROJECT_IS_TOP_LEVEL)
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 endif()
 
-set(CMAKE_ASM_MASM_COMPILER "ml64.exe")
+find_program(ml64_assembler NAMES "ml64.exe" REQUIRED
+    DOC "The required assembler for building main betterstring library"
+)
+set(CMAKE_ASM_MASM_COMPILER ${ml64_assembler})
 
 include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
 
