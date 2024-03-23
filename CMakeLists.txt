@@ -2,11 +2,13 @@ cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 project(betterstring VERSION 0.1 LANGUAGES CXX ASM_MASM)
 
-option(BUILD_TEST "" ${PROJECT_IS_TOP_LEVEL})
-option(USE_CLANG_TIDY "" ${PROJECT_IS_TOP_LEVEL})
-option(BUILD_BENCHMARK "" ${PROJECT_IS_TOP_LEVEL})
-option(BUILD_FUZZ "" ${PROJECT_IS_TOP_LEVEL})
-option(USE_SANITIZERS "" ${PROJECT_IS_TOP_LEVEL})
+option(BUILD_TEST "Build the betterstring-test target" ${PROJECT_IS_TOP_LEVEL})
+option(USE_CLANG_TIDY "Enable the clang-tidy analyzer" ${PROJECT_IS_TOP_LEVEL})
+option(BUILD_BENCHMARK "Build the betterstring-benchmark target" ${PROJECT_IS_TOP_LEVEL})
+option(BUILD_FUZZ "Build fuzzer targets" ${PROJECT_IS_TOP_LEVEL})
+option(USE_SANITIZERS "Enable sanitizers for entire project" ${PROJECT_IS_TOP_LEVEL})
+option(USE_NATVIS "Enable .natvis file for visual studio debugger" TRUE)
+option(USE_NATSTEPFILTER "Enable .natstepfilter file for visual studio debugger" TRUE)
 # option(INSTALL_BETTERSTRING "" ${PROJECT_IS_TOP_LEVEL})
 
 if (PROJECT_IS_TOP_LEVEL)
@@ -45,6 +47,7 @@ add_library(betterstring
 
 target_compile_options(betterstring PRIVATE $<$<COMPILE_LANGUAGE:ASM_MASM>:/Cp>)
 
+# ignore warnings for betterstring library headers
 if (NOT PROJECT_IS_TOP_LEVEL)
     set(include_as_system "SYSTEM")
 endif()
@@ -62,12 +65,18 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     )
 endif()
 
-target_sources(betterstring PUBLIC
-    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/debugger/betterstring.natvis>"
-    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_DATADIR}/debugger/betterstring.natvis>"
-    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/debugger/betterstring.natstepfilter>"
-    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_DATADIR}/debugger/betterstring.natstepfilter>"
-)
+if (USE_NATVIS)
+    target_sources(betterstring PUBLIC
+        "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/debugger/betterstring.natvis>"
+        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_DATADIR}/debugger/betterstring.natvis>"
+    )
+endif()
+if (USE_NATSTEPFILTER)
+    target_sources(betterstring PUBLIC
+        "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/debugger/betterstring.natstepfilter>"
+        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_DATADIR}/debugger/betterstring.natstepfilter>"
+    )
+endif()
 
 if (BUILD_TEST)
     enable_testing()
