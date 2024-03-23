@@ -56,10 +56,6 @@ vec_loop:
     vpmovmskb r9, ymm2
     vpmovmskb r10, ymm3
     vpmovmskb r11, ymm4
-    xor r8d, r8d
-    xor r9d, r9d
-    xor r10d, r10d
-    xor r11d, r11d
     popcnt r8, r8
     popcnt r9, r9
     popcnt r10, r10
