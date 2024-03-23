@@ -1,0 +1,13 @@
+<StepFilter xmlns="http://schemas.microsoft.com/vstudio/debugger/natstepfilter/2010">
+    <!-- Disable stepping into members/constructors of bs::string_view, they are mostly trivial -->
+    <Function>
+        <Name>bs::string_viewt&lt;.+&gt;::.+</Name>
+        <Action>NoStepInto</Action>
+    </Function>
+    <!--
+        <Function>
+            <Name>bs::stringt&lt;.+&gt;::.+</Name>
+            <Action>NoStepInto</Action>
+        </Function>
+    -->
+</StepFilter>

@@ -63,8 +63,10 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
 target_sources(betterstring PUBLIC
-        "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/debugger/betterstring.natvis>"
-        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_DATADIR}/debugger/betterstring.natvis>"
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/debugger/betterstring.natvis>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_DATADIR}/debugger/betterstring.natvis>"
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/debugger/betterstring.natstepfilter>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_DATADIR}/debugger/betterstring.natstepfilter>"
 )
 
 if (BUILD_TEST)
