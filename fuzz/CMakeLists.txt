@@ -7,6 +7,7 @@ macro(add_fuzzer target_name)
     add_executable(${target_name} ${ARGN})
     target_link_libraries(${target_name} PRIVATE betterstring)
     target_add_sanitizer(${target_name} SANITIZERS Fuzzer Address)
+    set_target_properties(${target_name} PROPERTIES FOLDER "fuzzers/")
     list(APPEND fuzz_targets ${target_name})
 endmacro()
 

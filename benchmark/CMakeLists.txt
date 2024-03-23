@@ -13,6 +13,7 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 FetchContent_MakeAvailable(nanobench fmt)
+set_target_properties(nanobench fmt PROPERTIES FOLDER "external/")
 
 add_executable(betterstring-benchmark
     "main.cpp"
