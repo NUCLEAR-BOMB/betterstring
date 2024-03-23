@@ -17,6 +17,16 @@
         <Name>bs::string_viewt&lt;.+&gt;::.+</Name>
         <Action>NoStepInto</Action>
     </Function>
+    <!-- Skip user-defined literals for bs::string_viewt -->
+    <Function>
+        <Name>bs::literals::operator "" _sv</Name>
+        <Action>NoStepInto</Action>
+    </Function>
+    <!-- Skip a result conversion from find-like functions (bs::find_result) -->
+    <Function>
+        <Name>bs::find_result&lt;.+&gt;::.+</Name>
+        <Action>NoStepInto</Action>
+    </Function>
     <!--
         <Function>
             <Name>bs::stringt&lt;.+&gt;::.+</Name>
