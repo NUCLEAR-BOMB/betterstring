@@ -142,13 +142,24 @@ TEST_CASE("bs::strfind", "[functions]") {
         CHECK(bs::strfind(page_test_string + (4096 - 90), 90, "21222324252627282930313233343536", 32) == &page_test_string[4096 - 90 + 32]);
         CHECK(bs::strfind(page_test_string + (4096 - 90), 90, "37383940414243444546474849", 26) == &page_test_string[4096 - 90 + 64]);
 
-        page_free(page_test_string);
 
         char* const needle_page = static_cast<char*>(page_alloc());
 
         const char* const str1 = "0123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354";
         std::memcpy(needle_page + (4096 - 20), "45464748495051525354", 20);
         CHECK(bs::strfind(str1, 100, needle_page + (4096 - 20), 20) == &str1[80]);
+        CHECK(bs::strfind(str1, 100, needle_page + 4096, 0) == &str1[0]);
+        std::memcpy(needle_page + (4096 - 32), "72829303132333435363738394041424", 32);
+        CHECK(bs::strfind(str1, 100, needle_page + (4096 - 32), 32) == &str1[45]);
+
+        std::memcpy(page_test_string + (4096 - 75), "012345678910111213141516171819202122232425262728293031323334353637383940414", 75);
+        std::memcpy(needle_page, "3435363738394", 13);
+        CHECK(bs::strfind(page_test_string + (4096 - 75), 75, needle_page, 13) == &page_test_string[4096 - 75 + 58]);
+        CHECK(bs::strfind(page_test_string + (4096 - 75), 75, needle_page, 0) == &page_test_string[4096 - 75 + 0]);
+        std::memcpy(needle_page, "10111213141516171819202122232425", 32);
+        CHECK(bs::strfind(page_test_string + (4096 - 75), 75, needle_page, 32) == &page_test_string[4096 - 75 + 10]);
+
+        page_free(page_test_string);
 
         page_free(needle_page);
 

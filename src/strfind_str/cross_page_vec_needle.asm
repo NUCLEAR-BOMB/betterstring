@@ -10,7 +10,13 @@ ENDM
 ; 
 ; _RDATA ENDS
 
+    lea rax, [r8 + r9 - 32]
+    and rax, PAGE_SIZE-1
+    cmp rax, PAGE_SIZE-32
+    ja L(needle_cross_page)
+
     vmovdqu ymm5, YMMWORD PTR [r8 + r9 - 32]
+L(needle_cross_page_continue):
 
     ; vmovdqu ymm5, YMMWORD PTR [r8]
     ; vpshufb ymm5, ymm5, YMMWORD PTR [L(needle_shuffle_mask)]
@@ -126,3 +132,12 @@ L(vec_last_loop_end):
     xor rax, rax
     vzeroupper
     ret
+
+    align 16
+L(needle_cross_page):
+    sub rsp, 64
+    vmovdqu ymm5, YMMWORD PTR [r8]
+    vmovdqu YMMWORD PTR [rsp + 32], ymm5
+    vmovdqu ymm5, YMMWORD PTR [rsp + r9]
+    add rsp, 64
+    jmp L(needle_cross_page_continue)
