@@ -64,11 +64,10 @@ betterstring_strfind_str_avx2 PROC
     cmp rdx, rax
     ja large_vec
 
-    lea rax, [rcx + rdx]
-    sub rax, r9
+    lea rax, [rcx + rdx - 1]
     and rax, PAGE_SIZE-1
     cmp rax, PAGE_SIZE-32
-    jae cross_page
+    ja cross_page
 
     ; rdx (count) <= 32
 
