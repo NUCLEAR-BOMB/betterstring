@@ -64,11 +64,11 @@ betterstring_strfind_str_avx2 PROC
     cmp rdx, rax
     ja large_vec
 
-    ; Check if haystack (rcx) or haystack + needle_len - 1 (rcx + r9 - 1) are crossing page boundary.
-    lea rax, [rcx + r9 - 1]
+    lea rax, [rcx + rdx]
+    sub rax, r9
     and rax, PAGE_SIZE-1
     cmp rax, PAGE_SIZE-32
-    ja cross_page
+    jae cross_page
 
     ; rdx (count) <= 32
 
@@ -80,13 +80,18 @@ betterstring_strfind_str_avx2 PROC
 
     sub rdx, r9
 
-    mov eax, -1
-    bzhi r9d, eax, r9d ; r9d = (1 << r9d) - 1. r9d - needle length
-
     ; Merge two resuls into single one
     vpand ymm5, ymm3, ymm4
 
+    mov rax, r8
+    and rax, PAGE_SIZE-1
+    cmp rax, PAGE_SIZE-32
+    ja needle_cross_page_left
     vmovdqu ymm2, YMMWORD PTR [r8]
+needle_cross_page_left_continue:
+    mov eax, -1
+    bzhi r9d, eax, r9d ; r9d = (1 << r9d) - 1. r9d - needle length
+
     vpmovmskb eax, ymm5
 loop_less_vec:
     xor r10d, r10d ; prevent false dependency for tzcnt
@@ -131,7 +136,13 @@ cross_page:
 
     add rcx, r9
 
+    lea rax, [r8 + r9 - 32]
+    and rax, PAGE_SIZE-1
+    cmp rax, PAGE_SIZE-32
+    ja needle_cross_page_right
+
     vmovdqu ymm2, YMMWORD PTR [r8 + r9 - 32]
+needle_cross_page_right_continue:
 
     vpand ymm5, ymm3, ymm4
     sub rdx, r9
@@ -179,6 +190,24 @@ large_vec:
     align 16
 cross_page_vec:
     include strfind_str/cross_page_vec_needle.asm
+
+    align 16
+needle_cross_page_left:
+    sub rsp, 64
+    vmovdqu ymm2, YMMWORD PTR [r8 + r9 - 32]
+    vmovdqu YMMWORD PTR [rsp + r9], ymm2
+    vmovdqu ymm2, YMMWORD PTR [rsp + 32]
+    add rsp, 64
+    jmp needle_cross_page_left_continue
+
+    align 16
+needle_cross_page_right:
+    sub rsp, 64
+    vmovdqu ymm2, YMMWORD PTR [r8]
+    vmovdqu YMMWORD PTR [rsp + 32], ymm2
+    vmovdqu ymm2, YMMWORD PTR [rsp + r9]
+    add rsp, 64
+    jmp needle_cross_page_right_continue
 
 betterstring_strfind_str_avx2 ENDP
 

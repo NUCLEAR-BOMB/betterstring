@@ -80,8 +80,9 @@ L(vec_last):
     vpcmpeqb ymm3, ymm1, YMMWORD PTR [rcx]
     lea rcx, [rcx + r9 + 1]
 
+    add rdx, r9
     and rdx, 32-1
-    neg rdx
+    not rdx
 
     mov eax, -1
     shlx r10d, eax, edx

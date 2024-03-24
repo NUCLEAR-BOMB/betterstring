@@ -99,6 +99,7 @@ L(vec_last):
     lea rcx, [rcx + r9 + 1]
     sub rcx, r9
 
+    add rdx, r9
     and rdx, 32-1
     not rdx
 
