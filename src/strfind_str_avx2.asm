@@ -41,6 +41,10 @@ PAGE_SIZE equ 1 SHL 12 ; 4096
 ; return nullptr;
 ;
 
+MM_SHUFFLE MACRO d:REQ, c:REQ, b:REQ, a:REQ
+    EXITM <(d SHL 6) OR (c SHL 4) OR (b SHL 2) OR (a)>
+ENDM
+
 betterstring_strfind_str_avx2 PROC
 
     cmp r9, rdx ; check if needle length is greater than haystack size.
@@ -161,7 +165,20 @@ cross_page_loop_less_vec:
 
     align 16
 large_vec:
+    vpcmpeqb ymm2, ymm0, YMMWORD PTR [rcx]
+    vpcmpeqb ymm3, ymm1, YMMWORD PTR [rcx + r9 - 1]
+
+    lea rax, [rcx + rdx]
+    sub rax, r9
+    and rax, PAGE_SIZE-1
+    cmp rax, PAGE_SIZE-32
+    jae cross_page_vec
+
     include strfind_str/vec_needle.asm
+
+    align 16
+cross_page_vec:
+    include strfind_str/cross_page_vec_needle.asm
 
 betterstring_strfind_str_avx2 ENDP
 

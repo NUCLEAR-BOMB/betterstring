@@ -1,15 +1,27 @@
 
 L MACRO label_name:REQ
-    EXITM <@CatStr(<vec_needle_>, label_name)>
+    EXITM <@CatStr(<cross_page_vec_needle_>, label_name)>
 ENDM
 
-    ; r9 (needle length) <= 32
-    ; r9 (needle length) <= rdx (haystack length)
+; _RDATA SEGMENT ALIGN(64) ALIAS(".rdata") READONLY
+;     align 64
+; L(needle_shuffle_mask):
+;     DB 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+; 
+; _RDATA ENDS
 
-    vmovdqu ymm5, YMMWORD PTR [r8]
+    vmovdqu ymm5, YMMWORD PTR [r8 + r9 - 32]
 
+    ; vmovdqu ymm5, YMMWORD PTR [r8]
+    ; vpshufb ymm5, ymm5, YMMWORD PTR [L(needle_shuffle_mask)]
+    ; vpermq ymm5, ymm5, MM_SHUFFLE(1, 0, 3, 2)
+
+    add rcx, r9
+
+    xor r8, r8
     mov eax, -1
-    bzhi r8d, eax, r9d ; r8d = (1 << r9d) - 1. r9d - needle length
+    sub r8, r9
+    shlx r8d, eax, r8d
 
     vpand ymm4, ymm2, ymm3
     vpmovmskb eax, ymm4
@@ -21,7 +33,7 @@ L(vec1_loop):
     xor r10d, r10d
     tzcnt r10d, eax
 
-    vpcmpeqb ymm2, ymm5, YMMWORD PTR [rcx + r10]
+    vpcmpeqb ymm2, ymm5, YMMWORD PTR [rcx + r10 - 32]
     btr eax, r10d
 
     vpmovmskb r11d, ymm2
@@ -29,19 +41,22 @@ L(vec1_loop):
     jnz L(vec1_loop)
 
     lea rax, [rcx + r10] ; return match position
+    sub rax, r9
     vzeroupper
     ret
 
 L(vec1_loop_end):
-    lea rax, [r9 + 64 - 1]
+    sub rcx, r9
+    lea rax, [r9 + 32*2 - 1]
     cmp rdx, rax
     jbe L(vec_last)
 
-    ; check next 32 bytes
     vpcmpeqb ymm2, ymm0, YMMWORD PTR [rcx + 32]
     vpcmpeqb ymm3, ymm1, YMMWORD PTR [rcx + r9 - 1 + 32]
+    add rcx, r9
     vpand ymm4, ymm2, ymm3
     vpmovmskb eax, ymm4
+
 L(vec2_loop):
     test eax, eax
     jz L(vec2_loop_end)
@@ -49,7 +64,7 @@ L(vec2_loop):
     xor r10d, r10d
     tzcnt r10d, eax
 
-    vpcmpeqb ymm2, ymm5, YMMWORD PTR [rcx + r10 + 32]
+    vpcmpeqb ymm2, ymm5, YMMWORD PTR [rcx + r10 - 32 + 32]
     btr eax, r10d
 
     vpmovmskb r11d, ymm2
@@ -57,25 +72,29 @@ L(vec2_loop):
     jnz L(vec2_loop)
 
     lea rax, [rcx + r10 + 32] ; return match position
+    sub rax, r9
     vzeroupper
     ret
 
 L(vec2_loop_end):
-    cmp rdx, 32*3
+    sub rcx, r9
+    lea rax, [r9 + 32*3 - 1]
+    cmp rdx, rax
     jbe L(vec_last)
+
+    mov QWORD PTR [0123h], rax
 
     align 16
 L(vec_last):
-    ; int 3
-
     lea rcx, [rcx + rdx - 32]
     neg r9
     vpcmpeqb ymm2, ymm0, YMMWORD PTR [rcx + r9 + 1]
     vpcmpeqb ymm3, ymm1, YMMWORD PTR [rcx]
     lea rcx, [rcx + r9 + 1]
+    sub rcx, r9
 
     and rdx, 32-1
-    neg rdx
+    not rdx
 
     mov eax, -1
     shlx r10d, eax, edx
@@ -91,7 +110,7 @@ L(vec_last_loop):
     xor r10d, r10d
     tzcnt r10d, eax
 
-    vpcmpeqb ymm2, ymm5, YMMWORD PTR [rcx + r10]
+    vpcmpeqb ymm2, ymm5, YMMWORD PTR [rcx + r10 - 32]
     btr eax, r10d
 
     vpmovmskb r11d, ymm2
@@ -99,6 +118,7 @@ L(vec_last_loop):
     jnz L(vec_last_loop)
 
     lea rax, [rcx + r10] ; return match position
+    add rax, r9
     vzeroupper
     ret
 
