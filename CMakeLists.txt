@@ -45,6 +45,18 @@ add_library(betterstring
 
     "src/strfirstof_avx2.asm"
 )
+set(strfirstof_files
+    "src/strfirstof/cmp_1.asm"
+    "src/strfirstof/cmp_2.asm"
+    "src/strfirstof/cmp_3.asm"
+    "src/strfirstof/cmp_4.asm"
+    "src/strfirstof/cmp_5.asm"
+    "src/strfirstof/cmp_6.asm"
+    "src/strfirstof/cmp_any.asm"
+)
+target_sources(betterstring PRIVATE ${strfirstof_files})
+set_source_files_properties(${strfirstof_files} PROPERTIES HEADER_FILE_ONLY TRUE)
+source_group("strfirstof" FILES ${strfirstof_files})
 
 target_compile_options(betterstring PRIVATE $<$<COMPILE_LANGUAGE:ASM_MASM>:/Cp>)
 
