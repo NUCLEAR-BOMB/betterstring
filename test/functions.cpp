@@ -144,6 +144,14 @@ TEST_CASE("bs::strfind", "[functions]") {
 
         page_free(page_test_string);
 
+        char* const needle_page = static_cast<char*>(page_alloc());
+
+        const char* const str1 = "0123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354";
+        std::memcpy(needle_page + (4096 - 20), "45464748495051525354", 20);
+        CHECK(bs::strfind(str1, 100, needle_page + (4096 - 20), 20) == &str1[80]);
+
+        page_free(needle_page);
+
         // CHECK(bs::strfind(test_str, 11, "string", 6) == &test_str[5]);
         // CHECK(bs::strfind(test_str, 3, "hello", 5) == nullptr);
         // CHECK(bs::strfind(test_str, 11, nullptr, 0) == test_str);

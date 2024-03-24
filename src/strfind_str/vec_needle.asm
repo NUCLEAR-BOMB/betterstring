@@ -6,7 +6,13 @@ ENDM
     ; r9 (needle length) <= 32
     ; r9 (needle length) <= rdx (haystack length)
 
+    mov rax, r8
+    and rax, PAGE_SIZE-1
+    cmp rax, PAGE_SIZE-32
+    ja L(needle_cross_page)
+
     vmovdqu ymm5, YMMWORD PTR [r8]
+L(needle_cross_page_continue):
 
     mov eax, -1
     bzhi r8d, eax, r9d ; r8d = (1 << r9d) - 1. r9d - needle length
@@ -106,3 +112,12 @@ L(vec_last_loop_end):
     xor rax, rax
     vzeroupper
     ret
+
+    align 16
+L(needle_cross_page):
+    sub rsp, 64
+    vmovdqu ymm5, YMMWORD PTR [r8 + r9 - 32]
+    vmovdqu YMMWORD PTR [rsp + r9], ymm5
+    vmovdqu ymm5, YMMWORD PTR [rsp + 32]
+    add rsp, 64
+    jmp L(needle_cross_page_continue)
