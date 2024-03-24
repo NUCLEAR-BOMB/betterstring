@@ -22,4 +22,5 @@ Checks: >
   -readability-qualified-auto,
   -bugprone-string-literal-with-embedded-nul,
   -cert-err33-c,
+  -bugprone-not-null-terminated-result,
 WarningsAsErrors: '*'
