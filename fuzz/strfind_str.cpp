@@ -39,16 +39,18 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* Data, size_t Size) {
     const size_t needle_size = *reinterpret_cast<const uint16_t*>(Data);
     const int8_t needle_page_offset = *reinterpret_cast<const int8_t*>(Data + 2);
     const int8_t haystack_page_offset = *reinterpret_cast<const int8_t*>(Data + 3);
+    const size_t leftover_size = Size - 4;
 
-    if (needle_size > Size) { return -1; }
+    if (needle_size > leftover_size) { return -1; }
 
     const auto needle_src = reinterpret_cast<const char*>(Data) + 4;
 
-    const size_t haystack_size = Size - 4 - needle_size;
+    const size_t haystack_size = leftover_size - needle_size;
+
     const auto haystack_src = reinterpret_cast<const char*>(Data) + 4 + needle_size;
 
-    if (needle_size > 32) { return -1; }
-    if (haystack_size > 96 + needle_size - 1) { return -1; }
+    if (needle_size > 32) { return 0; }
+    if (haystack_size > 96 + needle_size - 1) { return 0; }
 
     char* const haystack_base = (char*)page_alloc();
     char* const needle_base = (char*)page_alloc();
