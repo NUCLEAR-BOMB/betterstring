@@ -516,7 +516,7 @@ constexpr T* strlastof(T* str, std::size_t count, const detail::type_identity_t<
     using type = std::remove_const_t<T>;
     static_assert(is_character<type>);
 
-    if (needle_size == 0) { return str; }
+    if (needle_size == 0) { return nullptr; }
 
     if constexpr (std::is_same_v<type, char>) {
         uint8_t bitmap[256]{};
