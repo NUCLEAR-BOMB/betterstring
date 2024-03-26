@@ -536,10 +536,10 @@ constexpr T* strlastof(T* str, std::size_t count, const detail::type_identity_t<
     } else {
         while (count != 0) {
             std::size_t i = 0;
-            while (*(str + count - 1) != needle[i]) {
+            do {
+                if (*(str + count - 1) == needle[i]) { return str + count - 1; }
                 ++i;
-                if (i == needle_size) { return str + count - 1; }
-            }
+            } while (i < needle_size);
             --count;
         }
         return nullptr;
