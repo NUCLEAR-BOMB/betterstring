@@ -308,6 +308,8 @@ TEST_CASE(".at", "[string]") {
     CHECK(str.at(-2) == 'n');
     CHECK(str.at(str.size() - 1) == 'g');
 
+    CHECK(&(*str.at(0)).get() == &str[0]);
+
     CHECK_FALSE(str.at(3128) == 'a');
     CHECK_FALSE(str.at(-123).has_value());
     CHECK_FALSE(str.at(str.size()) == 'g');

@@ -11,6 +11,7 @@
 #include <memory>
 #include <type_traits>
 #include <optional>
+#include <functional>
 
 #include <betterstring/allocators.hpp>
 #include <betterstring/char_traits.hpp>
@@ -161,7 +162,8 @@ private:
     alignas(container_alignment) detail::string_representation<value_type, size_type, 0> rep;
 
     using self_string_view = bs::string_viewt<traits_type>;
-    using optional_char = std::optional<value_type>;
+    using optional_char_reference = std::optional<std::reference_wrapper<value_type>>;
+    using optional_char_const_reference = std::optional<std::reference_wrapper<const value_type>>;
 public:
 
     constexpr stringt() noexcept
@@ -496,9 +498,16 @@ public:
     }
 
     template<class Int, std::enable_if_t<std::is_integral_v<Int>, int> = 0>
-    constexpr optional_char at(const Int index) const noexcept {
+    constexpr optional_char_const_reference at(const Int index) const noexcept {
         if (index + Int(size()) < 0 || index >= Int(size())) {
-            return {};
+            return std::nullopt;
+        }
+        return data()[index < 0 ? index + size() : index];
+    }
+    template<class Int, std::enable_if_t<std::is_integral_v<Int>, int> = 0>
+    constexpr optional_char_reference at(const Int index) noexcept {
+        if (index + Int(size()) < 0 || index >= Int(size())) {
+            return std::nullopt;
         }
         return data()[index < 0 ? index + size() : index];
     }
@@ -520,12 +529,21 @@ public:
         return data()[size() - 1];
     }
 
-    constexpr optional_char at_front() const noexcept {
-        if (size() == 0) { return {}; }
+    constexpr optional_char_const_reference at_front() const noexcept {
+        if (size() == 0) { return std::nullopt; }
         return data()[0];
     }
-    constexpr optional_char at_back() const noexcept {
-        if (size() == 0) { return {}; }
+    constexpr optional_char_reference at_front() noexcept {
+        if (size() == 0) { return std::nullopt; }
+        return data()[0];
+    }
+
+    constexpr optional_char_const_reference at_back() const noexcept {
+        if (size() == 0) { return std::nullopt; }
+        return data()[size() - 1];
+    }
+    constexpr optional_char_reference at_back() noexcept {
+        if (size() == 0) { return std::nullopt; }
         return data()[size() - 1];
     }
 
