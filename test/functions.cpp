@@ -405,4 +405,14 @@ TEST_CASE("bs::strlastnof", "[functions]") {
     CHECK(bs::strlastnof(str1, 11, "ggggggnnnnggiii", 15) == &str1[7]);
 }
 
+TEST_CASE("bs::strrfindn", "[functions]") {
+    const char* str1 = "hello world";
+    CHECK(bs::strrfindn(str1, 11, 'd') == &str1[9]);
+    CHECK(bs::strrfindn(str1, 11, 'l') == &str1[10]);
+    const char* str2 = "aaaaaaabbbbb";
+    CHECK(bs::strrfindn(str2, 12, 'b') == &str2[6]);
+    const char* str3 = "bbbbbbbbbbbbbb";
+    CHECK(bs::strrfindn(str3, 14, 'b') == nullptr);
+}
+
 }

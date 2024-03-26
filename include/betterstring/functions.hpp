@@ -425,6 +425,20 @@ constexpr T* strfindn(T* str, std::size_t count, detail::type_identity_t<T> ch) 
     return nullptr;
 }
 
+template<class T>
+constexpr T* strrfindn(T* str, std::size_t count, detail::type_identity_t<T> ch) noexcept {
+    using type = std::remove_const_t<T>;
+    static_assert(is_character<type>);
+
+    while (count != 0) {
+        if (*(str + count - 1) != ch) {
+            return str + count - 1;
+        }
+        --count;
+    }
+    return nullptr;
+}
+
 namespace detail {
     extern "C" const char* betterstring_strfirstof_avx2(const char*, std::size_t, const char*, std::size_t);
 }
