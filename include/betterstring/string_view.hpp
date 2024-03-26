@@ -272,7 +272,7 @@ public:
         return this->rfind(ch);
     }
     constexpr self_find_result find_last_of(const string_viewt str) const noexcept {
-        return { data(), size(), traits_type::last_of(data(), size(), str.data(), str.size()) };
+        return { data(), 0, traits_type::last_of(data(), size(), str.data(), str.size()) };
     }
 
     constexpr self_find_result find_first_not_of(const value_type ch) const noexcept {

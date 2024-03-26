@@ -383,7 +383,7 @@ TEST_CASE("find_last_of", "[string_view]") {
         CHECK(str.find_last_of("g"_sv) == 10);
         CHECK(str.find_last_of("hei"_sv) == 8);
         CHECK(str.find_last_of(""_sv).ptr_or_null() == nullptr);
-        CHECK(str.find_last_of("a"_sv).ptr_or_end() == str.data() + str.size());
+        CHECK(str.find_last_of("a"_sv).ptr_or_end() == str.data());
     }
 }
 
