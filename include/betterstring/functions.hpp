@@ -152,6 +152,7 @@ constexpr void strcopy(const T* const, const T* const, const std::size_t) noexce
 template<class T>
 constexpr int strcomp(const T* const left, const T* const right, const std::size_t count) noexcept {
     static_assert(is_character<T>);
+    if (count == 0) { return 0; }
     BS_VERIFY(left != nullptr, "left is null pointer");
     BS_VERIFY(right != nullptr, "right is null pointer");
 #if BS_HAS_BUILTIN(__builtin_wmemcmp) || defined(_MSC_VER)
