@@ -77,7 +77,9 @@ namespace detail {
     inline constexpr bool is_input_iterator<T, std::void_t<iterator_category<T>>>
         = std::is_base_of_v<std::input_iterator_tag, iterator_category<T>>;
 
-
+    template<class From, class To>
+    inline constexpr bool is_qualification_convertible =
+        std::is_constructible_v<From (*)[], To (*)[]>;
 
     template<class T>
     struct is_character_impl : std::false_type {};
