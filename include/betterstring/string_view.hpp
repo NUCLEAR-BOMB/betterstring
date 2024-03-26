@@ -142,6 +142,7 @@ public:
     BS_CONST_FN constexpr const_pointer data_end() const noexcept { return data() + size(); }
 
     BS_CONST_FN constexpr size_type size() const noexcept { return string_size; }
+    constexpr size_type size_bytes() const noexcept { return string_size * sizeof(value_type); }
     BS_CONST_FN constexpr size_type length() const noexcept { return size(); }
 
     BS_CONST_FN constexpr size_type max_size() const noexcept { return static_cast<size_type>(-1); }
