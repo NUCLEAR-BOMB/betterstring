@@ -384,6 +384,10 @@ TEST_CASE("find_last_of", "[string_view]") {
         CHECK(str.find_last_of("hei"_sv) == 8);
         CHECK(str.find_last_of(""_sv).ptr_or_null() == nullptr);
         CHECK(str.find_last_of("a"_sv).ptr_or_end() == str.data());
+        CHECK(str.find_last_of(" ").index_or(10) == 4);
+        CHECK(str.find_last_of("y").index_or(5) == 5);
+        CHECK(str.find_last_of("ten ").ptr_or(str.data() + 5) == str.data() + 9);
+        CHECK(str.find_last_of("xqqq").ptr_or(str.data() - 1) == str.data() - 1);
     }
 }
 

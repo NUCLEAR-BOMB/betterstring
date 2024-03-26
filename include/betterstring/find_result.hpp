@@ -38,6 +38,10 @@ public:
         }
         return static_cast<size_type>(find_ptr - string_data);
     }
+    constexpr size_type index_or(const size_type other) const noexcept {
+        if (find_ptr == nullptr) { return other; }
+        return static_cast<size_type>(find_ptr - string_data);
+    }
 
     constexpr operator size_type() const noexcept {
         return index_or_end();
@@ -58,6 +62,10 @@ public:
         if (find_ptr == nullptr) {
             throw std::logic_error("result is not found");
         }
+        return find_ptr;
+    }
+    constexpr pointer ptr_or(const pointer other) const noexcept {
+        if (find_ptr == nullptr) { return other; }
         return find_ptr;
     }
 
