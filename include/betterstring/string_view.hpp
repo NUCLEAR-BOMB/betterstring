@@ -282,6 +282,13 @@ public:
         return { data(), size(), traits_type::first_not_of(data(), size(), str.data(), str.size()) };
     }
 
+    constexpr self_find_result find_last_not_of(const value_type ch) const noexcept {
+        return { data(), 0, traits_type::rfindn(data(), size(), ch) };
+    }
+    constexpr self_find_result find_last_not_of(const string_viewt str) const noexcept {
+        return { data(), 0, traits_type::last_not_of(data(), size(), str.data(), str.size()) };
+    }
+
     constexpr bool contains(const value_type ch) const noexcept {
         return traits_type::find(data(), size(), ch) != nullptr;
     }

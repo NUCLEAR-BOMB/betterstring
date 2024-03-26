@@ -460,4 +460,16 @@ TEST_CASE("find_first_not_of", "[string_view]") {
     CHECK_FALSE(""_sv.find_first_not_of("daksdh,aw").found());
 }
 
+TEST_CASE("find_last_not_of", "[string_view]") {
+    const bs::string_view str = "hello worldddd";
+    CHECK(str.find_last_not_of('d') == 9);
+    CHECK(str.find_last_not_of('l') == 13);
+    CHECK_FALSE(""_sv.find_last_not_of('a').found());
+
+    CHECK(str.find_last_not_of("dddd") == 9);
+    CHECK(str.find_last_not_of("dlorw") == 5);
+    CHECK(str.find_last_not_of("").found());
+    CHECK_FALSE(""_sv.find_first_not_of("4q34jtk").found());
+}
+
 }
