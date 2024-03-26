@@ -313,6 +313,14 @@ TEST_CASE(".at", "[string]") {
     CHECK_FALSE(str.at(3128) == 'a');
     CHECK_FALSE(str.at(-123).has_value());
     CHECK_FALSE(str.at(str.size()) == 'g');
+
+    *str.at(0) = 'a';
+    CHECK(str.at(0) == 'a');
+
+    str.at(5).value_or(str[4]) = 'x';
+    CHECK(str.at(5) == 'x');
+    str.at(11).value_or(str[4]) = 'x';
+    CHECK(str.at(4) == 'x');
 }
 
 TEST_CASE(".at_front", "[string]") {
@@ -320,6 +328,9 @@ TEST_CASE(".at_front", "[string]") {
     CHECK(str.at_front() == 't');
     str = "123"_sv;
     CHECK(str.at_front() == '1');
+
+    str.at_front().value_or(str[1]) = 'x';
+    CHECK(str.at(0) == 'x');
 
     str.clear();
     CHECK_FALSE(str.at_front().has_value());

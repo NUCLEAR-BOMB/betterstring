@@ -18,6 +18,7 @@
 #include <betterstring/type_traits.hpp>
 #include <betterstring/string_view.hpp>
 #include <betterstring/detail/preprocessor.hpp>
+#include <betterstring/detail/reference_wrapper.hpp>
 
 namespace bs {
 
@@ -162,8 +163,8 @@ private:
     alignas(container_alignment) detail::string_representation<value_type, size_type, 0> rep;
 
     using self_string_view = bs::string_viewt<traits_type>;
-    using optional_char_reference = std::optional<std::reference_wrapper<value_type>>;
-    using optional_char_const_reference = std::optional<std::reference_wrapper<const value_type>>;
+    using optional_char_reference = std::optional<detail::reference_wrapper<value_type>>;
+    using optional_char_const_reference = std::optional<detail::reference_wrapper<const value_type>>;
 public:
 
     constexpr stringt() noexcept
