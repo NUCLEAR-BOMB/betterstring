@@ -280,34 +280,34 @@ TEST_CASE("strip", "[string_view]") {
     CHECK("aaaaa"_sv.strip("a"_sv) == ""_sv);
 }
 
-TEST_CASE("lstrip", "[string_view]") {
+TEST_CASE("strip_left", "[string_view]") {
     SECTION("character") {
-        CHECK(" hello"_sv.lstrip(' ') == "hello"_sv);
-        CHECK("  hello"_sv.lstrip(' ') == "hello"_sv);
-        CHECK("hello "_sv.lstrip(' ') == "hello "_sv);
-        CHECK("hello  "_sv.lstrip(' ') == "hello  "_sv);
-        CHECK(" hello "_sv.lstrip(' ') == "hello "_sv);
+        CHECK(" hello"_sv.strip_left(' ') == "hello"_sv);
+        CHECK("  hello"_sv.strip_left(' ') == "hello"_sv);
+        CHECK("hello "_sv.strip_left(' ') == "hello "_sv);
+        CHECK("hello  "_sv.strip_left(' ') == "hello  "_sv);
+        CHECK(" hello "_sv.strip_left(' ') == "hello "_sv);
     }
     SECTION("string") {
-        CHECK("test string"_sv.lstrip("test"_sv) == " string"_sv);
-        CHECK("test string"_sv.lstrip("tes"_sv) == " string"_sv);
-        CHECK("test string"_sv.lstrip("t"_sv) == "est string"_sv);
-        CHECK("test string"_sv.lstrip("g"_sv) == "test string"_sv);
-        CHECK("test string"_sv.lstrip("string"_sv) == "est string"_sv);
+        CHECK("test string"_sv.strip_left("test"_sv) == " string"_sv);
+        CHECK("test string"_sv.strip_left("tes"_sv) == " string"_sv);
+        CHECK("test string"_sv.strip_left("t"_sv) == "est string"_sv);
+        CHECK("test string"_sv.strip_left("g"_sv) == "test string"_sv);
+        CHECK("test string"_sv.strip_left("string"_sv) == "est string"_sv);
     }
 }
 
-TEST_CASE("rstrip", "[string_view]") {
+TEST_CASE("strip_right", "[string_view]") {
     SECTION("string") {
-        CHECK("hello "_sv.rstrip(' ') == "hello"_sv);
-        CHECK("hello  "_sv.rstrip(' ') == "hello"_sv);
-        CHECK(" hello"_sv.rstrip(' ') == " hello"_sv);
-        CHECK(" hello "_sv.rstrip(' ') == " hello"_sv);
+        CHECK("hello "_sv.strip_right(' ') == "hello"_sv);
+        CHECK("hello  "_sv.strip_right(' ') == "hello"_sv);
+        CHECK(" hello"_sv.strip_right(' ') == " hello"_sv);
+        CHECK(" hello "_sv.strip_right(' ') == " hello"_sv);
 
-        CHECK("test string"_sv.rstrip("test"_sv) == "test string"_sv);
-        CHECK("test string"_sv.rstrip("string"_sv) == "test "_sv);
-        CHECK("test string"_sv.rstrip("g"_sv) == "test strin"_sv);
-        CHECK("test string"_sv.rstrip("t"_sv) == "test string"_sv);
+        CHECK("test string"_sv.strip_right("test"_sv) == "test string"_sv);
+        CHECK("test string"_sv.strip_right("string"_sv) == "test "_sv);
+        CHECK("test string"_sv.strip_right("g"_sv) == "test strin"_sv);
+        CHECK("test string"_sv.strip_right("t"_sv) == "test string"_sv);
     }
 }
 

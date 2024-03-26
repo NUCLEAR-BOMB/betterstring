@@ -283,7 +283,7 @@ public:
     }
 
     constexpr self_find_result find_last_not_of(const value_type ch) const noexcept {
-        return { data(), 0, traits_type::rfindn(data(), size(), ch) };
+        return { data(), 0, traits_type::rfind_not(data(), size(), ch) };
     }
     constexpr self_find_result find_last_not_of(const string_viewt str) const noexcept {
         return { data(), 0, traits_type::last_not_of(data(), size(), str.data(), str.size()) };
@@ -319,110 +319,58 @@ public:
         BS_UNREACHABLE();
     }
 
-private:
-    template<class Fn>
-    constexpr string_viewt strip_impl(Fn match_fn) const noexcept {
-        const auto* left_it = data();
-        for (;; ++left_it) {
-            if (left_it == data() + size() || !match_fn(*left_it)) break;
-        }
-        const auto* right_it = data() + size() - 1;
-        if (left_it != data() + size()) {
-            for (;; --right_it) {
-                if (!match_fn(*right_it) || right_it == left_it) break;
-            }
-        }
-        return string_viewt{left_it, right_it + 1};
-    }
-    template<class Fn>
-    constexpr string_viewt lstrip_impl(Fn match_fn) const noexcept {
-        for (const auto* it = data();; ++it) {
-            if (it == data() + size() || !match_fn(*it)) {
-                return string_viewt{it, data() + size()};
-            }
-        }
-        BS_UNREACHABLE();
-    }
-    template<class Fn>
-    constexpr string_viewt rstrip_impl(Fn match_fn) const noexcept {
-        for (const auto* it = data() + size() - 1;; --it) {
-            if (!match_fn(*it) || it == data()) {
-                return string_viewt(data(), it + 1);
-            }
-        }
-        BS_UNREACHABLE();
-    }
-
-    template<class StripFn>
-    constexpr string_viewt strip_impl2(StripFn strip_fn, const value_type strip_ch) const noexcept {
-        return strip_fn([&](auto ch) { return ch == strip_ch; });
-    }
-    template<class StripFn>
-    constexpr string_viewt strip_impl2(StripFn strip_fn, const string_viewt chs) const noexcept {
-        detail::char_bitmap<value_type> bitmap;
-        bitmap.mark(chs.data(), chs.data() + chs.size());
-        if (!bitmap.mark(chs.data(), chs.data() + chs.size())) {
-            return strip_fn([&](auto ch) {
-                return traits_type::find(chs.data(), chs.size(), ch);
-            });
-        }
-
-        return strip_fn([&](auto ch) {
-            return bitmap.match(ch);
-        });
-    }
-    template<class StripFn>
-    constexpr string_viewt strip_impl2(StripFn strip_fn) const noexcept {
-        constexpr string_viewt strip_chs{"\t\n\v\f\r ", 6};
-        detail::char_bitmap<value_type> bitmap;
-
-        if (!bitmap.mark(strip_chs.data(), strip_chs.data() + strip_chs.size())) {
-            BS_UNREACHABLE();
-        }
-
-        return strip_fn([&](auto ch) { return bitmap.match(ch); });
-    }
-
-
-public:
-
-    constexpr string_viewt strip(const value_type strip_ch) const noexcept {
-        return strip_impl2([&](auto f) { return strip_impl(f); }, strip_ch);
+    constexpr string_viewt strip(const value_type ch) const noexcept {
+        const auto first = traits_type::find_not(data(), size(), ch);
+        if (first == nullptr) { return string_viewt{}; }
+        const auto last = traits_type::rfind_not(data(), size(), ch);
+        BS_ASSUME(last != nullptr);
+        return string_viewt{first, last + 1};
     }
     constexpr string_viewt strip(const string_viewt chs) const noexcept {
-        return strip_impl2([&](auto f) { return strip_impl(f); }, chs);
+        BS_FLATTEN {
+            // hopefully the compiler is smart enough to merge two bitmaps into one
+            const auto first = traits_type::first_not_of(data(), size(), chs.data(), chs.size());
+            if (first == nullptr) { return string_viewt{}; }
+            const auto last = traits_type::last_not_of(data(), size(), chs.data(), chs.size());
+            BS_ASSUME(last != nullptr);
+            return string_viewt{first, last + 1};
+        }
     }
 
-    constexpr string_viewt lstrip(const value_type strip_ch) const noexcept {
-        return strip_impl2([&](auto f) { return lstrip_impl(f); }, strip_ch);
+    constexpr string_viewt strip_left(const value_type ch) const noexcept {
+        const auto first = traits_type::find_not(data(), size(), ch);
+        return string_viewt{first, data() + size()};
     }
-    constexpr string_viewt lstrip(const string_viewt chs) const noexcept {
-        return strip_impl2([&](auto f) { return lstrip_impl(f); }, chs);
+    constexpr string_viewt strip_left(const string_viewt chs) const noexcept {
+        const auto first = traits_type::first_not_of(data(), size(), chs.data(), chs.size());
+        return string_viewt{first, data() + size()};
     }
 
-    constexpr string_viewt rstrip(const value_type strip_ch) const noexcept {
-        return strip_impl2([&](auto f) { return rstrip_impl(f); }, strip_ch);
+    constexpr string_viewt strip_right(const value_type ch) const noexcept {
+        const auto last = traits_type::rfind_not(data(), size(), ch);
+        return string_viewt{data(), last + 1};
     }
-    constexpr string_viewt rstrip(const string_viewt chs) const noexcept {
-        return strip_impl2([&](auto f) { return rstrip_impl(f); }, chs);
+    constexpr string_viewt strip_right(const string_viewt chs) const noexcept {
+        const auto last = traits_type::last_not_of(data(), size(), chs.data(), chs.size());
+        return string_viewt{data(), last + 1};
     }
 
     constexpr string_viewt strip_first(const value_type ch) const noexcept {
         if (!starts_with(ch)) return *this;
-        return string_viewt(data() + 1, size() - 1);
+        return string_viewt{data() + 1, size() - 1};
     }
     constexpr string_viewt strip_first(const string_viewt str) const noexcept {
         if (!starts_with(str)) return *this;
-        return string_viewt(data() + str.size(), size() - str.size());
+        return string_viewt{data() + str.size(), size() - str.size()};
     }
 
     constexpr string_viewt strip_last(const value_type ch) const noexcept {
         if (!ends_with(ch)) return *this;
-        return string_viewt(data(), size() - 1);
+        return string_viewt{data(), size() - 1};
     }
     constexpr string_viewt strip_last(const string_viewt str) const noexcept {
         if (!ends_with(str)) return *this;
-        return string_viewt(data(), size() - str.size());
+        return string_viewt{data(), size() - str.size()};
     }
 
     template<class Predicate>
