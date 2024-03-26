@@ -20,7 +20,7 @@ set(CMAKE_ASM_MASM_COMPILER "ml64.exe")
 
 include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
 
-add_library(betterstring
+set(main_headers
     "include/betterstring/functions.hpp"
     "include/betterstring/string_view.hpp"
     "include/betterstring/splited_string.hpp"
@@ -32,18 +32,19 @@ add_library(betterstring
     "include/betterstring/safe_functions.hpp"
     "include/betterstring/find_result.hpp"
     "include/betterstring/allocators.hpp"
-
+)
+set(detail_headers
     "include/betterstring/detail/preprocessor.hpp"
     "include/betterstring/detail/integer_cmps.hpp"
     "include/betterstring/detail/parse_unsigned.hpp"
     "include/betterstring/detail/cpu_features.hpp"
     "include/betterstring/detail/reference_wrapper.hpp"
-
+)
+set(asm_src
     "src/strrfind_char_avx2.asm"
     "src/strcount_char_avx2.asm"
     "src/strlen_avx2.asm"
     "src/strfindn_char_avx2.asm"
-
     "src/strfirstof_avx2.asm"
 )
 set(strfirstof_files
@@ -55,9 +56,16 @@ set(strfirstof_files
     "src/strfirstof/cmp_6.asm"
     "src/strfirstof/cmp_any.asm"
 )
+add_library(betterstring
+    ${main_headers}
+    ${detail_headers}
+    ${asm_src}
+)
 target_sources(betterstring PRIVATE ${strfirstof_files})
 set_source_files_properties(${strfirstof_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 source_group("strfirstof" FILES ${strfirstof_files})
+
+source_group("Header Files/detail" FILES ${detail_headers})
 
 target_compile_options(betterstring PRIVATE $<$<COMPILE_LANGUAGE:ASM_MASM>:/Cp>)
 
