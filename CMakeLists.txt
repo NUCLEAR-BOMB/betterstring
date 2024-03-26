@@ -37,6 +37,7 @@ add_library(betterstring
     "include/betterstring/detail/integer_cmps.hpp"
     "include/betterstring/detail/parse_unsigned.hpp"
     "include/betterstring/detail/cpu_features.hpp"
+    "include/betterstring/detail/reference_wrapper.hpp"
 
     "src/strrfind_char_avx2.asm"
     "src/strcount_char_avx2.asm"
