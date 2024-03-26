@@ -395,4 +395,14 @@ TEST_CASE("bs::strlastof", "[functions]") {
     CHECK(bs::strlastof(str1, 11, "test stringtest stringtest string", 33) == &str1[10]);
 }
 
+TEST_CASE("bs::strlastnof", "[functions]") {
+    const char* str1 = "test string";
+    CHECK(bs::strlastnof(str1, 11, "", 0) == &str1[10]);
+    CHECK(bs::strlastnof(str1, 11, "test string", 11) == nullptr);
+    CHECK(bs::strlastnof(str1, 11, "string", 6) == &str1[4]);
+    CHECK(bs::strlastnof(str1, 11, "string ", 7) == &str1[1]);
+    CHECK(bs::strlastnof(str1, 11, "g", 1) == &str1[9]);
+    CHECK(bs::strlastnof(str1, 11, "ggggggnnnnggiii", 15) == &str1[7]);
+}
+
 }
