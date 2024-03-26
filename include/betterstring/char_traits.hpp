@@ -79,7 +79,7 @@ public:
     static constexpr const char_type* rfindstr(const char_type* const str, const std::size_t count, const char_type* const substr, const std::size_t substr_len) noexcept {
         return bs::strrfind(str, count, substr, substr_len);
     }
-    static constexpr const char_type* rfindn(const char_type* const str, const std::size_t count, const char_type ch) noexcept {
+    static constexpr const char_type* rfind_not(const char_type* const str, const std::size_t count, const char_type ch) noexcept {
         return bs::strrfindn(str, count, ch);
     }
 
