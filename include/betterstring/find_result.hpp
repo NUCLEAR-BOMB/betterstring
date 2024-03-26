@@ -8,6 +8,7 @@
 #include <betterstring/detail/preprocessor.hpp>
 #include <stdexcept>
 #include <cstddef>
+#include <optional>
 
 namespace bs {
 
@@ -42,6 +43,10 @@ public:
         if (find_ptr == nullptr) { return other; }
         return static_cast<size_type>(find_ptr - string_data);
     }
+    constexpr std::optional<size_type> index_opt() const noexcept {
+        if (find_ptr == nullptr) { return std::nullopt; }
+        return static_cast<size_type>(find_ptr - string_data);
+    }
 
     constexpr operator size_type() const noexcept {
         return index_or_end();
@@ -66,6 +71,10 @@ public:
     }
     constexpr pointer ptr_or(const pointer other) const noexcept {
         if (find_ptr == nullptr) { return other; }
+        return find_ptr;
+    }
+    constexpr std::optional<pointer> ptr_opt() const noexcept {
+        if (find_ptr == nullptr) { return std::nullopt; }
         return find_ptr;
     }
 

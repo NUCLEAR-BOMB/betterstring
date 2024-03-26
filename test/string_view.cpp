@@ -187,6 +187,15 @@ TEST_CASE("find", "[string_view]") {
         CHECK(str.find(""_sv) == 0);
         CHECK(str.find(""_sv, 3) == 3);
         CHECK(str.find("string"_sv, 8) == str.size());
+
+        CHECK(str.find("st ").index_opt() != std::nullopt);
+        CHECK(str.find("abc").index_opt() == std::nullopt);
+        CHECK(str.find(" string").index_opt() == 4);
+        CHECK(str.find("test string").index_opt() == 0);
+
+        CHECK(str.find("ing").ptr_opt() != std::nullopt);
+        CHECK(str.find("ing").ptr_opt() == str.data() + 8);
+        CHECK(str.find("xyz").ptr_opt() == std::nullopt);
     }
     SECTION("character") {
         CHECK(str.find('t') == 0);
