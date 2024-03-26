@@ -72,12 +72,17 @@ public:
     static constexpr const char_type* findstr(const char_type* const str, const std::size_t count, const char_type* const substr, const std::size_t substr_len) noexcept {
         return bs::strfind(str, count, substr, substr_len);
     }
+
     static constexpr const char_type* rfind(const char_type* const str, const std::size_t count, const char_type ch) noexcept {
         return bs::strrfind(str, count, ch);
     }
     static constexpr const char_type* rfindstr(const char_type* const str, const std::size_t count, const char_type* const substr, const std::size_t substr_len) noexcept {
         return bs::strrfind(str, count, substr, substr_len);
     }
+    static constexpr const char_type* rfindn(const char_type* const str, const std::size_t count, const char_type ch) noexcept {
+        return bs::strrfindn(str, count, ch);
+    }
+
     static constexpr const char_type* first_of(const char_type* const str, const std::size_t count, const char_type* const needle, const std::size_t needle_len) noexcept {
         return bs::strfirstof(str, count, needle, needle_len);
     }
