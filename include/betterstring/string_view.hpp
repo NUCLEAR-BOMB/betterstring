@@ -272,21 +272,7 @@ public:
         return this->rfind(ch);
     }
     constexpr self_find_result find_last_of(const string_viewt str) const noexcept {
-        detail::char_bitmap<value_type> bitmap;
-        if (!bitmap.mark(str.data(), str.data() + str.size())) {
-            for (auto match_try = data() + size() - 1; match_try != data() - 1; --match_try) {
-                if (traits_type::find(str.data(), str.size(), *match_try) != nullptr) {
-                    return { data(), size(), match_try };
-                }
-            }
-            return { data(), size(), nullptr };
-        }
-        for (size_type i = size(); i != 0; --i) {
-            if (bitmap.match(data()[i - 1])) {
-                return { data(), size(), data() + i - 1 };
-            }
-        }
-        return { data(), size(), nullptr };
+        return { data(), size(), traits_type::last_of(data(), size(), str.data(), str.size()) };
     }
 
     constexpr self_find_result find_first_not_of(const value_type ch) const noexcept {
