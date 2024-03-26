@@ -326,15 +326,14 @@ public:
         BS_ASSUME(last != nullptr);
         return string_viewt{first, last + 1};
     }
+    BS_FLATTEN
     constexpr string_viewt strip(const string_viewt chs) const noexcept {
-        BS_FLATTEN {
-            // hopefully the compiler is smart enough to merge two bitmaps into one
-            const auto first = traits_type::first_not_of(data(), size(), chs.data(), chs.size());
-            if (first == nullptr) { return string_viewt{}; }
-            const auto last = traits_type::last_not_of(data(), size(), chs.data(), chs.size());
-            BS_ASSUME(last != nullptr);
-            return string_viewt{first, last + 1};
-        }
+        // hopefully the compiler is smart enough to merge two bitmaps into one
+        const auto first = traits_type::first_not_of(data(), size(), chs.data(), chs.size());
+        if (first == nullptr) { return string_viewt{}; }
+        const auto last = traits_type::last_not_of(data(), size(), chs.data(), chs.size());
+        BS_ASSUME(last != nullptr);
+        return string_viewt{first, last + 1};
     }
 
     constexpr string_viewt strip_left(const value_type ch) const noexcept {
