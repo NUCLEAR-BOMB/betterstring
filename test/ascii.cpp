@@ -255,4 +255,32 @@ TEST_CASE("from_octdigit", "[ascii]") {
     CHECK(bs::ascii::from_octdigit(7) == '7');
 }
 
+TEST_CASE("ci_strcomp", "[ascii]") {
+    CHECK(bs::ascii::ci_strcomp("helloworld", "helloworld", 10) == 0);
+    CHECK(bs::ascii::ci_strcomp("HELLOWORLD", "HELLOWORLD", 10) == 0);
+    CHECK(bs::ascii::ci_strcomp("test string", "test string", 10) == 0);
+    CHECK(bs::ascii::ci_strcomp("TEST STRING", "TEST STRING", 0) == 0);
+    CHECK(bs::ascii::ci_strcomp(".^#*!$@^%!#", ".^#*!$@^%!#", 11) == 0);
+    CHECK(bs::ascii::ci_strcomp("     ", "     ", 5) == 0);
+    CHECK(bs::ascii::ci_strcomp("", "", 0) == 0);
+
+    CHECK(bs::ascii::ci_strcomp("a", "\0", 1) > 0);
+    CHECK(bs::ascii::ci_strcomp("\0", "b", 1) < 0);
+    CHECK(bs::ascii::ci_strcomp("a", "b", 1) < 0);
+    CHECK(bs::ascii::ci_strcomp("aaaaa", "aaaab", 5) < 0);
+    CHECK(bs::ascii::ci_strcomp("aaaac", "aaaab", 5) > 0);
+    CHECK(bs::ascii::ci_strcomp("\0\0\0", "\0\0\0", 3) == 0);
+    CHECK(bs::ascii::ci_strcomp("\0\0\0", "\0\0\1", 3) < 0);
+    CHECK(bs::ascii::ci_strcomp("\0\0\2", "\0\0\1", 3) > 0);
+    CHECK(bs::ascii::ci_strcomp("\0\0\2", "\0\3\1", 3) < 0);
+    CHECK(bs::ascii::ci_strcomp("\0\4\2", "\0\3\1", 3) > 0);
+    CHECK(bs::ascii::ci_strcomp("\0\4\2", "\5\3\1", 3) < 0);
+    CHECK(bs::ascii::ci_strcomp("\6\4\2", "\5\3\1", 3) > 0);
+
+    CHECK(bs::ascii::ci_strcomp("abcd", 4, "abce", 4) < 0);
+    CHECK(bs::ascii::ci_strcomp("abf", 3, "abce", 4) < 0);
+    CHECK(bs::ascii::ci_strcomp("abf", 3, "ab", 2) > 0);
 }
+
+}
+
