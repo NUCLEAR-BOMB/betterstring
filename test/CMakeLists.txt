@@ -11,6 +11,7 @@ add_executable(betterstring-test
     "string.cpp"
     "cpu_dispatch.cpp"
     "allocators.cpp"
+    "fixed_string.cpp"
 
     "util.hpp"
 )
