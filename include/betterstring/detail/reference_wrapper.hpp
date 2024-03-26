@@ -48,13 +48,6 @@ public:
         return *ptr;
     }
 
-    friend constexpr auto operator==(const reference_wrapper left, const reference_wrapper right) noexcept(noexcept(left.get() == right.get())) -> decltype(left.get() == right.get()) {
-        return left.get() == right.get();
-    }
-    friend constexpr auto operator!=(const reference_wrapper left, const reference_wrapper right) noexcept(noexcept(left.get() == right.get())) -> decltype(left.get() == right.get()) {
-        return left.get() == right.get();
-    }
-
     template<class... Args>
     constexpr std::invoke_result_t<T&, Args...> operator()(Args&&... args) const
         noexcept(std::is_nothrow_invocable_v<T, Args...>) {
