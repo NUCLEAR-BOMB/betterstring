@@ -511,4 +511,39 @@ constexpr T* strfirstnof(T* str, std::size_t count, const detail::type_identity_
     return nullptr;
 }
 
+template<class T>
+constexpr T* strlastof(T* str, std::size_t count, const detail::type_identity_t<T>* needle, std::size_t needle_size) noexcept {
+    using type = std::remove_const_t<T>;
+    static_assert(is_character<type>);
+
+    if (needle_size == 0) { return str; }
+
+    if constexpr (std::is_same_v<type, char>) {
+        uint8_t bitmap[256]{};
+        do {
+            bitmap[uint8_t(*needle)] = 0xFF;
+            ++needle;
+            --needle_size;
+        } while (needle_size != 0);
+
+        while (count != 0) {
+            if (bitmap[uint8_t(*(str + count - 1))] != 0) {
+                return str + count - 1;
+            }
+            --count;
+        }
+        return nullptr;
+    } else {
+        while (count != 0) {
+            std::size_t i = 0;
+            while (*(str + count - 1) != needle[i]) {
+                ++i;
+                if (i == needle_size) { return str + count - 1; }
+            }
+            --count;
+        }
+        return nullptr;
+    }
+}
+
 }

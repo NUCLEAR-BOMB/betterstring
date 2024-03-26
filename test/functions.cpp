@@ -386,4 +386,13 @@ TEST_CASE("bs::strfirstnof", "[functions]") {
     CHECK(bs::strfirstnof(str1, 11, "", 0) == &str1[0]);
 }
 
+TEST_CASE("bs::strlastof", "[functions]") {
+    const char* str1 = "test string";
+    CHECK(bs::strlastof(str1, 11, "str", 3) == &str1[7]);
+    CHECK(bs::strlastof(str1, 11, "t", 1) == &str1[6]);
+    CHECK(bs::strlastof(str1, 11, "tttteetsss", 10) == &str1[6]);
+    CHECK(bs::strlastof(str1, 11, "test string", 11) == &str1[10]);
+    CHECK(bs::strlastof(str1, 11, "test stringtest stringtest string", 33) == &str1[10]);
+}
+
 }
