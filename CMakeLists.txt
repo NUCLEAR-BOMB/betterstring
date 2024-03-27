@@ -60,12 +60,13 @@ add_library(betterstring
     ${main_headers}
     ${detail_headers}
     ${asm_src}
+    ${strfirstof_files}
 )
-target_sources(betterstring PRIVATE ${strfirstof_files})
 set_source_files_properties(${strfirstof_files} PROPERTIES HEADER_FILE_ONLY TRUE)
-source_group("strfirstof" FILES ${strfirstof_files})
+source_group("Source Files/strfirstof" FILES ${strfirstof_files})
 
 source_group("Header Files/detail" FILES ${detail_headers})
+source_group("Source Files" FILES ${asm_src})
 
 target_compile_options(betterstring PRIVATE $<$<COMPILE_LANGUAGE:ASM_MASM>:/Cp>)
 
