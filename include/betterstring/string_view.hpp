@@ -278,6 +278,12 @@ public:
     constexpr splited_string<string_viewt, value_type> split(const value_type character) const noexcept {
         return splited_string<string_viewt, value_type>(*this, character);
     }
+    constexpr reverse_splited_string<string_viewt, string_viewt> rsplit(const string_viewt separator) const noexcept {
+        return reverse_splited_string<string_viewt, string_viewt>{*this, separator};
+    }
+    constexpr reverse_splited_string<string_viewt, value_type> rsplit(const value_type separator) const noexcept {
+        return reverse_splited_string<string_viewt, value_type>{*this, separator};
+    }
 
     constexpr size_type count(const value_type ch) const noexcept {
         return traits_type::count(data(), size(), ch);

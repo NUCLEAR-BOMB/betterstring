@@ -290,6 +290,12 @@ TEST_CASE("split", "[string_view]") {
     }
 }
 
+TEST_CASE("rsplit", "[string_view]") {
+    using Catch::Matchers::RangeEquals;
+
+    CHECK_THAT("test string"_sv.rsplit(' '), RangeEquals(std::array{"string"_sv, "test"_sv}));
+}
+
 TEST_CASE("strip", "[string_view]") {
     const std::array strs{" hello "_sv, "hello "_sv, " hello"_sv, "  hello"_sv, "hello  "_sv, "  hello  "_sv};
     for (const auto s : strs) {

@@ -147,4 +147,28 @@ private:
     separator_type separator;
 };
 
+template<class String, class Separator>
+struct reverse_splited_string {
+public:
+    using separator_type = Separator;
+    using string_type = String;
+    using size_type = typename string_type::size_type;
+    using iterator = detail::reverse_splited_string_iterator<string_type, separator_type>;
+    using const_iterator = iterator;
+    using reverse_iterator = detail::splited_string_iterator<string_type, separator_type>;
+    using const_reverse_iterator = reverse_iterator;
+
+    constexpr reverse_splited_string(string_type str, separator_type sep) noexcept
+        : string(str), separator(sep) {}
+
+    constexpr iterator begin() const noexcept { return iterator{string, separator}; }
+    constexpr iterator end() const noexcept { return begin(); }
+    constexpr reverse_iterator rbegin() const noexcept { return reverse_iterator{string, separator}; }
+    constexpr reverse_iterator rend() const noexcept { return rbegin(); }
+
+private:
+    string_type string;
+    separator_type separator;
+};
+
 }
