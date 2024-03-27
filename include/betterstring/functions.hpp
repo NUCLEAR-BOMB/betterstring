@@ -61,7 +61,7 @@ constexpr T* data(T(&array)[N]) noexcept {
 }
 
 namespace detail {
-    extern "C" std::size_t betterstring_strlen_avx2(const char*);
+    extern "C" BS_CONST_FN std::size_t betterstring_strlen_avx2(const char*);
 }
 
 template<class T>
@@ -262,7 +262,7 @@ constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::
 }
 
 namespace detail {
-    extern "C" const char* betterstring_strrfind_char_avx2(const char*, std::size_t, char);
+    extern "C" BS_CONST_FN const char* betterstring_strrfind_char_avx2(const char*, std::size_t, char);
 }
 
 template<class T>
@@ -358,7 +358,7 @@ template<class T>
 constexpr void strmove(const T* const, const T* const, const std::size_t) noexcept = delete;
 
 namespace detail {
-    extern "C" std::size_t betterstring_strcount_char_avx2(const char*, std::size_t, char);
+    extern "C" BS_CONST_FN std::size_t betterstring_strcount_char_avx2(const char*, std::size_t, char);
 }
 
 template<class T>
@@ -383,7 +383,7 @@ constexpr std::size_t strcount(const T* str, const std::size_t count, const deta
 }
 
 namespace detail {
-    extern "C" const char* betterstring_strfindn_char_avx2(const char*, std::size_t, char);
+    extern "C" BS_CONST_FN const char* betterstring_strfindn_char_avx2(const char*, std::size_t, char);
 }
 
 template<class T>
@@ -423,7 +423,7 @@ constexpr T* strrfindn(T* str, std::size_t count, detail::type_identity_t<T> ch)
 }
 
 namespace detail {
-    extern "C" const char* betterstring_strfirstof_avx2(const char*, std::size_t, const char*, std::size_t);
+    extern "C" BS_CONST_FN const char* betterstring_strfirstof_avx2(const char*, std::size_t, const char*, std::size_t);
 }
 
 template<class T>
