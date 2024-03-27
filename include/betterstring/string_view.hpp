@@ -28,28 +28,6 @@
 namespace bs
 {
 
-namespace detail {
-    template<class T>
-    class char_bitmap {
-    public:
-        constexpr bool mark(const T* first, const T* const last) noexcept {
-            BS_VERIFY(first != nullptr && last != nullptr, "first or last is null pointer");
-            for (; first != last; ++first) {
-                const auto ch = static_cast<unsigned char>(*first);
-                if constexpr (sizeof(T) != 1) if (ch >= 256) return false;
-                matches[ch] = true;
-            }
-            return true;
-        }
-        constexpr bool match(const T ch) const noexcept {
-            return matches[static_cast<unsigned char>(ch)];
-        }
-
-    private:
-        bool matches[256] = {};
-    };
-}
-
 struct slice {
     using index_type = std::ptrdiff_t;
 
