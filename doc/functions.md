@@ -50,17 +50,6 @@ constexpr T* data(T(&array)[N]) noexcept;
 ```
 Returns `array`.
 
-## `bs::array_size`
-```cpp
-template<class T>
-constexpr auto array_size(const T& x) noexcept;
-```
-Returns length of the array, or, if it is single character returns `1`.
-
-- If `x` is any character, `1` is returned.
-- If `x` has the `.size()` method, returns result of this method.
-- Otherwise makes `static_assert` error.
-
 ## `bs::strlen`
 ```cpp
 template<class T>
