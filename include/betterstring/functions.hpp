@@ -66,7 +66,6 @@ namespace detail {
 
 template<class T>
 constexpr std::size_t strlen(const T* const str) noexcept {
-    static_assert(is_character<T>);
     BS_VERIFY(str != nullptr, "str is null pointer");
 
     if (!detail::is_constant_evaluated()) {
@@ -103,7 +102,6 @@ namespace detail {
 
 template<class T>
 constexpr void strcopy(T* const dest, const T* const src, const std::size_t count) noexcept {
-    static_assert(is_character<T>);
     BS_VERIFY(dest != nullptr, "dest or src is null pointer");
     BS_VERIFY(src != nullptr, "src is null pointer");
 #if BS_HAS_BUILTIN(__builtin_wmemcpy)
@@ -133,7 +131,6 @@ constexpr void strcopy(const T* const, const T* const, const std::size_t) noexce
 
 template<class T>
 constexpr int strcomp(const T* const left, const T* const right, const std::size_t count) noexcept {
-    static_assert(is_character<T>);
     if (count == 0) { return 0; }
     BS_VERIFY(left != nullptr, "left is null pointer");
     BS_VERIFY(right != nullptr, "right is null pointer");
@@ -267,10 +264,8 @@ namespace detail {
 
 template<class T>
 constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_identity_t<T> ch) noexcept {
-    static_assert(is_character<std::remove_const_t<T>>);
-    using type = std::remove_const_t<T>;
     if (!detail::is_constant_evaluated()) {
-        if constexpr (std::is_same_v<type, char>) {
+        if constexpr (std::is_same_v<std::remove_const_t<T>, char>) {
             using detail::cpu_features;
             if (cpu_features.value & (cpu_features.AVX2 + cpu_features.BMI2)) {
                 return const_cast<char*>(detail::betterstring_strrfind_char_avx2(str, count, ch));
@@ -363,7 +358,6 @@ namespace detail {
 
 template<class T>
 constexpr std::size_t strcount(const T* str, const std::size_t count, const detail::type_identity_t<T> ch) noexcept {
-    static_assert(is_character<T>);
     if (!detail::is_constant_evaluated()) {
         if constexpr (std::is_same_v<T, char>) {
             using detail::cpu_features;
@@ -404,11 +398,8 @@ namespace detail {
 
 template<class T>
 constexpr T* strfindn(T* str, std::size_t count, detail::type_identity_t<T> ch) noexcept {
-    using type = std::remove_const_t<T>;
-    static_assert(is_character<type>);
-
     if (!detail::is_constant_evaluated()) {
-        if constexpr (std::is_same_v<type, char>) {
+        if constexpr (std::is_same_v<std::remove_const_t<T>, char>) {
             using detail::cpu_features;
             if (cpu_features.value & (cpu_features.AVX2 + cpu_features.BMI2)) {
                 return const_cast<char*>(detail::betterstring_strfindn_char_avx2(str, count, ch));
@@ -426,9 +417,6 @@ constexpr T* strfindn(T* str, std::size_t count, detail::type_identity_t<T> ch) 
 
 template<class T>
 constexpr T* strrfindn(T* str, std::size_t count, detail::type_identity_t<T> ch) noexcept {
-    using type = std::remove_const_t<T>;
-    static_assert(is_character<type>);
-
     while (count != 0) {
         if (*(str + count - 1) != ch) {
             return str + count - 1;
@@ -444,11 +432,8 @@ namespace detail {
 
 template<class T>
 constexpr T* strfirstof(T* str, std::size_t count, const detail::type_identity_t<T>* needle, std::size_t needle_size) noexcept {
-    using type = std::remove_const_t<T>;
-    static_assert(is_character<type>);
-
     if (!detail::is_constant_evaluated()) {
-        if constexpr (std::is_same_v<type, char>) {
+        if constexpr (std::is_same_v<std::remove_const_t<T>, char>) {
             using detail::cpu_features;
             if (cpu_features.value & (cpu_features.AVX2 + cpu_features.BMI2)) {
                 return const_cast<char*>(detail::betterstring_strfirstof_avx2(str, count, needle, needle_size));
@@ -458,7 +443,7 @@ constexpr T* strfirstof(T* str, std::size_t count, const detail::type_identity_t
 
     if (needle_size == 0) { return nullptr; }
 
-    if constexpr (std::is_same_v<type, char>) {
+    if constexpr (sizeof(T) == sizeof(char)) {
         uint8_t bitmap[256]{};
         do {
             bitmap[uint8_t(*needle)] = 0xFF;
@@ -490,12 +475,9 @@ constexpr T* strfirstof(T* str, std::size_t count, const detail::type_identity_t
 
 template<class T>
 constexpr T* strfirstnof(T* str, std::size_t count, const detail::type_identity_t<T>* needle, std::size_t needle_size) noexcept {
-    using type = std::remove_const_t<T>;
-    static_assert(is_character<type>);
-
     if (needle_size == 0) { return str; }
 
-    if (std::is_same_v<type, char> && count >= 25) {
+    if (sizeof(T) == sizeof(char) && count >= 25) {
         uint8_t bitmap[256]{};
         do {
             bitmap[uint8_t(*needle)] = 0xFF;
@@ -526,12 +508,9 @@ constexpr T* strfirstnof(T* str, std::size_t count, const detail::type_identity_
 
 template<class T>
 constexpr T* strlastof(T* str, std::size_t count, const detail::type_identity_t<T>* needle, std::size_t needle_size) noexcept {
-    using type = std::remove_const_t<T>;
-    static_assert(is_character<type>);
-
     if (needle_size == 0) { return nullptr; }
 
-    if constexpr (std::is_same_v<type, char>) {
+    if constexpr (sizeof(T) == sizeof(char)) {
         uint8_t bitmap[256]{};
         do {
             bitmap[uint8_t(*needle)] = 0xFF;
@@ -561,12 +540,9 @@ constexpr T* strlastof(T* str, std::size_t count, const detail::type_identity_t<
 
 template<class T>
 constexpr T* strlastnof(T* str, std::size_t count, const detail::type_identity_t<T>* needle, std::size_t needle_size) noexcept {
-    using type = std::remove_const_t<T>;
-    static_assert(is_character<type>);
-
     if (needle_size == 0) { return str + count - 1; }
 
-    if constexpr (std::is_same_v<type, char> && false) {
+    if constexpr (sizeof(T) == sizeof(char)) {
         uint8_t bitmap[256]{};
         do {
             bitmap[uint8_t(*needle)] = 0xFF;
@@ -600,7 +576,7 @@ constexpr std::size_t strcountanyof(const T* str, std::size_t count, const T* ne
 
     std::size_t result = 0;
 
-    if constexpr (sizeof(T) == 1) {
+    if constexpr (sizeof(T) == sizeof(char)) {
         uint8_t bitmap[256]{};
         do {
             bitmap[uint8_t(*needle)] = 0xFF;
