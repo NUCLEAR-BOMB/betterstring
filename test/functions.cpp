@@ -268,6 +268,19 @@ TEST_CASE("bs::strcount", "[functions]") {
         CHECK(bs::strcount(str3, 11, 'a') == 11);
         page_free(str3);
     }
+    SECTION("string") {
+        CHECK(bs::strcount("hello world", 11, "ll", 2) == 1);
+        CHECK(bs::strcount("tteesstt  ssttrriinngg", 22, "st", 2) == 2);
+        CHECK(bs::strcount("tteesstt  ssttrriinngg", 22, "tt", 2) == 3);
+        CHECK(bs::strcount("tteesstt  ssttrriinngg", 22, " ", 1) == 2);
+        CHECK(bs::strcount("tteesstt  ssttrriinngg", 22, "gg", 2) == 1);
+        CHECK(bs::strcount("tteesstt  ssttrriinngg", 22, "t", 1) == 6);
+        CHECK(bs::strcount("test string", 11, "test string", 11) == 1);
+        CHECK(bs::strcount("test string", 11, "test string!", 12) == 0);
+        CHECK(bs::strcount("", 0, "", 0) == 0);
+        CHECK(bs::strcount("", 0, "a", 1) == 0);
+        CHECK(bs::strcount("a", 1, "a", 1) == 1);
+    }
 }
 
 TEST_CASE("bs::strfindn", "[functions]") {

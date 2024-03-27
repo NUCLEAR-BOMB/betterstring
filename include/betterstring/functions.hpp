@@ -382,6 +382,22 @@ constexpr std::size_t strcount(const T* str, const std::size_t count, const deta
     return result;
 }
 
+template<class T>
+constexpr std::size_t strcount(const T* str, std::size_t count, const T* needle, std::size_t needle_len) noexcept {
+    if (needle_len > count) { return 0; }
+    if (count == 0) { return 0; }
+
+    std::size_t result = 0;
+    const auto match_end = str + count;
+    while (true) {
+        str = bs::strfind(str, static_cast<std::size_t>(match_end - str), needle, needle_len);
+        if (str == nullptr) { break; }
+        ++result;
+        ++str;
+    }
+    return result;
+}
+
 namespace detail {
     extern "C" BS_CONST_FN const char* betterstring_strfindn_char_avx2(const char*, std::size_t, char);
 }
