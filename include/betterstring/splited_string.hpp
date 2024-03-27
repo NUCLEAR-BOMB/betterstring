@@ -25,38 +25,28 @@ namespace detail {
             return 1;
         }
     }
-}
 
-template<class String, class Separator>
-struct splited_string {
-public:
-    using separator_type = Separator;
-    using string_type = String;
-    using size_type = typename string_type::size_type;
-
-    constexpr splited_string(string_type str, separator_type sep) noexcept
-        : string(str), separator(sep) {}
-
-    class iterator {
+    template<class String, class Separator>
+    class splited_string_iterator {
     public:
         // iterator traits
         using difference_type = std::ptrdiff_t;
-        using value_type = string_type;
-        using size_type = typename string_type::size_type;
-        using reference = string_type;
+        using value_type = String;
+        using size_type = typename String::size_type;
+        using reference = String;
         using pointer = void;
         using iterator_category = std::input_iterator_tag;
 
-        constexpr iterator(const string_type str_, const separator_type sep_) noexcept
+        constexpr splited_string_iterator(const String str_, const Separator sep_) noexcept
             : str{str_}, sep{sep_} {
             str_end = str.find(sep).index_or_end();
         }
 
-        constexpr string_type operator*() const noexcept {
+        constexpr String operator*() const noexcept {
             return str(0, str_end);
         }
 
-        constexpr iterator& operator++() noexcept {
+        constexpr splited_string_iterator& operator++() noexcept {
             if (str_end == str.size()) {
                 str_end = size_type(-1);
                 return *this;
@@ -65,24 +55,37 @@ public:
             str_end = str.find(sep).index_or_end();
             return *this;
         }
-        constexpr iterator operator++(int) noexcept {
+        constexpr splited_string_iterator operator++(int) noexcept {
             auto tmp = *this;
             ++(*this);
             return tmp;
         }
 
-        constexpr bool operator!=(const iterator&) const noexcept {
+        constexpr bool operator!=(const splited_string_iterator&) const noexcept {
             return str_end != size_type(-1);
         }
-        constexpr bool operator==(const iterator&) const noexcept {
+        constexpr bool operator==(const splited_string_iterator&) const noexcept {
             return str_end == size_type(-1);
         }
 
     private:
-        string_type str;
-        separator_type sep;
+        String str;
+        Separator sep;
         size_type str_end{};
     };
+}
+
+template<class String, class Separator>
+struct splited_string {
+public:
+    using separator_type = Separator;
+    using string_type = String;
+    using size_type = typename string_type::size_type;
+    using iterator = detail::splited_string_iterator<string_type, separator_type>;
+
+    constexpr splited_string(string_type str, separator_type sep) noexcept
+        : string(str), separator(sep) {}
+
 
     constexpr iterator begin() const noexcept { return iterator(string, separator); }
     constexpr iterator end() const noexcept { return begin(); }
