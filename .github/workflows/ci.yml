@@ -40,7 +40,7 @@ jobs:
         key: ${{env.cache-name}}-${{matrix.platform.os}}-${{matrix.build.name}}-${{hashFiles('**/CMakeLists.txt', 'cmake/**')}}
 
     - name: Configure CMake
-      run: cmake -B build -D CMAKE_BUILD_TYPE=${{ matrix.build.name }} ${{ matrix.platform.flags }}
+      run: cmake -B build -D CMAKE_BUILD_TYPE=${{ matrix.build.name }} -D CMAKE_UNITY_BUILD=TRUE ${{ matrix.platform.flags }}
 
     - name: Build
       run: cmake --build build --config ${{ matrix.build.name }}
