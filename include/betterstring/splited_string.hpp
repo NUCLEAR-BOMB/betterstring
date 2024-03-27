@@ -142,19 +142,6 @@ public:
     constexpr reverse_iterator rbegin() const noexcept { return reverse_iterator{string, separator}; }
     constexpr reverse_iterator rend() const noexcept { return rbegin(); }
 
-    constexpr string_type nth(size_type index) const noexcept {
-        size_type i = 0;
-        for (; index > 0; --index) {
-            i = string.find(separator, i) + detail::size_or_1(separator);
-        }
-        BS_VERIFY(i <= string.size(), "out of range");
-        const size_type end = string.find(separator, i);
-        return string(i, end);
-    }
-    constexpr size_type count() const noexcept {
-        return string.count(separator) + 1;
-    }
-
 private:
     string_type string;
     separator_type separator;

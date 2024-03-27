@@ -256,11 +256,6 @@ TEST_CASE("split", "[string_view]") {
         CHECK_THAT("test string"_sv.split("t"_sv), RangeEquals(std::array{""_sv, "es"_sv, " s"_sv, "ring"_sv}));
         CHECK_THAT("aaaa"_sv.split(" "_sv), RangeEquals(std::array{"aaaa"_sv}));
 
-        CHECK("test string"_sv.split(" "_sv).nth(0) == "test"_sv);
-        CHECK("test string"_sv.split(" "_sv).nth(1) == "string"_sv);
-        CHECK("test string"_sv.split(" "_sv).count() == 2);
-        CHECK("  "_sv.split(" "_sv).nth(1) == ""_sv);
-
         const auto splited_str = "test string"_sv.split(" "_sv);
         CHECK_THAT(std::vector(splited_str.begin(), splited_str.end()), RangeEquals(std::array{"test"_sv, "string"_sv}));
 
@@ -274,10 +269,6 @@ TEST_CASE("split", "[string_view]") {
     }
     SECTION("character") {
         CHECK_THAT("test string"_sv.split(' '), RangeEquals(std::array{"test"_sv, "string"_sv}));
-
-        CHECK("test string"_sv.split('g').count() == 2);
-        CHECK("test string"_sv.split('g').nth(0) == "test strin"_sv);
-        CHECK("test string"_sv.split('g').nth(1) == ""_sv);
         CHECK_THAT("test string"_sv.split('g'), RangeEquals(std::array{"test strin"_sv, ""_sv}));
 
         const auto splited_str = "test string"_sv.split(' ');
