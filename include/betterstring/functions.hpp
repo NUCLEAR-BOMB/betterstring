@@ -61,24 +61,6 @@ constexpr T* data(T(&array)[N]) noexcept {
 }
 
 namespace detail {
-    template<class T, class = void> struct has_size_method : std::false_type {};
-    template<class T> struct has_size_method<T, std::void_t<decltype(std::declval<T>().size())>>
-        : std::is_integral<decltype(std::declval<T>().size())> {};
-
-}
-
-template<class T>
-constexpr auto array_size(const T& x) noexcept {
-    if constexpr (is_character<T>) {
-        return std::size_t(1);
-    } else if constexpr (detail::has_size_method<T>()) {
-        return x.size();
-    } else {
-        static_assert(detail::always_false<T>, "cannot get underlying container size");
-    }
-}
-
-namespace detail {
     extern "C" std::size_t betterstring_strlen_avx2(const char*);
 }
 

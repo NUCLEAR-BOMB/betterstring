@@ -11,6 +11,22 @@
 
 namespace bs {
 
+namespace detail {
+    template<class T, class = void>
+    inline constexpr bool has_size_method = false;
+    template<class T>
+    inline constexpr bool has_size_method<T, std::void_t<decltype(std::declval<const T&>().size())>> = true;
+
+    template<class T>
+    constexpr std::size_t size_or_1(const T& obj) noexcept {
+        if constexpr (has_size_method<T>) {
+            return obj.size();
+        } else {
+            return 1;
+        }
+    }
+}
+
 template<class String, class Separator>
 struct splited_string {
 public:
@@ -40,7 +56,7 @@ public:
         }
 
         constexpr iterator& operator++() noexcept {
-            current_begin = current_end + bs::array_size(separator);
+            current_begin = current_end + detail::size_or_1(separator);
             return *this;
         }
 
@@ -64,7 +80,7 @@ public:
     constexpr string_type operator[](size_type index) const noexcept {
         size_type i = 0;
         for (; index > 0; --index) {
-            i = string.find(separator, i) + bs::array_size(separator);
+            i = string.find(separator, i) + detail::size_or_1(separator);
         }
         BS_VERIFY(i <= string.size(), "out of range");
         const size_type end = string.find(separator, i);
