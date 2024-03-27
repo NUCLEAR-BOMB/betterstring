@@ -490,4 +490,17 @@ TEST_CASE("contains_any_of", "[string_view]") {
     CHECK("test string"_sv.contains_any_of("") == false);
 }
 
+TEST_CASE("rcontains", "[string_view]") {
+    CHECK("test string"_sv.rcontains(' ') == true);
+    CHECK("test string"_sv.rcontains(" ") == true);
+    CHECK("test string"_sv.rcontains('z') == false);
+    CHECK("test string"_sv.rcontains("x") == false);
+}
+
+TEST_CASE("rcontains_any_of", "[string_view]") {
+    CHECK("test string"_sv.rcontains_any_of("aaaabbbbb") == false);
+    CHECK("test string"_sv.rcontains_any_of("ndwqh,mdbfj as") == true);
+    CHECK("test string"_sv.rcontains_any_of("") == false);
+}
+
 }
