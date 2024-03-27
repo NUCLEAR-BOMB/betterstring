@@ -34,7 +34,7 @@
         </Expand>
     </Type>
 
-    <Type Name="bs::string_view&lt;*&gt;">
+    <Type Name="bs::string_viewt&lt;*&gt;">
         <Intrinsic Name="data" Expression="string_data" />
         <Intrinsic Name="size" Expression="string_size" />
         <Intrinsic Name="data_ptr" Expression="uintptr_t(data())"/>
