@@ -385,39 +385,26 @@ TEST_CASE("count", "[string_view]") {
 TEST_CASE("find_first_of", "[string_view]") {
     const bs::string_view str = "test string"_sv;
 
-    SECTION("character") {
-        CHECK(str.find_first_of('t') == 0);
-        CHECK(str.find_first_of('g') == 10);
-        CHECK(str.find_first_of(' ') == 4);
-    }
-    SECTION("string") {
-        CHECK(str.find_first_of("t"_sv) == 0);
-        CHECK(str.find_first_of("g"_sv) == 10);
-        CHECK(str.find_first_of("s ing"_sv) == 2);
-        CHECK_FALSE(str.find_first_of(""_sv).found());
-        CHECK_FALSE(str.find_first_of("l"_sv).found());
-    }
+    CHECK(str.find_first_of("t"_sv) == 0);
+    CHECK(str.find_first_of("g"_sv) == 10);
+    CHECK(str.find_first_of("s ing"_sv) == 2);
+    CHECK_FALSE(str.find_first_of(""_sv).found());
+    CHECK_FALSE(str.find_first_of("l"_sv).found());
 }
 
 TEST_CASE("find_last_of", "[string_view]") {
     const bs::string_view str = "test string"_sv;
 
-    SECTION("character") {
-        CHECK(str.find_last_of('t').index() == 6);
-        CHECK(str.find_last_of('g').index() == 10);
-        CHECK(str.find_last_of(' ').index() == 4);
-    }
-    SECTION("string") {
-        CHECK(str.find_last_of("t"_sv) == 6);
-        CHECK(str.find_last_of("g"_sv) == 10);
-        CHECK(str.find_last_of("hei"_sv) == 8);
-        CHECK(str.find_last_of(""_sv).ptr_or_null() == nullptr);
-        CHECK(str.find_last_of("a"_sv).ptr_or_end() == str.data() - 1);
-        CHECK(str.find_last_of(" ").index_or(10) == 4);
-        CHECK(str.find_last_of("y").index_or(5) == 5);
-        CHECK(str.find_last_of("ten ").ptr_or(str.data() + 5) == str.data() + 9);
-        CHECK(str.find_last_of("xqqq").ptr_or(str.data() - 1) == str.data() - 1);
-    }
+
+    CHECK(str.find_last_of("t"_sv) == 6);
+    CHECK(str.find_last_of("g"_sv) == 10);
+    CHECK(str.find_last_of("hei"_sv) == 8);
+    CHECK(str.find_last_of(""_sv).ptr_or_null() == nullptr);
+    CHECK(str.find_last_of("a"_sv).ptr_or_end() == str.data() - 1);
+    CHECK(str.find_last_of(" ").index_or(10) == 4);
+    CHECK(str.find_last_of("y").index_or(5) == 5);
+    CHECK(str.find_last_of("ten ").ptr_or(str.data() + 5) == str.data() + 9);
+    CHECK(str.find_last_of("xqqq").ptr_or(str.data() - 1) == str.data() - 1);
 }
 
 TEST_CASE("strip_first", "[string_view]") {
@@ -478,9 +465,6 @@ TEST_CASE("none_of", "[string_view]") {
 
 TEST_CASE("find_first_not_of", "[string_view]") {
     const bs::string_view str = "test string";
-    CHECK(str.find_first_not_of('t') == 1);
-    CHECK(str.find_first_not_of('e') == 0);
-    CHECK_FALSE(""_sv.find_first_not_of('a').found());
 
     CHECK(str.find_first_not_of("test") == 4);
     CHECK(str.find_first_not_of("tes") == 4);
@@ -491,9 +475,6 @@ TEST_CASE("find_first_not_of", "[string_view]") {
 
 TEST_CASE("find_last_not_of", "[string_view]") {
     const bs::string_view str = "hello worldddd";
-    CHECK(str.find_last_not_of('d') == 9);
-    CHECK(str.find_last_not_of('l') == 13);
-    CHECK_FALSE(""_sv.find_last_not_of('a').found());
 
     CHECK(str.find_last_not_of("dddd") == 9);
     CHECK(str.find_last_not_of("dlorw") == 5);

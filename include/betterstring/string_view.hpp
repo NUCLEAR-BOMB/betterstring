@@ -237,29 +237,14 @@ public:
         return { data(), size_type(-1), traits_type::rfindstr(start, (start - data()), str.data(), str.size()) };
     }
 
-    constexpr self_find_result find_first_of(const value_type ch) const noexcept {
-        return this->find(ch);
-    }
     constexpr self_find_result find_first_of(const string_viewt str) const noexcept {
         return { data(), size(), traits_type::first_of(data(), size(), str.data(), str.size()) };
-    }
-
-    constexpr self_find_result find_last_of(const value_type ch) const noexcept {
-        return this->rfind(ch);
     }
     constexpr self_find_result find_last_of(const string_viewt str) const noexcept {
         return { data(), size_type(-1), traits_type::last_of(data(), size(), str.data(), str.size()) };
     }
-
-    constexpr self_find_result find_first_not_of(const value_type ch) const noexcept {
-        return { data(), size(), traits_type::find_not(data(), size(), ch) };
-    }
     constexpr self_find_result find_first_not_of(const string_viewt str) const noexcept {
         return { data(), size(), traits_type::first_not_of(data(), size(), str.data(), str.size()) };
-    }
-
-    constexpr self_find_result find_last_not_of(const value_type ch) const noexcept {
-        return { data(), size_type(-1), traits_type::rfind_not(data(), size(), ch) };
     }
     constexpr self_find_result find_last_not_of(const string_viewt str) const noexcept {
         return { data(), size_type(-1), traits_type::last_not_of(data(), size(), str.data(), str.size()) };
