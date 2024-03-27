@@ -482,4 +482,12 @@ TEST_CASE("find_last_not_of", "[string_view]") {
     CHECK_FALSE(""_sv.find_first_not_of("4q34jtk").found());
 }
 
+TEST_CASE("contains_any_of", "[string_view]") {
+    CHECK("hello world"_sv.contains_any_of("xyz") == false);
+    CHECK("test string"_sv.contains_any_of("toql") == true);
+    CHECK("test string"_sv.contains_any_of("test string") == true);
+    CHECK("test string"_sv.contains_any_of("e") == true);
+    CHECK("test string"_sv.contains_any_of("") == false);
+}
+
 }

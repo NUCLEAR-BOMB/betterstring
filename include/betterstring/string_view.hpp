@@ -256,6 +256,9 @@ public:
     constexpr bool contains(const string_viewt str) const noexcept {
         return traits_type::findstr(data(), size(), str.data(), str.size()) != nullptr;
     }
+    constexpr bool contains_any_of(const string_viewt chs) const noexcept {
+        return traits_type::first_of(data(), size(), chs.data(), chs.size()) != nullptr;
+    }
 
     constexpr splited_string<string_viewt, string_viewt> split(const string_viewt separator) const noexcept {
         return splited_string<string_viewt, string_viewt>(*this, separator);
