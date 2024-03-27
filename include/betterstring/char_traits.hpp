@@ -98,6 +98,12 @@ public:
     static constexpr size_type count(const char_type* const str, const size_type str_len, const char_type ch) noexcept {
         return static_cast<size_type>(bs::strcount(str, str_len, ch));
     }
+    static constexpr size_type countstr(const char_type* const str, const size_type str_len, const char_type* const needle, const size_type needle_len) noexcept {
+        return static_cast<size_type>(bs::strcount(str, str_len, needle, needle_len));
+    }
+    static constexpr size_type count_any_of(const char_type* const str, const size_type str_len, const char_type* const needle, const size_type needle_len) noexcept {
+        return static_cast<size_type>(bs::strcountanyof(str, str_len, needle, needle_len));
+    }
 };
 
 }
