@@ -83,8 +83,6 @@ public:
         : string_data(detail::to_address(first))
         , string_size(static_cast<size_type>(last - first)) {}
 
-    constexpr string_viewt(std::nullptr_t) = delete;
-
     constexpr string_viewt& operator=(const string_viewt&) noexcept = default;
 
     constexpr const_iterator begin() const noexcept { return data(); }
