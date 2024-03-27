@@ -40,7 +40,7 @@ struct slice {
     index_type stop;
 };
 
-template<class Traits = char_traits<char>>
+template<class Traits>
 class string_viewt {
 public:
     using traits_type            = Traits;
