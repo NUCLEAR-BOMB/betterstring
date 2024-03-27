@@ -415,4 +415,15 @@ TEST_CASE("bs::strrfindn", "[functions]") {
     CHECK(bs::strrfindn(str3, 14, 'b') == nullptr);
 }
 
+TEST_CASE("bs::strcountanyof", "[functions]") {
+    const char* str1 = "test string";
+    CHECK(bs::strcountanyof(str1, 11, " ", 1) == 1);
+    CHECK(bs::strcountanyof(str1, 11, "st", 2) == 5);
+    CHECK(bs::strcountanyof(str1, 11, "si", 2) == 3);
+    CHECK(bs::strcountanyof(str1, 11, "", 0) == 0);
+    CHECK(bs::strcountanyof(str1, 11, "ing", 3) == 3);
+    CHECK(bs::strcountanyof(str1, 11, "xyz", 3) == 0);
+    CHECK(bs::strcountanyof(str1, 11, "txyz", 4) == 3);
+}
+
 }

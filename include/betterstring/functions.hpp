@@ -578,4 +578,38 @@ constexpr T* strlastnof(T* str, std::size_t count, const detail::type_identity_t
     }
 }
 
+template<class T>
+constexpr std::size_t strcountanyof(const T* str, std::size_t count, const T* needle, std::size_t needle_len) noexcept {
+    if (needle_len == 0) { return 0; }
+
+    std::size_t result = 0;
+
+    if constexpr (sizeof(T) == 1) {
+        uint8_t bitmap[256]{};
+        do {
+            bitmap[uint8_t(*needle)] = 0xFF;
+            ++needle;
+            --needle_len;
+        } while (needle_len != 0);
+
+        while (count != 0) {
+            if (bitmap[uint8_t(*str)] != 0) {
+                ++result;
+            }
+            ++str;
+            --count;
+        }
+        return result;
+    } else {
+        const auto match_end = str + count;
+        while (true) {
+            str = bs::strfirstof(str, static_cast<std::size_t>(match_end - str), needle, needle_len);
+            if (str == nullptr) { break; }
+            ++result;
+            ++str;
+        }
+        return result;
+    }
+}
+
 }
