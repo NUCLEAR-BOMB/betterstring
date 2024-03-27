@@ -378,31 +378,29 @@ public:
         return true;
     }
 
-private:
-    static constexpr int trait_cmp(const string_viewt l, const string_viewt r) noexcept {
-        if (l.size() > r.size()) return 1;
-        if (l.size() < r.size()) return -1;
-        return Traits::compare(l.data(), r.data(), l.size());
+    friend constexpr bool operator==(const string_viewt left, const string_viewt right) noexcept {
+        if (left.size() != right.size()) { return false; }
+        return Traits::compare(left.data(), right.data(), left.size()) == 0;
     }
-public:
-
-    friend constexpr bool operator==(const string_viewt l, const string_viewt r) noexcept {
-        return trait_cmp(l, r) == 0;
+    friend constexpr bool operator!=(const string_viewt left, const string_viewt right) noexcept {
+        if (left.size() != right.size()) { return true; }
+        return Traits::compare(left.data(), right.data(), left.size()) != 0;
     }
-    friend constexpr bool operator!=(const string_viewt l, const string_viewt r) noexcept {
-        return trait_cmp(l, r) != 0;
+    friend constexpr bool operator>(const string_viewt left, const string_viewt right) noexcept {
+        if (left.size() != right.size()) { return left.size() > right.size(); }
+        return Traits::compare(left.data(), right.data(), left.size()) > 0;
     }
-    friend constexpr bool operator>(const string_viewt l, const string_viewt r) noexcept {
-        return trait_cmp(l, r) > 0;
+    friend constexpr bool operator>=(const string_viewt left, const string_viewt right) noexcept {
+        if (left.size() != right.size()) { return left.size() > right.size(); }
+        return Traits::compare(left.data(), right.data(), left.size()) >= 0;
     }
-    friend constexpr bool operator>=(const string_viewt l, const string_viewt r) noexcept {
-        return trait_cmp(l, r) >= 0;
+    friend constexpr bool operator<(const string_viewt left, const string_viewt right) noexcept {
+        if (left.size() != right.size()) { return left.size() < right.size(); }
+        return Traits::compare(left.data(), right.data(), left.size()) < 0;
     }
-    friend constexpr bool operator<(const string_viewt l, const string_viewt r) noexcept {
-        return trait_cmp(l, r) < 0;
-    }
-    friend constexpr bool operator<=(const string_viewt l, const string_viewt r) noexcept {
-        return trait_cmp(l, r) <= 0;
+    friend constexpr bool operator<=(const string_viewt left, const string_viewt right) noexcept {
+        if (left.size() != right.size()) { return left.size() < right.size(); }
+        return Traits::compare(left.data(), right.data(), left.size()) <= 0;
     }
 
 #ifndef BS_DONT_INCLUDE_STRING
