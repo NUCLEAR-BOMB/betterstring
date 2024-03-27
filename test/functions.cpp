@@ -277,7 +277,8 @@ TEST_CASE("bs::strcount", "[functions]") {
         CHECK(bs::strcount("tteesstt  ssttrriinngg", 22, "t", 1) == 6);
         CHECK(bs::strcount("test string", 11, "test string", 11) == 1);
         CHECK(bs::strcount("test string", 11, "test string!", 12) == 0);
-        CHECK(bs::strcount("", 0, "", 0) == 0);
+        CHECK(bs::strcount("", 0, "", 0) == 1);
+        CHECK(bs::strcount("aaaaaaaaaaaaaaaaa", 17, "", 0) == 18);
         CHECK(bs::strcount("", 0, "a", 1) == 0);
         CHECK(bs::strcount("a", 1, "a", 1) == 1);
     }

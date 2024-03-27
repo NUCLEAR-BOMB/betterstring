@@ -378,7 +378,7 @@ constexpr std::size_t strcount(const T* str, const std::size_t count, const deta
 
 template<class T>
 constexpr std::size_t strcount(const T* str, std::size_t count, const T* needle, std::size_t needle_len) noexcept {
-    if (needle_len > count) { return 0; }
+    if (needle_len == 0) { return count + 1; }
     if (count == 0) { return 0; }
 
     std::size_t result = 0;
