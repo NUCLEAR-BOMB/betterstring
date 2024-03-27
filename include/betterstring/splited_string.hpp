@@ -77,7 +77,7 @@ public:
     constexpr iterator begin() const noexcept { return iterator(string, separator); }
     constexpr iterator end() const noexcept { return begin(); }
 
-    constexpr string_type operator[](size_type index) const noexcept {
+    constexpr string_type nth(size_type index) const noexcept {
         size_type i = 0;
         for (; index > 0; --index) {
             i = string.find(separator, i) + detail::size_or_1(separator);
