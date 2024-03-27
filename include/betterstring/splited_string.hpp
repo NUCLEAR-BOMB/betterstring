@@ -73,6 +73,53 @@ namespace detail {
         Separator sep;
         size_type str_end{};
     };
+    template<class String, class Separator>
+    class reverse_splited_string_iterator {
+    public:
+        // iterator traits
+        using difference_type = std::ptrdiff_t;
+        using value_type = String;
+        using size_type = typename String::size_type;
+        using reference = String;
+        using pointer = void;
+        using iterator_category = std::input_iterator_tag;
+
+        constexpr reverse_splited_string_iterator(const String str_, const Separator sep_) noexcept
+            : str{str_}, sep{sep_} {
+            str_end = str.rfind(sep).index_or_end();
+        }
+
+        constexpr String operator*() const noexcept {
+            return str(str_end + 1, {});
+        }
+
+        constexpr reverse_splited_string_iterator& operator++() noexcept {
+            if (str_end == size_type(-1)) {
+                str_end = size_type(-2);
+                return *this;
+            }
+            str.remove_suffix((str.size() - str_end - 1) + detail::size_or_1(sep));
+            str_end = str.rfind(sep).index_or_end();
+            return *this;
+        }
+        constexpr reverse_splited_string_iterator operator++(int) noexcept {
+            auto tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+
+        constexpr bool operator!=(const reverse_splited_string_iterator&) const noexcept {
+            return str_end != size_type(-2);
+        }
+        constexpr bool operator==(const reverse_splited_string_iterator&) const noexcept {
+            return str_end == size_type(-2);
+        }
+
+    private:
+        String str;
+        Separator sep;
+        size_type str_end{};
+    };
 }
 
 template<class String, class Separator>
@@ -82,13 +129,18 @@ public:
     using string_type = String;
     using size_type = typename string_type::size_type;
     using iterator = detail::splited_string_iterator<string_type, separator_type>;
+    using const_iterator = iterator;
+    using reverse_iterator = detail::reverse_splited_string_iterator<string_type, separator_type>;
+    using const_reverse_iterator = reverse_iterator;
 
     constexpr splited_string(string_type str, separator_type sep) noexcept
         : string(str), separator(sep) {}
 
 
-    constexpr iterator begin() const noexcept { return iterator(string, separator); }
+    constexpr iterator begin() const noexcept { return iterator{string, separator}; }
     constexpr iterator end() const noexcept { return begin(); }
+    constexpr reverse_iterator rbegin() const noexcept { return reverse_iterator{string, separator}; }
+    constexpr reverse_iterator rend() const noexcept { return rbegin(); }
 
     constexpr string_type nth(size_type index) const noexcept {
         size_type i = 0;

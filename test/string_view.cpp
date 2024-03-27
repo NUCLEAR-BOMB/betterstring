@@ -237,7 +237,7 @@ TEST_CASE("rfind", "[string_view]") {
         CHECK(str.rfind("string"_sv) == 5);
         CHECK(str.rfind(" "_sv) == 4);
         CHECK(str.rfind("test"_sv, 8) == 0);
-        CHECK(str.rfind("string"_sv, 10) == 0);
+        CHECK(str.rfind("string"_sv, 10) == -1);
     }
     SECTION("character") {
         CHECK(str.rfind(' ') == 4);
@@ -282,6 +282,20 @@ TEST_CASE("split", "[string_view]") {
 
         const auto splited_str = "test string"_sv.split(' ');
         CHECK_THAT(std::vector(splited_str.begin(), splited_str.end()), RangeEquals(std::array{"test"_sv, "string"_sv}));
+    }
+    SECTION("reverse split") {
+        const auto split = "test string hello world"_sv.split(' ');
+        {
+            auto it = split.rbegin();
+            CHECK(*it == "world");
+            std::advance(it, 2);
+            CHECK(*it == "string");
+            ++it;
+            CHECK(*it == "test");
+            ++it;
+            CHECK(it == split.rend());
+        }
+        CHECK_THAT(std::vector(split.rbegin(), split.rend()), RangeEquals(std::array{"world"_sv, "hello"_sv, "string"_sv, "test"_sv}));
     }
 }
 
@@ -401,7 +415,7 @@ TEST_CASE("find_last_of", "[string_view]") {
         CHECK(str.find_last_of("g"_sv) == 10);
         CHECK(str.find_last_of("hei"_sv) == 8);
         CHECK(str.find_last_of(""_sv).ptr_or_null() == nullptr);
-        CHECK(str.find_last_of("a"_sv).ptr_or_end() == str.data());
+        CHECK(str.find_last_of("a"_sv).ptr_or_end() == str.data() - 1);
         CHECK(str.find_last_of(" ").index_or(10) == 4);
         CHECK(str.find_last_of("y").index_or(5) == 5);
         CHECK(str.find_last_of("ten ").ptr_or(str.data() + 5) == str.data() + 9);

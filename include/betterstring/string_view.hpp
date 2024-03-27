@@ -215,26 +215,26 @@ public:
     }
 
     constexpr self_find_result rfind(const value_type ch) const noexcept {
-        return { data(), 0, traits_type::rfind(data(), size(), ch), };
+        return { data(), size_type(-1), traits_type::rfind(data(), size(), ch),};
     }
     constexpr self_find_result rfind(const string_viewt str) const noexcept {
-        return { data(), 0, traits_type::rfindstr(data(), size(), str.data(), str.size()) };
+        return { data(), size_type(-1), traits_type::rfindstr(data(), size(), str.data(), str.size()) };
     }
     constexpr self_find_result rfind(const value_type ch, const size_type start) const noexcept {
         BS_VERIFY(start <= size(), "start is out of range");
-        return { data(), 0, traits_type::rfind(data(), start, ch) };
+        return { data(), size_type(-1), traits_type::rfind(data(), start, ch) };
     }
     constexpr self_find_result rfind(const string_viewt str, const size_type start) const noexcept {
         BS_VERIFY(start <= size(), "start is out of range");
-        return { data(), 0, traits_type::rfindstr(data(), start, str.data(), str.size()) };
+        return { data(), size_type(-1), traits_type::rfindstr(data(), start, str.data(), str.size()) };
     }
     constexpr self_find_result rfind(const value_type ch, const const_pointer start) const noexcept {
         BS_VERIFY(start >= data() && start <= data_end(), "start is out of range");
-        return { data(), 0, traits_type::rfind(data(), (start - data()), ch) };
+        return { data(), size_type(-1), traits_type::rfind(data(), (start - data()), ch) };
     }
     constexpr self_find_result rfind(const string_viewt str, const const_pointer start) const noexcept {
         BS_VERIFY(start >= data() && start <= data_end(), "start is out of range");
-        return { data(), 0, traits_type::rfindstr(start, (start - data()), str.data(), str.size()) };
+        return { data(), size_type(-1), traits_type::rfindstr(start, (start - data()), str.data(), str.size()) };
     }
 
     constexpr self_find_result find_first_of(const value_type ch) const noexcept {
@@ -248,7 +248,7 @@ public:
         return this->rfind(ch);
     }
     constexpr self_find_result find_last_of(const string_viewt str) const noexcept {
-        return { data(), 0, traits_type::last_of(data(), size(), str.data(), str.size()) };
+        return { data(), size_type(-1), traits_type::last_of(data(), size(), str.data(), str.size()) };
     }
 
     constexpr self_find_result find_first_not_of(const value_type ch) const noexcept {
@@ -259,10 +259,10 @@ public:
     }
 
     constexpr self_find_result find_last_not_of(const value_type ch) const noexcept {
-        return { data(), 0, traits_type::rfind_not(data(), size(), ch) };
+        return { data(), size_type(-1), traits_type::rfind_not(data(), size(), ch) };
     }
     constexpr self_find_result find_last_not_of(const string_viewt str) const noexcept {
-        return { data(), 0, traits_type::last_not_of(data(), size(), str.data(), str.size()) };
+        return { data(), size_type(-1), traits_type::last_not_of(data(), size(), str.data(), str.size()) };
     }
 
     constexpr bool contains(const value_type ch) const noexcept {
