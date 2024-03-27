@@ -43,35 +43,45 @@ public:
         using difference_type = std::ptrdiff_t;
         using value_type = string_type;
         using size_type = typename string_type::size_type;
-        using reference = void;
+        using reference = string_type;
         using pointer = void;
         using iterator_category = std::input_iterator_tag;
 
-        constexpr iterator(string_type str, separator_type sep) noexcept
-            : string(str), separator(sep) {}
+        constexpr iterator(const string_type str_, const separator_type sep_) noexcept
+            : str{str_}, sep{sep_} {
+            str_end = str.find(sep).index_or_end();
+        }
 
-        constexpr string_type operator*() noexcept {
-            current_end = string.find(separator, current_begin);
-            return string(current_begin, current_end);
+        constexpr string_type operator*() const noexcept {
+            return str(0, str_end);
         }
 
         constexpr iterator& operator++() noexcept {
-            current_begin = current_end + detail::size_or_1(separator);
+            if (str_end == str.size()) {
+                str_end = size_type(-1);
+                return *this;
+            }
+            str.remove_prefix(str_end + detail::size_or_1(sep));
+            str_end = str.find(sep).index_or_end();
             return *this;
+        }
+        constexpr iterator operator++(int) noexcept {
+            auto tmp = *this;
+            ++(*this);
+            return tmp;
         }
 
         constexpr bool operator!=(const iterator&) const noexcept {
-            return current_end != string.size();
+            return str_end != size_type(-1);
         }
         constexpr bool operator==(const iterator&) const noexcept {
-            return current_end == string.size();
+            return str_end == size_type(-1);
         }
 
     private:
-        string_type string;
-        separator_type separator;
-        size_type current_begin = 0;
-        size_type current_end = 0;
+        string_type str;
+        separator_type sep;
+        size_type str_end{};
     };
 
     constexpr iterator begin() const noexcept { return iterator(string, separator); }

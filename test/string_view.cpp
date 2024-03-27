@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
 #include <array>
+#include <iterator>
 
 #include <betterstring/string_view.hpp>
 #include <betterstring/ascii.hpp>
@@ -262,6 +263,14 @@ TEST_CASE("split", "[string_view]") {
 
         const auto splited_str = "test string"_sv.split(" "_sv);
         CHECK_THAT(std::vector(splited_str.begin(), splited_str.end()), RangeEquals(std::array{"test"_sv, "string"_sv}));
+
+        const auto splited_str1 = "1 2 3 4 5 6 7 8 9"_sv.split(" "_sv);
+        {
+            auto it = splited_str1.begin();
+            CHECK(*it == "1");
+            std::advance(it, 3);
+            CHECK(*it == "4");
+        }
     }
     SECTION("character") {
         CHECK_THAT("test string"_sv.split(' '), RangeEquals(std::array{"test"_sv, "string"_sv}));
