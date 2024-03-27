@@ -287,16 +287,10 @@ public:
         return traits_type::count(data(), size(), ch);
     }
     constexpr size_type count(const string_viewt str) const noexcept {
-        if (str.empty()) return this->size() + 1;
-
-        size_type result = 0;
-        const auto match_end = data() + size();
-        for (auto match_try = data();; ++match_try) {
-            match_try = traits_type::findstr(match_try, static_cast<size_type>(match_end - match_try), str.data(), str.size());
-            if (match_try == nullptr) return result;
-            ++result;
-        }
-        BS_UNREACHABLE();
+        return traits_type::countstr(data(), size(), str.data(), str.size());
+    }
+    constexpr size_type count_any_of(const string_viewt chs) const noexcept {
+        return traits_type::count_any_of(data(), size(), chs.data(), chs.size());
     }
 
     constexpr string_viewt strip(const value_type ch) const noexcept {

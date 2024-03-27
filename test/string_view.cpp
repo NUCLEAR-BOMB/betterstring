@@ -503,4 +503,12 @@ TEST_CASE("rcontains_any_of", "[string_view]") {
     CHECK("test string"_sv.rcontains_any_of("") == false);
 }
 
+TEST_CASE("count_any_of", "[string_view]") {
+    CHECK("test str"_sv.count_any_of("t e") == 5);
+    CHECK("test str"_sv.count_any_of("") == 0);
+    CHECK("test str"_sv.count_any_of("t") == 3);
+    CHECK("test str"_sv.count_any_of("xyz") == 0);
+    CHECK("test str"_sv.count_any_of("re") == 2);
+}
+
 }
