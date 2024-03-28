@@ -28,8 +28,10 @@ function(target_add_sanitizer target)
             return()
         elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
             if (sanitizers_Address)
-                target_compile_options(${target} PRIVATE -fsanitize=address)
-                set_target_properties(${target} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded")
+                foreach (tgt ${target} ${libraries})
+                    target_compile_options(${tgt} PRIVATE -fsanitize=address)
+                endforeach()
+                set_target_properties(${target} ${libraries} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded")
                 target_link_libraries(${target} PRIVATE
                     #"C:/Program Files/LLVM/lib/clang/18/lib/windows/clang_rt.asan-x86_64.lib"
                     #"C:/Program Files/LLVM/lib/clang/18/lib/windows/clang_rt.asan_cxx-x86_64.lib"
