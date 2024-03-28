@@ -20,9 +20,9 @@ namespace Catch {
     };
 }
 
-using namespace bs::literals;
-
 namespace {
+
+using namespace bs::literals;
 
 TEST_CASE("constructor", "[string]") {
     SECTION("default") {

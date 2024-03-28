@@ -17,8 +17,6 @@
 static_assert(static_cast<uint8_t>(bs::parse_error{}) == 0);
 static_assert(static_cast<uint8_t>(bs::parse_error::invalid_argument) == 1);
 
-using std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t;
-
 namespace Catch {
     template<class T>
     struct StringMaker<bs::parse_result<T>> {
@@ -30,6 +28,8 @@ namespace Catch {
 }
 
 namespace {
+
+using std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t;
 
 TEST_CASE("uint8", "[parsing]") {
     CHECK(bs::parse<uint8_t>("", 0) == bs::parse_error::invalid_argument);

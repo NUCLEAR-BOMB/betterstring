@@ -14,9 +14,9 @@
 
 #include "util.hpp"
 
-using namespace bs::literals;
-
 namespace {
+
+using namespace bs::literals;
 
 TEST_CASE("bs::strlen", "[functions]") {
     CHECK(bs::strlen("test string") == 11);

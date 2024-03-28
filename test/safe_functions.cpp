@@ -22,6 +22,8 @@ namespace Catch {
     };
 }
 
+namespace {
+
 TEST_CASE("bs::safe::strcopy", "[safe functions]") {
     char* const char_nullptr = nullptr;
 
@@ -81,4 +83,6 @@ TEST_CASE("bs::safe::strmove", "[safe functions]") {
 
     auto err8 = bs::safe::strmove(buffer, 20, buffer + 10, 10);
     CHECK(err8 == bs::safe::errorc{});
+}
+
 }
