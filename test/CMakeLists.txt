@@ -53,9 +53,9 @@ if (USE_CLANG_TIDY)
 endif()
 
 set_target_properties(betterstring-test PROPERTIES
-    VS_DEBUGGER_ENVIRONMENT "UBSAN_OPTIONS=print_stacktrace=1"
+    VS_DEBUGGER_ENVIRONMENT "UBSAN_OPTIONS=print_stacktrace=1 ASAN_OPTIONS=detect_odr_violation=0"
 )
 add_custom_target(run-betterstring-test VERBATIM
-    COMMAND "${CMAKE_COMMAND}" -E env "UBSAN_OPTIONS=print_stacktrace=1" "$<TARGET_FILE:betterstring-test>"
+    COMMAND "${CMAKE_COMMAND}" -E env "UBSAN_OPTIONS=print_stacktrace=1" "ASAN_OPTIONS=detect_odr_violation=0" "$<TARGET_FILE:betterstring-test>"
 )
 # dependency will be added automatically
