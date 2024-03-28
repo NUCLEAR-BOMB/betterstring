@@ -16,6 +16,7 @@ add_executable(betterstring-test
 )
 target_add_warnings(betterstring-test)
 target_link_libraries(betterstring-test PRIVATE betterstring)
+set_target_properties(betterstring-test PROPERTIES UNITY_BUILD FALSE)
 
 include(FetchContent)
 FetchContent_Declare(
