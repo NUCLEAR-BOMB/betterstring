@@ -38,7 +38,7 @@ target_compile_definitions(betterstring-test PRIVATE CATCH_CONFIG_FAST_COMPILE)
 
 if (USE_SANITIZERS)
     include("${PROJECT_SOURCE_DIR}/cmake/sanitizers.cmake")
-    target_add_sanitizer(betterstring-test SANITIZERS Address UndefinedBehavior LIBRARIES Catch2 Catch2WithMain)
+    target_add_sanitizer(betterstring-test SANITIZERS Address Undefined LIBRARIES Catch2 Catch2WithMain)
 endif()
 
 if (USE_CLANG_TIDY)
