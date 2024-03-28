@@ -26,3 +26,9 @@ add_executable(betterstring-benchmark
 )
 target_link_libraries(betterstring-benchmark PRIVATE fmt::fmt nanobench betterstring)
 
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(betterstring-benchmark PRIVATE
+        -Wno-c++20-extensions
+    )
+endif()
+
