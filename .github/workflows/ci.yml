@@ -41,6 +41,7 @@ jobs:
     #     key: ${{env.cache-name}}-${{matrix.platform.os}}-${{matrix.build.name}}-${{hashFiles('**/CMakeLists.txt', 'cmake/**')}}
 
     - name: Cache Install LLVM
+      if: ${{ matrix.platform.install-llvm }} == true
       id: cache-llvm
       uses: actions/cache@v4.0.2
       with:
