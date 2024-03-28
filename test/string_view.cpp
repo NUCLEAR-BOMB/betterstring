@@ -6,9 +6,9 @@
 #include <betterstring/string_view.hpp>
 #include <betterstring/ascii.hpp>
 
-using namespace bs::literals;
-
 namespace {
+
+using namespace bs::literals;
 
 TEST_CASE("constructor", "[string_view]") {
     const bs::string_view empty_str;
