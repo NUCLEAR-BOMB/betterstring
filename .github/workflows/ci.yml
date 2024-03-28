@@ -45,8 +45,8 @@ jobs:
       run: |
         curl -Lo "${{runner.temp}}/llvm-download.tar.xz" https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.2/clang+llvm-18.1.2-x86_64-pc-windows-msvc.tar.xz
         7z x "${{runner.temp}}/llvm-download.tar.xz" "-o${{runner.temp}}" -y
-        7z x "${{runner.temp}}/llvm-download.tar" "-oC:/Program Files" -y
-        ren "C:/Program Files/clang+llvm-18.1.2-x86_64-pc-windows-msvc" "LLVM"
+        7z x "${{runner.temp}}/llvm-download.tar" "-o${{runner.temp}}" -y
+        copy "${{runner.temp}}/clang+llvm-18.1.2-x86_64-pc-windows-msvc" "C:/Program Files/LLVM"
 
     - name: Configure CMake
       run: cmake -B build -D CMAKE_BUILD_TYPE=${{ matrix.build.name }} -D CMAKE_UNITY_BUILD=TRUE ${{ matrix.platform.flags }}
