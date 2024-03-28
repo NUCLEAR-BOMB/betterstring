@@ -4,7 +4,7 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
-    name: "${{ matrix.platform.name }} | Build: ${{ matrix.build.name }}"
+    name: "${{ matrix.platform.name }} | Build: ${{ matrix.config.name }}"
     runs-on: ${{ matrix.platform.os }}
 
     strategy:
