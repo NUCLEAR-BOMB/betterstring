@@ -13,7 +13,7 @@ jobs:
         platform:
           - { name: Windows VS 2022, os: windows-2022 }
           - { name: Windows VS 2022 ClangCL, os: windows-2022, flags: -T ClangCL, install-llvm: 'true' }
-        build:
+        config:
           - { name: Debug }
           - { name: Release }
 
@@ -61,16 +61,16 @@ jobs:
         xcopy "${{runner.temp}}\clang+llvm-18.1.2-x86_64-pc-windows-msvc" "C:\Program Files\LLVM" /e /y
 
     - name: Configure CMake
-      run: cmake -B build -D CMAKE_BUILD_TYPE=${{ matrix.build.name }} -D CMAKE_UNITY_BUILD=TRUE ${{ matrix.platform.flags }}
+      run: cmake -B build -D CMAKE_BUILD_TYPE=${{ matrix.config.name }} -D CMAKE_UNITY_BUILD=TRUE ${{ matrix.platform.flags }}
 
     - name: Build
-      run: cmake --build build --config ${{ matrix.build.name }}
+      run: cmake --build build --config ${{ matrix.config.name }}
 
     - name: Run tests
-      run: cmake --build build --config ${{ matrix.build.name }} --target run-betterstring-test
+      run: cmake --build build --config ${{ matrix.config.name }} --target run-betterstring-test
       
     - name: Run fuzzer
-      run: cmake --build build --config ${{ matrix.build.name }} --target run-betterstring-fuzz
+      run: cmake --build build --config ${{ matrix.config.name }} --target run-betterstring-fuzz
 
     - name: Upload fuzzer artifacts
       uses: actions/upload-artifact@v4.3.1
