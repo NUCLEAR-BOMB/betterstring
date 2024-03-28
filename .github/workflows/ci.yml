@@ -11,8 +11,8 @@ jobs:
       fail-fast: false
       matrix:
         platform:
-          - { name: Windows VS 2022, os: windows-2022, flags: -A x64 }
-          - { name: Windows VS 2022 ClangCL, os: windows-2022, flags: -A x64 -T ClangCL }
+          - { name: Windows VS 2022, os: windows-2022 }
+          - { name: Windows VS 2022 ClangCL, os: windows-2022, flags: -T ClangCL }
         build:
           - { name: Debug }
           - { name: Release }
