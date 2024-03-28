@@ -51,6 +51,7 @@ function(target_add_warnings target)
         -Wno-shadow-field-in-constructor
         -Wno-sign-conversion
         -Wno-self-assign-overloaded
+        -Wno-assume
         >)
     endif()
 endfunction()
