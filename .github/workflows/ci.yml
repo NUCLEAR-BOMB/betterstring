@@ -48,7 +48,7 @@ jobs:
         key: cache-llvm-18-1-2
 
     - name: Install LLVM
-      if: ${{matrix.platform.install-llvm}} && steps.cache-llvm-18-1-2.outputs.cache-hit != 'true'
+      if: ${{matrix.platform.install-llvm}} && steps.cache-llvm.outputs.cache-hit != 'true'
       run: |
         curl -Lo "${{runner.temp}}/llvm-download.tar.xz" https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.2/clang+llvm-18.1.2-x86_64-pc-windows-msvc.tar.xz
         7z x "${{runner.temp}}/llvm-download.tar.xz" "-o${{runner.temp}}" -y
