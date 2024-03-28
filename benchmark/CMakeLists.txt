@@ -14,6 +14,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(nanobench fmt)
 set_target_properties(nanobench fmt PROPERTIES FOLDER "external/")
+target_suppress_warnings(fmt)
 
 add_executable(betterstring-benchmark
     "main.cpp"
