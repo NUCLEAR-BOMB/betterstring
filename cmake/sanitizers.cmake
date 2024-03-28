@@ -11,6 +11,8 @@ function(target_add_sanitizer target)
 
     set(libraries ${ARG_LIBRARIES})
     set(options ${ARG_OPTIONS})
+
+    target_compile_options(${target} PRIVATE ${options})
     if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
             if (sanitizers_Address)
@@ -24,7 +26,6 @@ function(target_add_sanitizer target)
             if (sanitizers_Address OR sanitizers_Fuzzer)
                 target_link_options(${target} PRIVATE $<$<CONFIG:Debug>:/INCREMENTAL:NO>)
             endif()
-            target_compile_options(${target} PRIVATE ${options})
             return()
         elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
             if (sanitizers_Address)
@@ -32,12 +33,18 @@ function(target_add_sanitizer target)
                     target_compile_options(${tgt} PRIVATE -fsanitize=address)
                 endforeach()
                 set_target_properties(${target} ${libraries} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded")
-                target_link_libraries(${target} PRIVATE
-                    #"C:/Program Files/LLVM/lib/clang/18/lib/windows/clang_rt.asan-x86_64.lib"
-                    #"C:/Program Files/LLVM/lib/clang/18/lib/windows/clang_rt.asan_cxx-x86_64.lib"
-                    clang_rt.asan-x86_64.lib
-                    clang_rt.asan_cxx-x86_64.lib
+
+                find_library(clang_rt_asan
+                    NAMES "clang_rt.asan-x86_64.lib"
+                    PATHS "$ENV{ProgramFiles}/LLVM/lib/clang/18/lib/windows"
                 )
+                if (NOT clang_rt_asan STREQUAL "clang_rt_asan-NOTFOUND")
+                    cmake_path(REPLACE_FILENAME clang_rt_asan "clang_rt.asan_cxx-x86_64.lib" OUTPUT_VARIABLE clang_rt_asan_cxx)
+                else()
+                    set(clang_rt_asan "clang_rt.asan-x86_64.lib")
+                    set(clang_rt_asan_cxx "clang_rt.asan_cxx-x86_64.lib")
+                endif()
+                target_link_libraries(${target} PRIVATE ${clang_rt_asan} ${clang_rt_asan_cxx})
             endif()
             if (sanitizers_Fuzzer)
                 target_compile_options(${target} PRIVATE -fsanitize=fuzzer)
@@ -51,16 +58,13 @@ function(target_add_sanitizer target)
                 endif()
             endif()
             if (sanitizers_Undefined)
-                target_compile_options(${target} PRIVATE
-                    -fsanitize=undefined -fno-sanitize-recover=all
-                )
+                target_compile_options(${target} PRIVATE -fsanitize=undefined)
                 set_target_properties(${target} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded")
                 target_link_libraries(${target} PRIVATE
                     clang_rt.ubsan_standalone_cxx-x86_64.lib
                     clang_rt.ubsan_standalone-x86_64.lib
                 )
             endif()
-            target_compile_options(${target} PRIVATE ${options})
             return()
         elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
             
@@ -75,7 +79,6 @@ function(target_add_sanitizer target)
                 target_link_options(${target} PRIVATE -fsanitize=undefined)
             endif()
             set_target_properties(${target} ${libraries} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded")
-            target_compile_options(${target} PRIVATE ${options})
             return()
         endif()
     endif()
@@ -87,5 +90,4 @@ function(target_add_sanitizer target)
         target_compile_options(${target} PRIVATE -fsanitize=undefined)
         target_link_options(${target} PRIVATE -fsanitize=undefined)
     endif()
-    target_compile_options(${target} PRIVATE ${options})
 endfunction()
