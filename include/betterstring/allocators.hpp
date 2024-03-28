@@ -59,7 +59,7 @@ public:
 #endif
         }
     }
-    constexpr void deallocate(T* const ptr, const std::size_t n) {
+    constexpr void deallocate(T* const ptr, [[maybe_unused]] const std::size_t n) {
         if constexpr (Alignment == 1) {
 #ifdef BS_BUILTIN_OPERATOR_DELETE
             BS_BUILTIN_OPERATOR_DELETE(ptr);
