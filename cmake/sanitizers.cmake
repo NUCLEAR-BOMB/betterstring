@@ -29,9 +29,10 @@ function(target_add_sanitizer target)
             return()
         elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
             if (sanitizers_Address)
-                foreach (tgt ${target} ${libraries})
-                    target_compile_options(${tgt} PRIVATE -fsanitize=address)
-                endforeach()
+                # Address sanitizer is broken for Release config
+                set_property(TARGET ${target} ${libraries} APPEND
+                    PROPERTY COMPILE_OPTIONS $<$<NOT:$<CONFIG:Release>>:-fsanitize=address>
+                )
                 set_target_properties(${target} ${libraries} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded")
 
                 find_library(clang_rt_asan
@@ -59,7 +60,7 @@ function(target_add_sanitizer target)
             endif()
             if (sanitizers_Undefined)
                 target_compile_options(${target} PRIVATE -fsanitize=undefined)
-                set_target_properties(${target} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded")
+                set_target_properties(${target} ${libraries} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded")
                 target_link_libraries(${target} PRIVATE
                     clang_rt.ubsan_standalone_cxx-x86_64.lib
                     clang_rt.ubsan_standalone-x86_64.lib
