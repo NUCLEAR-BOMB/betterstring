@@ -13,6 +13,7 @@ add_executable(betterstring-test
     "allocators.cpp"
 
     "util.hpp"
+    "stacktrace.hpp"
 )
 target_add_warnings(betterstring-test)
 target_link_libraries(betterstring-test PRIVATE betterstring)
@@ -50,6 +51,24 @@ if (USE_CLANG_TIDY)
         EXTRA_ARG "-std=c++17" "-Wno-unknown-warning-option"
         USE_COLOR QUIET SHOW_TIME
     )
+endif()
+
+if (PRINT_STACKTRACE)
+    include(FetchContent)
+    FetchContent_Declare(
+        cpptrace
+        GIT_REPOSITORY https://github.com/jeremy-rifkin/cpptrace.git
+        GIT_TAG        v0.5.1
+    )
+    FetchContent_MakeAvailable(cpptrace)
+    target_link_libraries(betterstring-test PRIVATE cpptrace::cpptrace)
+    target_compile_definitions(betterstring-test PRIVATE BETTERSTRING_TEST_ENABLE_STACKTRACE)
+
+    if (CMAKE_SYSTEM_NAME MATCHES "Windows")
+        add_custom_command(TARGET betterstring-test POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_FILE:cpptrace::cpptrace> $<TARGET_FILE_DIR:betterstring-test>
+        )
+    endif()
 endif()
 
 set_target_properties(betterstring-test PROPERTIES

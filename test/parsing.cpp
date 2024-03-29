@@ -4,8 +4,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
 
 #include <catch2/catch_test_macros.hpp>
-
 #include <cstdint>
+
+#include "stacktrace.hpp"
 #include <betterstring/parsing.hpp>
 
 #if BS_COMP_CLANG

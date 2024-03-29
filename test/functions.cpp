@@ -5,14 +5,14 @@
 
 #define BS_DONT_INCLUDE_STRING
 
-#include <betterstring/string_view.hpp>
-#include <betterstring/functions.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <string>
 #include <cstdlib>
 
-#include <catch2/catch_test_macros.hpp>
-
+#include "stacktrace.hpp"
 #include "util.hpp"
+#include <betterstring/string_view.hpp>
+#include <betterstring/functions.hpp>
 
 namespace {
 

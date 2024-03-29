@@ -9,6 +9,8 @@
 #include <array>
 #include <sstream>
 #include <iomanip>
+
+#include "stacktrace.hpp"
 #include <betterstring/string.hpp>
 
 namespace Catch {

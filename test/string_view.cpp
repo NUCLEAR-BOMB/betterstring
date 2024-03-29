@@ -1,8 +1,14 @@
+
+// Copyright 2024.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
+
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
 #include <array>
 #include <iterator>
 
+#include "stacktrace.hpp"
 #include <betterstring/string_view.hpp>
 #include <betterstring/ascii.hpp>
 

@@ -170,7 +170,7 @@
 #ifndef NDEBUG
     #if BS_COMP_CLANG || BS_COMP_GCC
         #define BS_VERIFY(expression, message) \
-            (__builtin_expect((expression), 1) ? (void)0 : BS_ABORT(expression, message))
+            (__builtin_expect((expression), 1) ? (void)0 : (void)(BS_ABORT(expression, message)))
     #else
         #define BS_VERIFY(expression, message) \
             ((expression) ? (void)0 : BS_ABORT(expression, message))
