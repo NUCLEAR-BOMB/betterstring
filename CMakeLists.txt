@@ -9,7 +9,7 @@ option(BUILD_FUZZ "Build fuzzer targets" ${PROJECT_IS_TOP_LEVEL})
 option(USE_SANITIZERS "Enable sanitizers for entire project" ${PROJECT_IS_TOP_LEVEL})
 option(USE_NATVIS "Enable .natvis file for visual studio debugger" TRUE)
 option(USE_NATSTEPFILTER "Enable .natstepfilter file for visual studio debugger" TRUE)
-option(PRINT_STACKTRACE "Print stacktrace if internal check is failed for betterstring-test target" TRUE)
+option(PRINT_STACKTRACE "Print stacktrace if internal check is failed for betterstring-test target" FALSE)
 # option(INSTALL_BETTERSTRING "" ${PROJECT_IS_TOP_LEVEL})
 
 if (PROJECT_IS_TOP_LEVEL)
