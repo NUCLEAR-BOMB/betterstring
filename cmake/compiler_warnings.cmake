@@ -1,5 +1,7 @@
 include_guard(GLOBAL)
 
+include("${PROJECT_SOURCE_DIR}/cmake/util.cmake")
+
 function(target_add_warnings target)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:
@@ -56,10 +58,13 @@ function(target_add_warnings target)
     endif()
 endfunction()
 
+
+
 function(target_suppress_warnings target)
+    get_target_name(target_name ${target})
     if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-        target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/w>)
+        target_compile_options(${target_name} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/w>)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-        target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-w>)
+        target_compile_options(${target_name} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-w>)
     endif()
 endfunction()

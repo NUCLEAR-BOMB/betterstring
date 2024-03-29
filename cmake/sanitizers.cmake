@@ -1,5 +1,7 @@
 include_guard(GLOBAL)
 
+include("${PROJECT_SOURCE_DIR}/cmake/util.cmake")
+
 function(target_add_sanitizer target)
     cmake_parse_arguments(ARG "" "" "SANITIZERS;LIBRARIES;OPTIONS" ${ARGN})
     if (NOT ARG_SANITIZERS)
@@ -9,7 +11,7 @@ function(target_add_sanitizer target)
 
     cmake_parse_arguments(sanitizers "Address;Undefined;Fuzzer;Integer" "" "" ${ARG_SANITIZERS})
 
-    set(libraries ${ARG_LIBRARIES})
+    get_target_name(libraries ${ARG_LIBRARIES})
     set(options ${ARG_OPTIONS})
 
     target_compile_options(${target} PRIVATE ${options})
