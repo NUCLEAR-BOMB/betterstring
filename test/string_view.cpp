@@ -237,7 +237,7 @@ TEST_CASE("rfind", "[string_view]") {
         CHECK(str.rfind("string"_sv) == 5);
         CHECK(str.rfind(" "_sv) == 4);
         CHECK(str.rfind("test"_sv, 8) == 0);
-        CHECK(str.rfind("string"_sv, 10) + 1 == 0);
+        CHECK(str.rfind("string"_sv, 10) == -1);
     }
     SECTION("character") {
         CHECK(str.rfind(' ') == 4);

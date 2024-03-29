@@ -12,14 +12,16 @@
 
 namespace bs {
 
-template<class CharT>
+template<class CharT, class SizeT = std::size_t>
 class find_result {
 public:
-    using size_type = std::size_t;
+    using size_type = SizeT;
     using pointer = CharT*;
 
     constexpr find_result(const pointer string_data_, const size_type string_end_, const pointer find_ptr_) noexcept
-        : string_data(string_data_), string_end(string_end_), find_ptr(find_ptr_) {}
+        : string_data(string_data_), string_end(string_end_), find_ptr(find_ptr_) {
+        BS_VERIFY(find_ptr_ >= string_data_ || find_ptr_ == nullptr, "Given match pointer is located before the beginning of the string");
+    }
 
     constexpr size_type index() const noexcept {
         BS_VERIFY(find_ptr != nullptr, "index() is called when the result is not found");

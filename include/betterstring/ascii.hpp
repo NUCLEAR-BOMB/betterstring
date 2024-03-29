@@ -143,14 +143,14 @@ template<class T>
 constexpr int ci_strcomp(const T* const left, const T* const right, const std::size_t count) noexcept {
     static_assert(detail::is_ascii_compatible_impl<T>::value, "T must be ASCII compatible");
 
-    constexpr uint64_t delta = 'a' - 'A';
+    constexpr int64_t delta = 'a' - 'A';
 
-    uint64_t a{}, b{}, c{};
+    int64_t a{}, b{}, c{};
     for (std::size_t i = 0; i < count; ++i) {
-        a = uint64_t(left[i]);
+        a = int64_t(left[i]);
         b = a - delta >= 26 ? a : a + delta; // cmov
 
-        c = uint64_t(right[i]);
+        c = int64_t(right[i]);
         a = c - delta >= 26 ? c : c + delta; // cmov
 
         if (b != a) {
@@ -164,9 +164,8 @@ template<class T>
 constexpr int ci_strcomp(const T* const left, const std::size_t left_len, const T* const right, const std::size_t right_len) noexcept {
     static_assert(detail::is_ascii_compatible_impl<T>::value, "T must be ASCII compatible");
 
-    if (left_len != right_len) {
-        return int(left_len - right_len); // sign extend
-    }
+    if (left_len < right_len) { return -1; }
+    if (left_len > right_len) { return 1; }
     return ci_strcomp(left, right, left_len);
 }
 

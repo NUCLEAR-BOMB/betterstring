@@ -79,7 +79,7 @@ namespace detail {
         // iterator traits
         using difference_type = std::ptrdiff_t;
         using value_type = String;
-        using size_type = typename String::size_type;
+        using size_type = std::make_signed_t<typename String::size_type>;
         using reference = String;
         using pointer = void;
         using iterator_category = std::input_iterator_tag;
@@ -94,8 +94,8 @@ namespace detail {
         }
 
         constexpr reverse_splited_string_iterator& operator++() noexcept {
-            if (str_end == size_type(-1)) {
-                str_end = size_type(-2);
+            if (str_end == -1) {
+                str_end = -2;
                 return *this;
             }
             str.remove_suffix((str.size() - str_end - 1) + detail::size_or_1(sep));
@@ -109,10 +109,10 @@ namespace detail {
         }
 
         constexpr bool operator!=(const reverse_splited_string_iterator&) const noexcept {
-            return str_end != size_type(-2);
+            return str_end != -2;
         }
         constexpr bool operator==(const reverse_splited_string_iterator&) const noexcept {
-            return str_end == size_type(-2);
+            return str_end == -2;
         }
 
     private:
