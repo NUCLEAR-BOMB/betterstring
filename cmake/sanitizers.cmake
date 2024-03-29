@@ -61,6 +61,7 @@ function(target_add_sanitizer target)
             if (sanitizers_Undefined)
                 target_compile_options(${target} PRIVATE
                     -fsanitize=undefined,integer,alignment,bool,builtin,function,null,unreachable
+                    -fno-sanitize-recover=all
                 )
                 set_target_properties(${target} ${libraries} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded")
                 target_link_libraries(${target} PRIVATE
