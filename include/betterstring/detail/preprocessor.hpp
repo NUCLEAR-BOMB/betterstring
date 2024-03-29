@@ -84,8 +84,10 @@
     #endif
 #endif
 
-#define BS_ABORT(expression, message) \
-    ((void)std::fprintf(stderr, "%s:%d: assertion '%s' failed: %s\n", __FILE__, __LINE__, #expression, message), (void)BS_DEBUG_BREAK)
+#ifndef BS_ABORT
+    #define BS_ABORT(expression, message) \
+        ((void)std::fprintf(stderr, "%s:%d: assertion '%s' failed: %s\n", __FILE__, __LINE__, #expression, message), (void)BS_DEBUG_BREAK)
+#endif
 
 #if BS_HAS_BUILTIN(__builtin_assume)
     #define BS_ASSUME(expression) __builtin_assume(expression)
