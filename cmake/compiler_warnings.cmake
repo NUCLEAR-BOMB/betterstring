@@ -23,6 +23,7 @@ function(target_add_warnings target)
         /wd4868 # 'file(line_number)' compiler may not enforce left-to-right evaluation order in braced initializer list
         /wd5267 # definition of implicit copy constructor/assignment operator for 'type' is deprecated because it has a user-provided assignment operator/copy constructor
         /wd4574 # 'Identifier' is defined to be '0': did you mean to use '#if identifier'?
+        /wd4365 # 'action' : conversion from 'type_1' to 'type_2', signed/unsigned mismatch
         >)
     elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
         target_compile_options(${target} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:
@@ -34,10 +35,10 @@ function(target_add_warnings target)
         -Wcast-align # Warn whenever a pointer is cast such that the required alignment of the target is increased
         -Wunused # -Wunused options combined
         -Wconversion # Warn for implicit conversions that may alter a value
-        -Wsign-conversion # Warn for implicit conversions that may change the sign of an integer value
         -Wdouble-promotion # Give a warning when a value of type float is implicitly promoted to double
         -Wold-style-cast # Warn for C style casting
         -Wshadow # Warn whenever a local variable or type declaration shadows another variable
+        -Wno-sign-conversion # Don't warn for implicit conversions that may change the sign of an integer value
         -Wno-old-style-cast # Disable warning for using C-style casts
         -Wno-c++98-compat
         -Wno-pre-c++17-compat
@@ -49,7 +50,6 @@ function(target_add_warnings target)
         -Wno-c++98-compat-pedantic
         -Wno-zero-as-null-pointer-constant
         -Wno-shadow-field-in-constructor
-        -Wno-sign-conversion
         -Wno-self-assign-overloaded
         -Wno-assume
         >)
