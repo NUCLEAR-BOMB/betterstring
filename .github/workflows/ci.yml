@@ -61,7 +61,7 @@ jobs:
         xcopy "${{runner.temp}}\clang+llvm-18.1.2-x86_64-pc-windows-msvc" "C:\Program Files\LLVM" /e /y
 
     - name: Configure CMake
-      run: |
+      run: >
         cmake -B build ${{ matrix.platform.flags }}
         -DCMAKE_BUILD_TYPE=${{ matrix.config.name }} -DCMAKE_UNITY_BUILD=TRUE -DPRINT_STACKTRACE=TRUE
 
