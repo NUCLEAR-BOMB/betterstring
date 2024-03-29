@@ -38,21 +38,6 @@ set_target_properties(Catch2 Catch2WithMain PROPERTIES FOLDER "external/")
 
 target_compile_definitions(betterstring-test PRIVATE CATCH_CONFIG_FAST_COMPILE)
 
-if (USE_SANITIZERS)
-    include("${PROJECT_SOURCE_DIR}/cmake/sanitizers.cmake")
-    target_add_sanitizer(betterstring-test SANITIZERS Address Undefined LIBRARIES Catch2 Catch2WithMain)
-endif()
-
-if (USE_CLANG_TIDY)
-    include("${PROJECT_SOURCE_DIR}/cmake/clang_tidy.cmake")
-    set_target_properties(betterstring-test PROPERTIES EXPORT_COMPILE_COMMANDS TRUE)
-    add_clang_tidy_target(NAME clang-tidy
-        CONFIG "${PROJECT_SOURCE_DIR}/.clang-tidy"
-        EXTRA_ARG "-std=c++17" "-Wno-unknown-warning-option"
-        USE_COLOR QUIET SHOW_TIME
-    )
-endif()
-
 if (PRINT_STACKTRACE)
     include(FetchContent)
     FetchContent_Declare(
@@ -63,12 +48,29 @@ if (PRINT_STACKTRACE)
     FetchContent_MakeAvailable(cpptrace)
     target_link_libraries(betterstring-test PRIVATE cpptrace::cpptrace)
     target_compile_definitions(betterstring-test PRIVATE BETTERSTRING_TEST_ENABLE_STACKTRACE)
+    target_suppress_warnings(cpptrace::cpptrace)
 
     if (CMAKE_SYSTEM_NAME MATCHES "Windows")
         add_custom_command(TARGET betterstring-test POST_BUILD
             COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_FILE:cpptrace::cpptrace> $<TARGET_FILE_DIR:betterstring-test>
         )
     endif()
+    set(cpptrace_target cpptrace::cpptrace)
+endif()
+
+if (USE_SANITIZERS)
+    include("${PROJECT_SOURCE_DIR}/cmake/sanitizers.cmake")
+    target_add_sanitizer(betterstring-test SANITIZERS Address Undefined LIBRARIES Catch2::Catch2 Catch2::Catch2WithMain ${cpptrace_target})
+endif()
+
+if (USE_CLANG_TIDY)
+    include("${PROJECT_SOURCE_DIR}/cmake/clang_tidy.cmake")
+    set_target_properties(betterstring-test PROPERTIES EXPORT_COMPILE_COMMANDS TRUE)
+    add_clang_tidy_target(NAME clang-tidy
+        CONFIG "${PROJECT_SOURCE_DIR}/.clang-tidy"
+        EXTRA_ARG "-std=c++17" "-Wno-unknown-warning-option"
+        USE_COLOR QUIET SHOW_TIME
+    )
 endif()
 
 set_target_properties(betterstring-test PROPERTIES

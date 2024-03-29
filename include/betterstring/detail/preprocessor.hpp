@@ -70,23 +70,23 @@
 #endif
 
 #if BS_HAS_BUILTIN(__builtin_debugtrap)
-    #define BS_DEBUG_BREAK __builtin_debugtrap()
+    #define BS_DEBUG_BREAK() __builtin_debugtrap()
 #elif BS_COMP_GCC
-    #define BS_DEBUG_BREAK __builtin_trap()
+    #define BS_DEBUG_BREAK() __builtin_trap()
 #elif BS_COMP_MSVC
-    #define BS_DEBUG_BREAK __debugbreak()
+    #define BS_DEBUG_BREAK() __debugbreak()
 #else
     #include <csignal>
     #if defined(SIGTRAP)
-        #define BS_DEBUG_BREAK std::raise(SIGTRAP)
+        #define BS_DEBUG_BREAK() std::raise(SIGTRAP)
     #else
-        #define BS_DEBUG_BREAK std::raise(SIGABRT)
+        #define BS_DEBUG_BREAK() std::raise(SIGABRT)
     #endif
 #endif
 
 #ifndef BS_ABORT
     #define BS_ABORT(expression, message) \
-        ((void)std::fprintf(stderr, "%s:%d: assertion '%s' failed: %s\n", __FILE__, __LINE__, #expression, message), (void)BS_DEBUG_BREAK)
+        ((void)std::fprintf(stderr, "%s:%d: assertion '%s' failed: %s\n", __FILE__, __LINE__, #expression, message), (void)BS_DEBUG_BREAK())
 #endif
 
 #if BS_HAS_BUILTIN(__builtin_assume)
