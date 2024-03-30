@@ -32,9 +32,8 @@ FetchContent_MakeAvailable(Catch2)
 target_compile_features(Catch2 PRIVATE cxx_std_17)
 target_link_libraries(betterstring-test PRIVATE Catch2::Catch2WithMain)
 set_target_properties(Catch2 PROPERTIES
-    INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:Catch2,INTERFACE_INCLUDE_DIRECTORIES>
+    INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:Catch2::Catch2,INTERFACE_INCLUDE_DIRECTORIES>
 )
-set_target_properties(Catch2 Catch2WithMain PROPERTIES FOLDER "external/")
 
 target_compile_definitions(betterstring-test PRIVATE CATCH_CONFIG_FAST_COMPILE)
 
@@ -49,6 +48,7 @@ if (PRINT_STACKTRACE)
     target_link_libraries(betterstring-test PRIVATE cpptrace::cpptrace)
     target_compile_definitions(betterstring-test PRIVATE BETTERSTRING_TEST_ENABLE_STACKTRACE)
     target_suppress_warnings(cpptrace::cpptrace)
+    get_target_name(cpptrace_name cpptrace::cpptrace)
 
     if (CMAKE_SYSTEM_NAME MATCHES "Windows")
         add_custom_command(TARGET betterstring-test POST_BUILD
@@ -57,6 +57,8 @@ if (PRINT_STACKTRACE)
     endif()
     set(cpptrace_target cpptrace::cpptrace)
 endif()
+
+set_target_properties(${cpptrace_name} Catch2 Catch2WithMain PROPERTIES FOLDER "external/")
 
 if (USE_SANITIZERS)
     include("${PROJECT_SOURCE_DIR}/cmake/sanitizers.cmake")
