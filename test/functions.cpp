@@ -443,13 +443,33 @@ TEST_CASE("bs::strlastnof", "[functions]") {
 }
 
 TEST_CASE("bs::strrfindn", "[functions]") {
-    const char* str1 = "hello world";
-    CHECK(bs::strrfindn(str1, 11, 'd') == &str1[9]);
-    CHECK(bs::strrfindn(str1, 11, 'l') == &str1[10]);
-    const char* str2 = "aaaaaaabbbbb";
-    CHECK(bs::strrfindn(str2, 12, 'b') == &str2[6]);
-    const char* str3 = "bbbbbbbbbbbbbb";
-    CHECK(bs::strrfindn(str3, 14, 'b') == nullptr);
+    SECTION("character") {
+        const char* str1 = "hello world";
+        CHECK(bs::strrfindn(str1, 11, 'd') == &str1[9]);
+        CHECK(bs::strrfindn(str1, 11, 'l') == &str1[10]);
+        const char* str2 = "aaaaaaabbbbb";
+        CHECK(bs::strrfindn(str2, 12, 'b') == &str2[6]);
+        const char* str3 = "bbbbbbbbbbbbbb";
+        CHECK(bs::strrfindn(str3, 14, 'b') == nullptr);
+    }
+    SECTION("string") {
+        const char* str1 = "test string";
+        CHECK(bs::strrfindn(str1, 11, "test", 4) == &str1[7]);
+        CHECK(bs::strrfindn(str1, 11, "string", 6) == &str1[4]);
+        CHECK(bs::strrfindn(str1, 11, "ing", 3) == &str1[7]);
+        CHECK(bs::strrfindn(str1, 11, "strin", 5) == &str1[6]);
+        CHECK(bs::strrfindn(str1, 11, "test string", 11) == nullptr);
+        CHECK(bs::strrfindn(str1, 11, "test string2", 12) == nullptr);
+        CHECK(bs::strrfindn(str1, 11, "", 0) == &str1[10]);
+        const char* str2 = "test stringggg";
+        CHECK(bs::strrfindn(str2, 14, "g", 1) == &str2[9]);
+        CHECK(bs::strrfindn(str2, 14, "gg", 2) == &str2[9]);
+        CHECK(bs::strrfindn(str2, 14, "ggggg", 5) == &str2[9]);
+        CHECK(bs::strrfindn(str2, 14, "gggggg", 6) == &str2[8]);
+        CHECK(bs::strrfindn(str2, 14, "ggggggg", 7) == &str2[7]);
+        const char* str3 = "test stringg";
+        CHECK(bs::strrfindn(str3, 12, "g", 1) == &str3[9]);
+    }
 }
 
 TEST_CASE("bs::strcountanyof", "[functions]") {

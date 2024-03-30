@@ -417,7 +417,7 @@ constexpr T* strfindn(T* str, std::size_t count, detail::type_identity_t<T> ch) 
 
 template<class T>
 constexpr T* strfindn(T* str, std::size_t count, const detail::type_identity_t<T>* needle, std::size_t needle_len) noexcept {
-    if (needle_len > count) { return str; }
+    if (needle_len > count) { return nullptr; }
     if (needle_len == 0) { return str; }
 
     if (bs::strcomp(str, needle, needle_len) != 0) { return str; }
@@ -439,6 +439,23 @@ constexpr T* strrfindn(T* str, std::size_t count, detail::type_identity_t<T> ch)
             return str + count - 1;
         }
         --count;
+    }
+    return nullptr;
+}
+
+template<class T>
+constexpr T* strrfindn(T* str, std::size_t count, const detail::type_identity_t<T>* needle, const std::size_t needle_len) noexcept {
+    if (needle_len > count) { return nullptr; }
+    if (needle_len == 0) { return str + count - 1; }
+
+    if (bs::strcomp(str + count - needle_len, needle, needle_len) != 0) { return str + count - needle_len; }
+    if (count == needle_len) { return nullptr; }
+    if (bs::strcomp(str - 1 + count - needle_len, needle, needle_len) != 0) { return str - 1 + count - needle_len; }
+
+    const auto mismatch = bs::strrfindn(str, count, needle[0]);
+    if (mismatch != nullptr) {
+        BS_VERIFY(mismatch <= str + count - needle_len, "mismatch is outside range");
+        return mismatch;
     }
     return nullptr;
 }
