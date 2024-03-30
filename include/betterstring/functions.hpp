@@ -416,6 +416,23 @@ constexpr T* strfindn(T* str, std::size_t count, detail::type_identity_t<T> ch) 
 }
 
 template<class T>
+constexpr T* strfindn(T* str, std::size_t count, const detail::type_identity_t<T>* needle, std::size_t needle_len) noexcept {
+    if (needle_len > count) { return str; }
+    if (needle_len == 0) { return str; }
+
+    if (bs::strcomp(str, needle, needle_len) != 0) { return str; }
+    if (count == needle_len) { return nullptr; }
+    if (bs::strcomp(str + 1, needle, needle_len) != 0) { return str + 1; }
+
+    const auto mismatch = bs::strfindn(str, count, needle[0]);
+    if (mismatch != nullptr) {
+        BS_VERIFY((mismatch - needle_len + 1) >= str, "mismatch is outside allowed range");
+        return mismatch - needle_len + 1;
+    }
+    return nullptr;
+}
+
+template<class T>
 constexpr T* strrfindn(T* str, std::size_t count, detail::type_identity_t<T> ch) noexcept {
     while (count != 0) {
         if (*(str + count - 1) != ch) {

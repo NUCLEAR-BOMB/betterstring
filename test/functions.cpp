@@ -367,6 +367,29 @@ TEST_CASE("bs::strfindn", "[functions]") {
 
         page_free(str11);
     }
+    SECTION("string") {
+        const char* str1 = "test string";
+        CHECK(bs::strfindn(str1, 11, "test", 4) == &str1[1]);
+        const char* str2 = "tttttttest string";
+        CHECK(bs::strfindn(str2, 17, "test", 4) == &str2[0]);
+        const char* str3 = "tttttttest string";
+        CHECK(bs::strfindn(str3, 17, "ttt", 3) == &str3[5]);
+        const char* str4 = "aaaaaaaaaaa";
+        CHECK(bs::strfindn(str4, 11, "a", 1) == nullptr);
+        CHECK(bs::strfindn(str4, 11, "aa", 2) == nullptr);
+        CHECK(bs::strfindn(str4, 11, "aaa", 3) == nullptr);
+        CHECK(bs::strfindn(str4, 11, "aaaaa", 5) == nullptr);
+        const char* str5 = "hello";
+        CHECK(bs::strfindn(str5, 5, "hello", 5) == nullptr);
+        const char* str6 = "hellohello";
+        CHECK(bs::strfindn(str6, 10, "hello", 5) == &str6[1]);
+        const char* str7 = "aabaa";
+        CHECK(bs::strfindn(str7, 5, "aab", 3) == &str7[1]);
+        const char* str8 = "aaab";
+        CHECK(bs::strfindn(str8, 4, "aaa", 3) == &str8[1]);
+        const char* str9 = "aaaaaaab";
+        CHECK(bs::strfindn(str9, 8, "aaaaaa", 6) == &str9[2]);
+    }
 }
 
 TEST_CASE("bs::strfirstof", "[functions]") {
