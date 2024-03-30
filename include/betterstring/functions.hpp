@@ -80,7 +80,9 @@ constexpr std::size_t strlen(const T* const str) noexcept {
         }
     }
     std::size_t i = 0;
-    while (str[i] != T()) ++i;
+    while (str[i] != T()) {
+        ++i;
+    }
     return i;
 }
 
@@ -95,7 +97,7 @@ namespace detail {
             }
         }
         std::size_t i = 0;
-        while (str[i] != T()) ++i;
+        while (str[i] != T()) { ++i; }
         return i;
     }
 }
@@ -151,8 +153,8 @@ constexpr int strcomp(const T* const left, const T* const right, const std::size
         }
     }
     for (std::size_t i = 0; i < count; ++i) {
-        if (left[i] < right[i]) return -1;
-        if (left[i] > right[i]) return 1;
+        if (left[i] < right[i]) { return -1; }
+        if (left[i] > right[i]) { return 1; }
     }
     return 0;
     }
@@ -163,8 +165,8 @@ template<class T>
 constexpr int strcomp(const T* const left, const std::size_t left_len, const T* const right, const std::size_t right_len) noexcept {
     BS_VERIFY(left != nullptr, "left is null pointer");
     BS_VERIFY(right != nullptr, "right is null pointer");
-    if (left_len > right_len) return 1;
-    if (left_len < right_len) return -1;
+    if (left_len > right_len) { return 1; }
+    if (left_len < right_len) { return -1; }
     return bs::strcomp(left, right, left_len);
 }
 
@@ -198,7 +200,7 @@ template<class T>
 #endif
     if (detail::is_constant_evaluated()) {
         for (std::size_t i = 0; i < count; ++i) {
-            if (str[i] == ch) return str + i;
+            if (str[i] == ch) { return str + i; }
         }
         return nullptr;
     } else {
@@ -208,20 +210,21 @@ template<class T>
             return std::wmemchr(str, ch, count);
         } else {
             T* const result = std::find(str, str + count, ch);
-            return result == str + count ? nullptr : result;
+            if (result == str + count) { return nullptr; }
+            return result;
         }
     }
 }
 
 template<class T>
 constexpr T* strfind(T* const haystack, const std::size_t count, const detail::type_identity_t<T>* const needle, const std::size_t needle_len) noexcept {
-    if (needle_len > count) return nullptr;
-    if (needle_len == 0) return haystack;
+    if (needle_len > count) { return nullptr; }
+    if (needle_len == 0) { return haystack; }
 
     const auto match_end = haystack + (count - needle_len) + 1;
     for (T* match_try = haystack;; ++match_try) {
         match_try = bs::strfind(match_try, static_cast<std::size_t>(match_end - match_try), needle[0]);
-        if (match_try == nullptr) return nullptr;
+        if (match_try == nullptr) { return nullptr; }
 
         // the needle may be aligned for std::memcmp,
         // so we compare the entire string even though
@@ -246,14 +249,14 @@ constexpr T* strrfind(T* const haystack, const std::size_t count, const detail::
         }
     }
 #endif
-    if (needle_len > count) return nullptr;
-    if (needle_len == 0) return haystack + count;
+    if (needle_len > count) { return nullptr; }
+    if (needle_len == 0) { return haystack + count; }
 
     for (auto match_try = haystack + (count - needle_len);; --match_try) {
         if (bs::strcomp(match_try, needle, needle_len) == 0) {
             return match_try;
         }
-        if (match_try == haystack) return nullptr;
+        if (match_try == haystack) { return nullptr; }
     }
     BS_UNREACHABLE();
 }
@@ -271,7 +274,7 @@ constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_
                 return const_cast<char*>(detail::betterstring_strrfind_char_avx2(str, count, ch));
             } else {
                 for (std::size_t i = count; i > 0; --i) {
-                    if (str[i - 1] == ch) return str + i - 1;
+                    if (str[i - 1] == ch) { return str + i - 1; }
                 }
                 return nullptr;
             }
@@ -279,7 +282,7 @@ constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_
     }
 
     for (std::size_t i = count; i > 0; --i) {
-        if (str[i - 1] == ch) return str + i - 1;
+        if (str[i - 1] == ch) { return str + i - 1; }
     }
     return nullptr;
 }

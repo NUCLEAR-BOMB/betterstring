@@ -176,7 +176,7 @@ public:
     }
 
     constexpr bool starts_with(const string_viewt str) const noexcept {
-        if (size() < str.size()) return false;
+        if (size() < str.size()) { return false; }
         return traits_type::compare(data(), str.data(), str.size()) == 0;
     }
     constexpr bool starts_with(const value_type ch) const noexcept {
@@ -184,7 +184,7 @@ public:
     }
 
     constexpr bool ends_with(const string_viewt str) const noexcept {
-        if (size() < str.size()) return false;
+        if (size() < str.size()) { return false; }
         return traits_type::compare(data() + (size() - str.size()), str.data(), str.size()) == 0;
     }
     constexpr bool ends_with(const value_type ch) const noexcept {
@@ -375,20 +375,20 @@ public:
     }
 
     constexpr string_viewt strip_first(const value_type ch) const noexcept {
-        if (!starts_with(ch)) return *this;
+        if (!starts_with(ch)) { return *this; }
         return string_viewt{data() + 1, size() - 1};
     }
     constexpr string_viewt strip_first(const string_viewt str) const noexcept {
-        if (!starts_with(str)) return *this;
+        if (!starts_with(str)) { return *this; }
         return string_viewt{data() + str.size(), size() - str.size()};
     }
 
     constexpr string_viewt strip_last(const value_type ch) const noexcept {
-        if (!ends_with(ch)) return *this;
+        if (!ends_with(ch)) { return *this; }
         return string_viewt{data(), size() - 1};
     }
     constexpr string_viewt strip_last(const string_viewt str) const noexcept {
-        if (!ends_with(str)) return *this;
+        if (!ends_with(str)) { return *this; }
         return string_viewt{data(), size() - str.size()};
     }
 
