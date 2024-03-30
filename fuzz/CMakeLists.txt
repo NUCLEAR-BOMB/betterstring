@@ -7,6 +7,7 @@ macro(add_fuzzer name)
     add_executable(${name}-fuzz ${ARGN})
     target_link_libraries(${name}-fuzz PRIVATE betterstring)
     target_add_sanitizer(${name}-fuzz SANITIZERS Address Fuzzer Undefined)
+    set_target_properties(${name}-fuzz PROPERTIES UNITY_BUILD FALSE)
     list(APPEND fuzz_targets "${name}-fuzz")
 endmacro()
 
