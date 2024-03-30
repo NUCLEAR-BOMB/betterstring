@@ -26,6 +26,7 @@ add_executable(betterstring-benchmark
     "benchmarks/functions.hpp"
 )
 target_link_libraries(betterstring-benchmark PRIVATE fmt::fmt nanobench betterstring)
+set_target_properties(betterstring-benchmark PROPERTIES UNITY_BUILD FALSE)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     target_compile_options(betterstring-benchmark PRIVATE
