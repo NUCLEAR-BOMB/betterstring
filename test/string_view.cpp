@@ -547,4 +547,29 @@ TEST_CASE("find_not", "[string_view]") {
     }
 }
 
+TEST_CASE("rfind_not", "[string_view]") {
+    SECTION("character") {
+        const bs::string_view str = "sample test string";
+        CHECK(str.rfind_not('g') == 16);
+        CHECK(str.rfind_not('n') == 17);
+        CHECK(str.rfind_not('g', str.size()) == 16);
+        CHECK(str.rfind_not('n', str.size()) == 17);
+        CHECK(str.rfind_not('t', 10) == 9);
+        CHECK(str.rfind_not('t', 9) == 8);
+
+        CHECK(str.rfind_not('g', str.data() + str.size()) == 16);
+        CHECK(str.rfind_not('n', str.data() + str.size()) == 17);
+    }
+    SECTION("string") {
+        const bs::string_view str = "test string";
+        CHECK(str.rfind_not("string") == 4);
+        CHECK(str.rfind_not("string2") == 4);
+        CHECK(str.rfind_not("string", str.size()) == 4);
+        CHECK(str.rfind_not("string2", str.size()) == 4);
+
+        // CHECK(str.rfind_not("string", str.data() + str.size()) == 4);
+        // CHECK(str.rfind_not("string2", str.data() + str.size()) == 4);
+    }
+}
+
 }
