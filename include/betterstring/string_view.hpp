@@ -237,6 +237,29 @@ public:
         return { data(), -1, traits_type::rfindstr(start, (start - data()), str.data(), str.size()) };
     }
 
+    constexpr find_res find_not(const value_type ch) const noexcept {
+        return { data(), size(), traits_type::find_not(data(), size(), ch) };
+    }
+    constexpr find_res find_not(const string_viewt str) const noexcept {
+        return { data(), size(), traits_type::findstr_not(data(), size(), str.data(), str.size()) };
+    }
+    constexpr find_res find_not(const value_type ch, const size_type start) const noexcept {
+        BS_VERIFY(start <= size(), "start is out of range");
+        return { data(), size(), traits_type::find_not(data() + start, size() - start, ch) };
+    }
+    constexpr find_res find_not(const string_viewt str, const size_type start) const noexcept {
+        BS_VERIFY(start <= size(), "start is out of range");
+        return { data(), size(), traits_type::findstr_not(data() + start, size() - start, str.data(), str.size()) };
+    }
+    constexpr find_res find_not(const value_type ch, const const_pointer start) const noexcept {
+        BS_VERIFY(start >= data() && start <= data_end(), "start is out of range");
+        return { data(), size(), traits_type::find_not(start, size() - (start - data()), ch) };
+    }
+    constexpr find_res find_not(const string_viewt str, const const_pointer start) const noexcept {
+        BS_VERIFY(start >= data() && start <= data_end(), "start is out of range");
+        return { data(), size(), traits_type::findstr_not(start, size() - (start - data()), str.data(), str.size()) };
+    }
+
     constexpr find_res find_first_of(const string_viewt str) const noexcept {
         return { data(), size(), traits_type::first_of(data(), size(), str.data(), str.size()) };
     }

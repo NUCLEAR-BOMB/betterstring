@@ -517,4 +517,34 @@ TEST_CASE("count_any_of", "[string_view]") {
     CHECK("test str"_sv.count_any_of("re") == 2);
 }
 
+TEST_CASE("find_not", "[string_view]") {
+    SECTION("character") {
+        const bs::string_view str = "sample string";
+        CHECK(str.find_not('s') == 1);
+        CHECK(str.find_not('a') == 0);
+        CHECK(str.find_not('s', size_t(0)) == 1);
+        CHECK(str.find_not('s', 1) == 1);
+        CHECK(str.find_not('s', 7) == 8);
+
+        CHECK(str.find_not('s', str.data() + 0) == 1);
+        CHECK(str.find_not('s', str.data() + 1) == 1);
+        CHECK(str.find_not('s', str.data() + 7) == 8);
+        CHECK(str.find_not('s', str.data() + 8) == 8);
+    }
+    SECTION("string") {
+        const bs::string_view str = "test string";
+        CHECK(str.find_not("test") == 1);
+        CHECK(str.find_not("test2") == 0);
+        CHECK(str.find_not("t") == 1);
+        CHECK(str.find_not("test", size_t(0)) == 1);
+        CHECK(str.find_not("test", 1) == 1);
+        CHECK(str.find_not("str", 5) == 6);
+        CHECK(str.find_not("str", 4) == 4);
+        CHECK(str.find_not("str", 6) == 6);
+
+        CHECK(str.find_not("test", str.data()) == 1);
+        CHECK(str.find_not("test", str.data() + 1) == 1);
+    }
+}
+
 }
