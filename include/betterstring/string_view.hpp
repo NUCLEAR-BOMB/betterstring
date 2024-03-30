@@ -234,7 +234,7 @@ public:
     }
     constexpr sfind_res rfind(const string_viewt str, const const_pointer start) const noexcept {
         BS_VERIFY(start >= data() && start <= data_end(), "start is out of range");
-        return { data(), -1, traits_type::rfindstr(start, (start - data()), str.data(), str.size()) };
+        return { data(), -1, traits_type::rfindstr(data(), (start - data()), str.data(), str.size())};
     }
 
     constexpr find_res find_not(const value_type ch) const noexcept {
@@ -280,7 +280,7 @@ public:
     }
     constexpr sfind_res rfind_not(const string_viewt str, const const_pointer start) const noexcept {
         BS_VERIFY(start >= data() && start <= data_end(), "start is out of range");
-        return { data(), -1, traits_type::rfindstr_not(start, (start - data()), str.data(), str.size()) };
+        return { data(), -1, traits_type::rfindstr_not(data(), (start - data()), str.data(), str.size())};
     }
 
     constexpr find_res find_first_of(const string_viewt str) const noexcept {

@@ -567,8 +567,8 @@ TEST_CASE("rfind_not", "[string_view]") {
         CHECK(str.rfind_not("string", str.size()) == 4);
         CHECK(str.rfind_not("string2", str.size()) == 4);
 
-        // CHECK(str.rfind_not("string", str.data() + str.size()) == 4);
-        // CHECK(str.rfind_not("string2", str.data() + str.size()) == 4);
+        CHECK(str.rfind_not("string", str.data() + str.size()) == 4);
+        CHECK(str.rfind_not("string2", str.data() + str.size()) == 4);
     }
 }
 
