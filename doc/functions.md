@@ -208,6 +208,17 @@ constexpr T* strfindn(T* str, std::size_t count, T ch) noexcept;
 ```
 Returns a pointer to first occurrence of the character that is **not** `ch` in the range [`str`, `str + count`). \
 If no match is found, `nullptr` is returned.
+<br/><br/>
+
+```cpp
+template<class T>
+constexpr T* strfindn(T* str, std::size_t count, const T* needle, std::size_t needle_len) noexcept;
+```
+Returns a pointer to first absence of the substring [`needle`, `needle + needle_len`) in the range [`str`, `str + count`). \
+If there is no absence of that substring, `nullptr` is returned.
+
+Postcondition:
+- If returned pointer is not `nullptr`, then the range [`/*result*/`, `/*result*/ + needle_len`) is always valid.
 
 ## `bs::strfirstof`
 ```cpp
