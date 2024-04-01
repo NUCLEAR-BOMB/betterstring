@@ -17,19 +17,42 @@ namespace {
 using namespace bs::literals;
 
 TEST_CASE("constructor", "[string_view]") {
-    const bs::string_view empty_str;
-    CHECK(empty_str.size() == 0);
-    CHECK(empty_str.data() == nullptr);
+    SECTION("default constructor") {
+        const bs::string_view empty_str;
+        CHECK(empty_str.size() == 0);
+        CHECK(empty_str.data() == nullptr);
+    }
+    SECTION("copy constructor") {
+        const bs::string_view str{"test string"};
 
-    const bs::string_view copy_str("test string"_sv);
-    CHECK(copy_str == "test string"_sv);
+        const bs::string_view copy_str{str};
+        CHECK(copy_str == "test string"_sv);
+    }
+    SECTION("from pointer and length") {
+        const char* str = "sample string";
+        const std::size_t str_len = 13;
 
-    const bs::string_view cut_str("test string", 4);
-    CHECK(cut_str == "test"_sv);
+        const bs::string_view result{str, str_len};
+        CHECK(result == "sample string");
+    }
+    SECTION("from string literal") {
+        const bs::string_view str1{"hello world"};
+        CHECK(str1 == "hello world");
 
-    constexpr auto cstring = "123456789";
-    const bs::string_view range_str(cstring + 1, cstring + 7);
-    CHECK(range_str == "234567"_sv);
+        decltype(auto) char_arr = "random string";
+        const bs::string_view str2{char_arr};
+        CHECK(str2 == "random string");
+    }
+    SECTION("from iterators") {
+        const char* first = "test string";
+        const char* last = first + 5;
+
+        const bs::string_view str1{first, last};
+        CHECK(str1 == "test ");
+
+        const bs::string_view str2{first, first};
+        CHECK(str2 == "");
+    }
 }
 
 TEST_CASE("begin, end", "[string_view]") {
