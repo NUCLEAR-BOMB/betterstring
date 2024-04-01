@@ -572,4 +572,18 @@ TEST_CASE("rfind_not", "[string_view]") {
     }
 }
 
+TEST_CASE("bs::string_view type properties", "[string_view]") {
+    CHECK(std::is_trivially_copy_constructible_v<bs::string_view>);
+    CHECK(std::is_trivially_move_constructible_v<bs::string_view>);
+    CHECK(std::is_trivially_copy_assignable_v<bs::string_view>);
+    CHECK(std::is_trivially_move_assignable_v<bs::string_view>);
+    CHECK(std::is_trivially_destructible_v<bs::string_view>);
+    CHECK(std::is_standard_layout_v<bs::string_view>);
+
+    CHECK_FALSE(std::is_polymorphic_v<bs::string_view>);
+    CHECK_FALSE(std::is_abstract_v<bs::string_view>);
+    CHECK_FALSE(std::is_final_v<bs::string_view>);
+    CHECK_FALSE(std::has_virtual_destructor_v<bs::string_view>);
+}
+
 }
