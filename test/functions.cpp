@@ -3,20 +3,15 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
 
-#define BS_DONT_INCLUDE_STRING
-
 #include <catch2/catch_test_macros.hpp>
 #include <string>
 #include <cstdlib>
 
 #include "stacktrace.hpp"
 #include "util.hpp"
-#include <betterstring/string_view.hpp>
 #include <betterstring/functions.hpp>
 
 namespace {
-
-using namespace bs::literals;
 
 TEST_CASE("bs::strlen", "[functions]") {
     CHECK(bs::strlen("test string") == 11);
