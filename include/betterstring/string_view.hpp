@@ -94,6 +94,11 @@ public:
         : string_data{detail::ranges::data(range)}
         , string_size{detail::ranges::size(range)} {}
 
+    [[nodiscard]] static constexpr string_viewt from_c_string(const const_pointer c_str) noexcept {
+        BS_VERIFY(c_str != nullptr, "c_str is null pointer");
+        return string_viewt{c_str, traits_type::length(c_str)};
+    }
+
     constexpr string_viewt& operator=(const string_viewt&) noexcept = default;
 
     constexpr const_iterator begin() const noexcept { return data(); }

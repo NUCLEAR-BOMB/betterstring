@@ -68,6 +68,11 @@ TEST_CASE("constructor", "[string_view]") {
         const bs::string_view str3{vec_str};
         CHECK(str3 == "hello world!");
     }
+    SECTION("from_c_string") {
+        const char* c_str1 = "test string";
+        bs::string_view str1 = bs::string_view::from_c_string(c_str1);
+        CHECK(str1 == "test string");
+    }
 }
 
 TEST_CASE("begin, end", "[string_view]") {
