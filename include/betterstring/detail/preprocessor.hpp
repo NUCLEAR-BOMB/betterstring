@@ -69,6 +69,12 @@
     #define BS_HAS_BUILTIN(x) 0
 #endif
 
+#ifdef __has_cpp_attribute
+    #define BS_HAS_CPP_ATTRIBUTE(x) __has_cpp_attribute(x)
+#else
+    #define BS_HAS_CPP_ATTRIBUTE(x) 0
+#endif
+
 #if BS_HAS_BUILTIN(__builtin_debugtrap)
     #define BS_DEBUG_BREAK() __builtin_debugtrap()
 #elif BS_COMP_GCC
@@ -159,6 +165,16 @@
 #if (BS_HAS_BUILTIN(__builtin_operator_new) >= 201802L) && (BS_HAS_BUILTIN(__builtin_operator_delete) >= 201802L)
     #define BS_BUILTIN_OPERATOR_NEW __builtin_operator_new
     #define BS_BUILTIN_OPERATOR_DELETE __builtin_operator_delete
+#endif
+
+#ifndef BS_LIFETIMEBOUND
+    #if BS_HAS_CPP_ATTRIBUTE(clang::lifetimebound)
+        #define BS_LIFETIMEBOUND [[clang::lifetimebound]]
+    #elif BS_HAS_CPP_ATTRIBUTE(msvc::lifetimebound)
+        #define BS_LIFETIMEBOUND [[msvc::lifetimebound]]
+    #else
+        #define BS_LIFETIMEBOUND
+    #endif
 #endif
 
 #if BS_HAS_BUILTIN(__builtin_constant_p)
