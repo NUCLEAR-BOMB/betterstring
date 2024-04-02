@@ -433,11 +433,11 @@ public:
         this->append(detail::to_address(first), static_cast<size_type>(last - first));
     }
 
-    constexpr self_string_view substr(const size_type position) const noexcept {
+    constexpr self_string_view substr(const size_type position) const noexcept BS_LIFETIMEBOUND {
         BS_VERIFY(position <= size(), "the start position of the substring exceeds the length of the string");
         return self_string_view{data() + position, size() - position};
     }
-    constexpr self_string_view substr(const size_type position, const size_type count) const noexcept {
+    constexpr self_string_view substr(const size_type position, const size_type count) const noexcept BS_LIFETIMEBOUND {
         BS_VERIFY(position <= size(), "the start position of the substring exceeds the length of the string");
         BS_VERIFY(count - position <= size(), "the length of substring exceeds the length of the string");
         return self_string_view{data() + position, count};
@@ -468,10 +468,10 @@ public:
         return traits_type::compare(data() + (size() - str.size()), str.data(), str.size()) == 0;
     }
 
-    constexpr pointer data() noexcept {
+    constexpr pointer data() noexcept BS_LIFETIMEBOUND {
         return rep.get_pointer();
     }
-    constexpr const_pointer data() const noexcept {
+    constexpr const_pointer data() const noexcept BS_LIFETIMEBOUND {
         return rep.get_pointer();
     }
 
@@ -482,73 +482,73 @@ public:
         return rep.get_capacity();
     }
 
-    constexpr iterator begin() noexcept { return data(); }
-    constexpr const_iterator begin() const noexcept { return data(); }
-    constexpr iterator end() noexcept { return data() + size(); }
-    constexpr const_iterator end() const noexcept { return data() + size(); }
+    constexpr iterator begin() noexcept BS_LIFETIMEBOUND { return data(); }
+    constexpr const_iterator begin() const noexcept BS_LIFETIMEBOUND { return data(); }
+    constexpr iterator end() noexcept BS_LIFETIMEBOUND { return data() + size(); }
+    constexpr const_iterator end() const noexcept BS_LIFETIMEBOUND { return data() + size(); }
 
     template<class Int, std::enable_if_t<std::is_integral_v<Int>, int> = 0>
-    constexpr const_reference operator[](const Int index) const noexcept {
+    constexpr const_reference operator[](const Int index) const noexcept BS_LIFETIMEBOUND {
         BS_VERIFY((index + Int(size())) >= 0 && index < Int(size()), "index is out of range");
         return data()[index < 0 ? index + Int(size()) : index];
     }
     template<class Int, std::enable_if_t<std::is_integral_v<Int>, int> = 0>
-    constexpr reference operator[](const Int index) noexcept {
+    constexpr reference operator[](const Int index) noexcept BS_LIFETIMEBOUND {
         BS_VERIFY((index + Int(size())) >= 0 && index < Int(size()), "index is out of range");
         return data()[index < 0 ? index + Int(size()) : index];
     }
 
     template<class Int, std::enable_if_t<std::is_integral_v<Int>, int> = 0>
-    constexpr optional_char_const_reference at(const Int index) const noexcept {
+    constexpr optional_char_const_reference at(const Int index) const noexcept BS_LIFETIMEBOUND {
         if (index + Int(size()) < 0 || index >= Int(size())) {
             return std::nullopt;
         }
         return data()[index < 0 ? index + Int(size()) : index];
     }
     template<class Int, std::enable_if_t<std::is_integral_v<Int>, int> = 0>
-    constexpr optional_char_reference at(const Int index) noexcept {
+    constexpr optional_char_reference at(const Int index) noexcept BS_LIFETIMEBOUND {
         if (index + Int(size()) < 0 || index >= Int(size())) {
             return std::nullopt;
         }
         return data()[index < 0 ? index + Int(size()) : index];
     }
 
-    constexpr const_reference front() const noexcept {
+    constexpr const_reference front() const noexcept BS_LIFETIMEBOUND {
         BS_VERIFY(size() >= 1, "cannot access the first element from an empty string");
         return data()[0];
     }
-    constexpr reference front() noexcept {
+    constexpr reference front() noexcept BS_LIFETIMEBOUND {
         BS_VERIFY(size() >= 1, "cannot access the first element from an empty string");
         return data()[0];
     }
-    constexpr const_reference back() const noexcept {
+    constexpr const_reference back() const noexcept BS_LIFETIMEBOUND {
         BS_VERIFY(size() >= 1, "cannot access the last element from an empty string");
         return data()[size() - 1];
     }
-    constexpr reference back() noexcept {
+    constexpr reference back() noexcept BS_LIFETIMEBOUND {
         BS_VERIFY(size() >= 1, "cannot access the last element from an empty string");
         return data()[size() - 1];
     }
 
-    constexpr optional_char_const_reference at_front() const noexcept {
+    constexpr optional_char_const_reference at_front() const noexcept BS_LIFETIMEBOUND {
         if (size() == 0) { return std::nullopt; }
         return data()[0];
     }
-    constexpr optional_char_reference at_front() noexcept {
+    constexpr optional_char_reference at_front() noexcept BS_LIFETIMEBOUND {
         if (size() == 0) { return std::nullopt; }
         return data()[0];
     }
 
-    constexpr optional_char_const_reference at_back() const noexcept {
+    constexpr optional_char_const_reference at_back() const noexcept BS_LIFETIMEBOUND {
         if (size() == 0) { return std::nullopt; }
         return data()[size() - 1];
     }
-    constexpr optional_char_reference at_back() noexcept {
+    constexpr optional_char_reference at_back() noexcept BS_LIFETIMEBOUND {
         if (size() == 0) { return std::nullopt; }
         return data()[size() - 1];
     }
 
-    constexpr operator bs::string_viewt<traits_type>() const noexcept {
+    constexpr operator bs::string_viewt<traits_type>() const noexcept BS_LIFETIMEBOUND {
         return bs::string_viewt<traits_type>{data(), size()};
     }
 
