@@ -9,8 +9,9 @@ add_executable(betterstring-test
     "ascii.cpp"
     "parsing.cpp"
     "string.cpp"
-    "cpu_dispatch.cpp"
     "allocators.cpp"
+
+    "main.cpp"
 
     "util.hpp"
 )
@@ -29,7 +30,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2)
 
 target_compile_features(Catch2 PRIVATE cxx_std_17)
-target_link_libraries(betterstring-test PRIVATE Catch2::Catch2WithMain)
+target_link_libraries(betterstring-test PRIVATE Catch2::Catch2)
 set_target_properties(Catch2 PROPERTIES
     INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:Catch2::Catch2,INTERFACE_INCLUDE_DIRECTORIES>
 )
@@ -56,12 +57,12 @@ if (PRINT_STACKTRACE)
     set(libassert_target libassert::assert)
 endif()
 
-set_target_properties(${libassert_name} Catch2 Catch2WithMain PROPERTIES FOLDER "external/")
+set_target_properties(${libassert_name} Catch2 PROPERTIES FOLDER "external/")
 
 if (USE_SANITIZERS)
     include("${PROJECT_SOURCE_DIR}/cmake/sanitizers.cmake")
     target_add_sanitizer(betterstring-test SANITIZERS Address Undefined
-        LIBRARIES Catch2::Catch2 Catch2::Catch2WithMain ${libassert_target}
+        LIBRARIES Catch2::Catch2 ${libassert_target}
     )
 endif()
 
