@@ -84,8 +84,7 @@ target_include_directories(betterstring ${include_as_system} PUBLIC
 target_compile_features(betterstring PUBLIC cxx_std_17)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(betterstring PUBLIC
-        $<$<COMPILE_LANGUAGE:CXX>:/Zc:__cplusplus /Zc:inline /Zc:preprocessor>
+    target_compile_options(betterstring PRIVATE
         $<$<COMPILE_LANGUAGE:ASM_MASM>:/WX>
     )
 endif()
