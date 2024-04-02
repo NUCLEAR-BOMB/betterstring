@@ -60,7 +60,7 @@ TEST_CASE("constructor", "[string_view]") {
         const bs::string_view str1{arr_str};
         CHECK(str1 == "test string");
 
-        std::vector<char> vec_str{std::initializer_list{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'}};
+        std::vector<char> vec_str{std::initializer_list<char>{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'}};
         const bs::string_view str2{vec_str};
         CHECK(str2 == "hello world");
 
