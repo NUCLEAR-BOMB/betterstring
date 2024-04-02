@@ -6,7 +6,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <cstdint>
 
-#include "stacktrace.hpp"
 #include <betterstring/parsing.hpp>
 
 #if BS_COMP_CLANG

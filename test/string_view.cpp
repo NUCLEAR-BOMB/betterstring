@@ -9,7 +9,6 @@
 #include <iterator>
 #include <vector>
 
-#include "stacktrace.hpp"
 #include <betterstring/string_view.hpp>
 #include <betterstring/ascii.hpp>
 

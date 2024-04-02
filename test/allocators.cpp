@@ -9,7 +9,6 @@
 #include <vector>
 #include <array>
 
-#include "stacktrace.hpp"
 #include <betterstring/allocators.hpp>
 
 namespace {

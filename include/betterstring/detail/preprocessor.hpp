@@ -90,9 +90,16 @@
     #endif
 #endif
 
-#ifndef BS_ABORT
-    #define BS_ABORT(expression, message) \
-        ((void)std::fprintf(stderr, "%s:%d: assertion '%s' failed: %s\n", __FILE__, __LINE__, #expression, message), (void)BS_DEBUG_BREAK())
+#if __has_include(<libassert/assert.hpp>)
+    #define BS_HAS_LIBASSERT 1
+#else
+    #define BS_HAS_LIBASSERT 0
+#endif
+
+#if !defined(BS_VERIFY_FAIL) && !BS_HAS_LIBASSERT
+    #include <cstdio>
+    #define BS_VERIFY_FAIL(expression, message) \
+        ((void)::std::fprintf(stderr, "%s:%d: assertion '%s' failed: %s\n", __FILE__, __LINE__, #expression, message), (void)BS_DEBUG_BREAK())
 #endif
 
 #if BS_HAS_BUILTIN(__builtin_assume)
@@ -184,12 +191,17 @@
 #endif
 
 #ifndef NDEBUG
-    #if BS_COMP_CLANG || BS_COMP_GCC
-        #define BS_VERIFY(expression, message) \
-            (__builtin_expect((expression), 1) ? (void)0 : (void)(BS_ABORT(expression, message)))
+    #if BS_HAS_LIBASSERT
+        #include <libassert/assert.hpp>
+        #define BS_VERIFY(expression, message) DEBUG_ASSERT(expression, message)
     #else
-        #define BS_VERIFY(expression, message) \
-            ((expression) ? (void)0 : BS_ABORT(expression, message))
+        #if BS_COMP_CLANG || BS_COMP_GCC
+            #define BS_VERIFY(expression, message) \
+                (__builtin_expect((expression), 1) ? (void)0 : (void)(BS_VERIFY_FAIL(expression, message)))
+        #else
+            #define BS_VERIFY(expression, message) \
+                ((expression) ? (void)0 : BS_VERIFY_FAIL(expression, message))
+        #endif
     #endif
 #else
     #define BS_VERIFY(expression, message) BS_ASSUME(expression)

@@ -13,7 +13,6 @@ add_executable(betterstring-test
     "allocators.cpp"
 
     "util.hpp"
-    "stacktrace.hpp"
 )
 target_add_warnings(betterstring-test)
 target_link_libraries(betterstring-test PRIVATE betterstring)
@@ -40,29 +39,30 @@ target_compile_definitions(betterstring-test PRIVATE CATCH_CONFIG_FAST_COMPILE)
 if (PRINT_STACKTRACE)
     include(FetchContent)
     FetchContent_Declare(
-        cpptrace
-        GIT_REPOSITORY https://github.com/jeremy-rifkin/cpptrace.git
-        GIT_TAG        v0.5.1
+        libassert
+        GIT_REPOSITORY https://github.com/jeremy-rifkin/libassert.git
+        GIT_TAG        v2.0.0
     )
-    FetchContent_MakeAvailable(cpptrace)
-    target_link_libraries(betterstring-test PRIVATE cpptrace::cpptrace)
-    target_compile_definitions(betterstring-test PRIVATE BETTERSTRING_TEST_ENABLE_STACKTRACE)
-    target_suppress_warnings(cpptrace::cpptrace)
-    get_target_name(cpptrace_name cpptrace::cpptrace)
+    FetchContent_MakeAvailable(libassert)
+    target_link_libraries(betterstring-test PRIVATE libassert::assert)
+    target_suppress_warnings(libassert::assert)
+    get_target_name(libassert_name libassert::assert)
 
     if (CMAKE_SYSTEM_NAME MATCHES "Windows")
         add_custom_command(TARGET betterstring-test POST_BUILD
-            COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_FILE:cpptrace::cpptrace> $<TARGET_FILE_DIR:betterstring-test>
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_FILE:libassert::assert> $<TARGET_FILE_DIR:betterstring-test>
         )
     endif()
-    set(cpptrace_target cpptrace::cpptrace)
+    set(libassert_target libassert::assert)
 endif()
 
-set_target_properties(${cpptrace_name} Catch2 Catch2WithMain PROPERTIES FOLDER "external/")
+set_target_properties(${libassert_name} Catch2 Catch2WithMain PROPERTIES FOLDER "external/")
 
 if (USE_SANITIZERS)
     include("${PROJECT_SOURCE_DIR}/cmake/sanitizers.cmake")
-    target_add_sanitizer(betterstring-test SANITIZERS Address Undefined LIBRARIES Catch2::Catch2 Catch2::Catch2WithMain ${cpptrace_target})
+    target_add_sanitizer(betterstring-test SANITIZERS Address Undefined
+        LIBRARIES Catch2::Catch2 Catch2::Catch2WithMain ${libassert_target}
+    )
 endif()
 
 if (USE_CLANG_TIDY)

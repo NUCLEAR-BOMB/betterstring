@@ -7,7 +7,6 @@
 #include <cstdio>
 #include <vector>
 
-#include "stacktrace.hpp"
 #include <betterstring/string_view.hpp>
 #include <betterstring/detail/cpu_features.hpp>
 

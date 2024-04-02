@@ -7,7 +7,6 @@
 #include <string>
 #include <cstdlib>
 
-#include "stacktrace.hpp"
 #include "util.hpp"
 #include <betterstring/functions.hpp>
 
