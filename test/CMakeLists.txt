@@ -19,6 +19,10 @@ target_add_warnings(betterstring-test)
 target_link_libraries(betterstring-test PRIVATE betterstring)
 set_target_properties(betterstring-test PROPERTIES UNITY_BUILD FALSE)
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(betterstring-test PRIVATE /Zc:inline)
+endif()
+
 include(FetchContent)
 FetchContent_Declare(
     Catch2
