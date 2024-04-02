@@ -40,6 +40,7 @@ set(detail_headers
     "include/betterstring/detail/parse_unsigned.hpp"
     "include/betterstring/detail/cpu_features.hpp"
     "include/betterstring/detail/reference_wrapper.hpp"
+    "include/betterstring/detail/ranges_traits.hpp"
 )
 set(asm_src
     "src/strrfind_char_avx2.asm"

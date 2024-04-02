@@ -14,6 +14,7 @@
 
 #include <betterstring/detail/preprocessor.hpp>
 #include <betterstring/detail/integer_cmps.hpp>
+#include <betterstring/detail/ranges_traits.hpp>
 #include <betterstring/functions.hpp>
 #include <betterstring/splited_string.hpp>
 #include <betterstring/char_traits.hpp>
@@ -82,6 +83,16 @@ public:
     constexpr string_viewt(Begin first, End last) noexcept(noexcept(last - first))
         : string_data(detail::to_address(first))
         , string_size(static_cast<size_type>(last - first)) {}
+
+    template<class Range, std::enable_if_t<
+        !std::is_same_v<detail::remove_cvref_t<Range>, string_viewt>
+        && !std::is_convertible_v<Range, const value_type*>
+        && !detail::has_conversion_operator<detail::remove_cvref_t<Range>&, string_viewt>
+        && detail::ranges::is_contiguous_range<Range>
+    , int> = 0>
+    constexpr string_viewt(Range&& range) noexcept(noexcept(detail::ranges::data(range), detail::ranges::size(range)))
+        : string_data{detail::ranges::data(range)}
+        , string_size{detail::ranges::size(range)} {}
 
     constexpr string_viewt& operator=(const string_viewt&) noexcept = default;
 

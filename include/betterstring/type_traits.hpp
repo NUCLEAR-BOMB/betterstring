@@ -81,6 +81,11 @@ namespace detail {
     inline constexpr bool is_qualification_convertible =
         std::is_constructible_v<From (*)[], To (*)[]>;
 
+    template<class T, class U, class = void>
+    inline constexpr bool has_conversion_operator = false;
+    template<class T, class U>
+    inline constexpr bool has_conversion_operator<T, U, std::void_t<decltype(std::declval<T>().operator U())>> = true;
+
     template<class T>
     struct is_character_impl : std::false_type {};
     template<> struct is_character_impl<char> : std::true_type {};

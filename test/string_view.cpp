@@ -53,6 +53,12 @@ TEST_CASE("constructor", "[string_view]") {
         const bs::string_view str2{first, first};
         CHECK(str2 == "");
     }
+    // SECTION("from range") {
+    //     const std::array arr_str{'t', 'e', 's', 't', ' ', 's', 't', 'r', 'i', 'n', 'g'};
+    // 
+    //     const bs::string_view str1{arr_str};
+    //     CHECK(str1 == "test string");
+    // }
 }
 
 TEST_CASE("begin, end", "[string_view]") {
