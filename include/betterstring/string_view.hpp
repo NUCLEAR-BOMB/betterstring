@@ -90,7 +90,7 @@ public:
         && !detail::has_conversion_operator<detail::remove_cvref_t<Range>&, string_viewt>
         && detail::ranges::is_contiguous_range<Range>
     , int> = 0>
-    constexpr string_viewt(Range&& range) noexcept(noexcept(detail::ranges::data(range), detail::ranges::size(range)))
+    constexpr string_viewt(BS_LIFETIMEBOUND Range&& range) noexcept(noexcept(detail::ranges::data(range), detail::ranges::size(range)))
         : string_data{detail::ranges::data(range)}
         , string_size{detail::ranges::size(range)} {}
 
