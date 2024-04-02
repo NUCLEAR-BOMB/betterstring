@@ -63,7 +63,7 @@ jobs:
     - name: Configure CMake
       run: >
         cmake -B build ${{ matrix.platform.flags }}
-        -DCMAKE_BUILD_TYPE=${{ matrix.config.name }} -DCMAKE_UNITY_BUILD=TRUE -DPRINT_STACKTRACE=TRUE
+        -DCMAKE_BUILD_TYPE=${{ matrix.config.name }} -DCMAKE_UNITY_BUILD=TRUE -DUSE_LIBASSERT=TRUE
 
     - name: Build
       run: cmake --build build --config ${{ matrix.config.name }}
