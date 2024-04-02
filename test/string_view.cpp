@@ -7,6 +7,7 @@
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
 #include <array>
 #include <iterator>
+#include <vector>
 
 #include "stacktrace.hpp"
 #include <betterstring/string_view.hpp>
@@ -53,12 +54,20 @@ TEST_CASE("constructor", "[string_view]") {
         const bs::string_view str2{first, first};
         CHECK(str2 == "");
     }
-    // SECTION("from range") {
-    //     const std::array arr_str{'t', 'e', 's', 't', ' ', 's', 't', 'r', 'i', 'n', 'g'};
-    // 
-    //     const bs::string_view str1{arr_str};
-    //     CHECK(str1 == "test string");
-    // }
+    SECTION("from range") {
+        const std::array arr_str{'t', 'e', 's', 't', ' ', 's', 't', 'r', 'i', 'n', 'g'};
+
+        const bs::string_view str1{arr_str};
+        CHECK(str1 == "test string");
+
+        std::vector<char> vec_str{std::initializer_list{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'}};
+        const bs::string_view str2{vec_str};
+        CHECK(str2 == "hello world");
+
+        vec_str.emplace_back('!');
+        const bs::string_view str3{vec_str};
+        CHECK(str3 == "hello world!");
+    }
 }
 
 TEST_CASE("begin, end", "[string_view]") {

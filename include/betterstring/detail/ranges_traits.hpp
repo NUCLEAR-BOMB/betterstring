@@ -123,8 +123,6 @@ namespace begin_impl {
     constexpr auto begin(T&& x) noexcept(noexcept(begin(x))) {
         return begin(x);
     }
-    template<class T>
-    void begin(T&&) = delete;
 }
 
 template<class T>
@@ -177,8 +175,6 @@ namespace end_impl {
     constexpr auto end(T&& x) noexcept(noexcept(end(x))) {
         return end(x);
     }
-    template<class T>
-    void end(T&&) = delete;
 }
 
 using end_impl::end;
@@ -210,7 +206,7 @@ namespace size_impl {
     inline constexpr bool has_difference<T, std::void_t<decltype(
         ranges::begin(std::declval<T>()),
         ranges::end(std::declval<T>())
-    )>> = !has_adl_size<T>
+    )>> = !has_adl_size<T> && !has_member_size<T>
         && is_class_or_enum<remove_cvref_t<T>>
         && is_forward_iterator<decltype(ranges::begin(std::declval<T>()))>
         && is_sentinel_for<
