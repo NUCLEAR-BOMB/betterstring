@@ -59,14 +59,20 @@ set(strfirstof_files
     "src/strfirstof/cmp_6.asm"
     "src/strfirstof/cmp_any.asm"
 )
+set(strfind_str_files
+    "src/strfind_str/cross_page_vec_needle.asm"
+    "src/strfind_str/vec_needle.asm"
+)
 add_library(betterstring
     ${main_headers}
     ${detail_headers}
     ${asm_src}
     ${strfirstof_files}
+    ${strfind_str_files}
 )
-set_source_files_properties(${strfirstof_files} PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties(${strfirstof_files} ${strfind_str_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 source_group("Source Files/strfirstof" FILES ${strfirstof_files})
+source_group("Source Files/strfind_str" FILES ${strfind_str_files})
 
 source_group("Header Files/detail" FILES ${detail_headers})
 source_group("Source Files" FILES ${asm_src})
