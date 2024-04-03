@@ -20,7 +20,9 @@ target_link_libraries(betterstring-test PRIVATE betterstring)
 set_target_properties(betterstring-test PROPERTIES UNITY_BUILD FALSE)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(betterstring-test PRIVATE /Zc:inline)
+    target_compile_options(betterstring-test PRIVATE
+        /Zc:inline /RTCs /RTCu
+    )
 endif()
 
 include(FetchContent)
