@@ -2,18 +2,26 @@ cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 project(betterstring VERSION 0.1 LANGUAGES CXX ASM_MASM)
 
-option(BUILD_TEST "" ${PROJECT_IS_TOP_LEVEL})
-option(USE_CLANG_TIDY "" ${PROJECT_IS_TOP_LEVEL})
-option(BUILD_BENCHMARK "" ${PROJECT_IS_TOP_LEVEL})
-option(BUILD_FUZZ "" ${PROJECT_IS_TOP_LEVEL})
-option(USE_SANITIZERS "" ${PROJECT_IS_TOP_LEVEL})
+option(BUILD_TEST "Build the betterstring-test target" ${PROJECT_IS_TOP_LEVEL})
+option(USE_CLANG_TIDY "Enable the clang-tidy analyzer" ${PROJECT_IS_TOP_LEVEL})
+option(BUILD_BENCHMARK "Build the betterstring-benchmark target" ${PROJECT_IS_TOP_LEVEL})
+option(BUILD_FUZZ "Build fuzzer targets" ${PROJECT_IS_TOP_LEVEL})
+option(USE_SANITIZERS "Enable sanitizers for entire project" ${PROJECT_IS_TOP_LEVEL})
+option(USE_NATVIS "Enable .natvis file for visual studio debugger" TRUE)
+option(USE_NATSTEPFILTER "Enable .natstepfilter file for visual studio debugger" TRUE)
+option(USE_LIBASSERT "Use libassert to print diagnostic if internal check is failed" FALSE)
 # option(INSTALL_BETTERSTRING "" ${PROJECT_IS_TOP_LEVEL})
 
+if (PROJECT_IS_TOP_LEVEL)
+    set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+endif()
+
+# use the masm64 assembler for compiling assembly language files
 set(CMAKE_ASM_MASM_COMPILER "ml64.exe")
 
 include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
 
-add_library(betterstring
+set(main_headers
     "include/betterstring/functions.hpp"
     "include/betterstring/string_view.hpp"
     "include/betterstring/splited_string.hpp"
@@ -24,12 +32,17 @@ add_library(betterstring
     "include/betterstring/string.hpp"
     "include/betterstring/safe_functions.hpp"
     "include/betterstring/find_result.hpp"
-
+    "include/betterstring/allocators.hpp"
+)
+set(detail_headers
     "include/betterstring/detail/preprocessor.hpp"
     "include/betterstring/detail/integer_cmps.hpp"
     "include/betterstring/detail/parse_unsigned.hpp"
     "include/betterstring/detail/cpu_features.hpp"
-
+    "include/betterstring/detail/reference_wrapper.hpp"
+    "include/betterstring/detail/ranges_traits.hpp"
+)
+set(asm_src
     "src/strrfind_char_avx2.asm"
     "src/strcount_char_avx2.asm"
     "src/strlen_avx2.asm"
@@ -37,9 +50,30 @@ add_library(betterstring
     "src/strfirstof_avx2.asm"
     "src/strfind_str_avx2.asm"
 )
+set(strfirstof_files
+    "src/strfirstof/cmp_1.asm"
+    "src/strfirstof/cmp_2.asm"
+    "src/strfirstof/cmp_3.asm"
+    "src/strfirstof/cmp_4.asm"
+    "src/strfirstof/cmp_5.asm"
+    "src/strfirstof/cmp_6.asm"
+    "src/strfirstof/cmp_any.asm"
+)
+add_library(betterstring
+    ${main_headers}
+    ${detail_headers}
+    ${asm_src}
+    ${strfirstof_files}
+)
+set_source_files_properties(${strfirstof_files} PROPERTIES HEADER_FILE_ONLY TRUE)
+source_group("Source Files/strfirstof" FILES ${strfirstof_files})
+
+source_group("Header Files/detail" FILES ${detail_headers})
+source_group("Source Files" FILES ${asm_src})
 
 target_compile_options(betterstring PRIVATE $<$<COMPILE_LANGUAGE:ASM_MASM>:/Cp>)
 
+# ignore warnings for betterstring library headers
 if (NOT PROJECT_IS_TOP_LEVEL)
     set(include_as_system "SYSTEM")
 endif()
@@ -51,16 +85,23 @@ target_include_directories(betterstring ${include_as_system} PUBLIC
 target_compile_features(betterstring PUBLIC cxx_std_17)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(betterstring PUBLIC
-        $<$<COMPILE_LANGUAGE:CXX>:/Zc:__cplusplus /Zc:inline /Zc:preprocessor>
+    target_compile_options(betterstring PRIVATE
         $<$<COMPILE_LANGUAGE:ASM_MASM>:/WX>
     )
 endif()
 
-target_sources(betterstring PUBLIC
+if (USE_NATVIS)
+    target_sources(betterstring PUBLIC
         "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/debugger/betterstring.natvis>"
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_DATADIR}/debugger/betterstring.natvis>"
-)
+    )
+endif()
+if (USE_NATSTEPFILTER)
+    target_sources(betterstring PUBLIC
+        "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/debugger/betterstring.natstepfilter>"
+        "$<INSTALL_INTERFACE:${CMAKE_INSTALL_DATADIR}/debugger/betterstring.natstepfilter>"
+    )
+endif()
 
 if (BUILD_TEST)
     enable_testing()

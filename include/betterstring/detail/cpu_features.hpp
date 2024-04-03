@@ -1,3 +1,8 @@
+
+// Copyright 2024.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
+
 #pragma once
 
 #include <betterstring/detail/preprocessor.hpp>
@@ -56,8 +61,9 @@ inline uint64_t xgetbv(unsigned int a) {
 }
 #endif
 
-struct cpu_features_t {
+struct alignas(64) cpu_features_t {
     uint64_t value{};
+    uint64_t _dummy[7];
 
     enum : uint64_t {
         AVX2 = (1 << 0),
@@ -99,7 +105,6 @@ inline cpu_features_t dynamic_cpu_features_initializer() noexcept {
     return features;
 }
 
-alignas(64)
 inline const cpu_features_t cpu_features = dynamic_cpu_features_initializer();
 
 }

@@ -1,6 +1,11 @@
-#include <catch2/catch_test_macros.hpp>
 
+// Copyright 2024.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
+
+#include <catch2/catch_test_macros.hpp>
 #include <cstdint>
+
 #include <betterstring/parsing.hpp>
 
 #if BS_COMP_CLANG
@@ -11,8 +16,6 @@
 
 static_assert(static_cast<uint8_t>(bs::parse_error{}) == 0);
 static_assert(static_cast<uint8_t>(bs::parse_error::invalid_argument) == 1);
-
-using std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t;
 
 namespace Catch {
     template<class T>
@@ -25,6 +28,8 @@ namespace Catch {
 }
 
 namespace {
+
+using std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t;
 
 TEST_CASE("uint8", "[parsing]") {
     CHECK(bs::parse<uint8_t>("", 0) == bs::parse_error::invalid_argument);

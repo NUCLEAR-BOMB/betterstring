@@ -4,41 +4,82 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
-    name: "${{ matrix.platform.name }} | Build: ${{ matrix.build.name }}"
+    name: "${{ matrix.platform.name }} | Build: ${{ matrix.config.name }}"
     runs-on: ${{ matrix.platform.os }}
 
     strategy:
       fail-fast: false
       matrix:
         platform:
-          - { name: Windows Visual Studio 2022 x64, os: windows-2022 }
-        build:
+          - { name: Windows VS 2022, os: windows-2022 }
+          - { name: Windows VS 2022 ClangCL, os: windows-2022, flags: -T ClangCL, install-llvm: 'true' }
+        config:
           - { name: Debug }
           - { name: Release }
+
+        include:
+          - platform: { name: Windows VS 2022 ClangCL, os: windows-2022, flags: -T ClangCL, install-llvm: 'true' }
+            config: { name: RelWithDebInfo }
 
     steps:
     - name: Checkout
       uses: actions/checkout@v4.1.1
 
+    - name: Cache CMake dependency source code
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-cmake-dependency-sources
+      with:
+        path: ${{github.workspace}}/build/_deps/*-src
+        key: ${{env.cache-name}}-${{hashFiles('**/CMakeLists.txt', 'cmake/**')}}
+        restore-keys: ${{env.cache-name}}-
+      
+    # - name: Cache CMake dependency build directories
+    #   uses: actions/cache@v4
+    #   env:
+    #     cache-name: cache-cmake-dependency-build-directories
+    #   with:
+    #     path: |
+    #       ${{github.workspace}}/build/_deps/*-build
+    #       ${{github.workspace}}/build/_deps/*-subbuild
+    #     key: ${{env.cache-name}}-${{matrix.platform.os}}-${{matrix.build.name}}-${{hashFiles('**/CMakeLists.txt', 'cmake/**')}}
+
+    - name: Cache Install LLVM
+      if: matrix.platform.install-llvm == 'true'
+      id: cache-llvm
+      uses: actions/cache@v4.0.2
+      with:
+        path: "C:/Program Files/LLVM"
+        key: cache-llvm-18-1-2
+
+    - name: Install LLVM
+      if: (matrix.platform.install-llvm == 'true' && steps.cache-llvm.outputs.cache-hit != 'true')
+      run: |
+        curl -Lo "${{runner.temp}}/llvm-download.tar.xz" https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.2/clang+llvm-18.1.2-x86_64-pc-windows-msvc.tar.xz
+        7z x "${{runner.temp}}/llvm-download.tar.xz" "-o${{runner.temp}}" -y
+        7z x "${{runner.temp}}/llvm-download.tar" "-o${{runner.temp}}" -y
+        xcopy "${{runner.temp}}\clang+llvm-18.1.2-x86_64-pc-windows-msvc" "C:\Program Files\LLVM" /e /y
+
     - name: Configure CMake
-      run: cmake -B build -D CMAKE_BUILD_TYPE=${{ matrix.build.name }} ${{ matrix.platform.flags }}
+      run: >
+        cmake -B build ${{ matrix.platform.flags }}
+        -DCMAKE_BUILD_TYPE=${{ matrix.config.name }} -DCMAKE_UNITY_BUILD=TRUE -DUSE_LIBASSERT=TRUE
 
     - name: Build
-      run: cmake --build build --config ${{ matrix.build.name }}
+      run: cmake --build build --config ${{ matrix.config.name }}
 
     - name: Run tests
-      run: cmake --build build --config ${{ matrix.build.name }} --target run-betterstring-test
+      run: cmake --build build --config ${{ matrix.config.name }} --target run-betterstring-test
       
     - name: Run fuzzer
-      id: run-fuzzer
-      run: cmake --build build --config ${{ matrix.build.name }} --target run-betterstring-fuzz
+      run: cmake --build build --config ${{ matrix.config.name }} --target run-betterstring-fuzz
 
     - name: Upload fuzzer artifacts
-      if: always() && steps.run-fuzzer.outcome != 'success'
       uses: actions/upload-artifact@v4.3.1
       with:
         name: fuzzer-artifacts
         path: build/crash-*
+        if-no-files-found: ignore
 
   clang-tidy:
     name: Clang Tidy

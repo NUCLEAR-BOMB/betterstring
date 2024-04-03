@@ -1,3 +1,8 @@
+
+// Copyright 2024.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
+
 #pragma once
 
 #include <betterstring/detail/preprocessor.hpp>
@@ -132,6 +137,36 @@ template<class Ch = char, detail::enable_is_ascii_compatible<Ch> = 0>
 constexpr Ch from_octdigit(const int d) noexcept {
     BS_VERIFY(d >= 0 && d <= 7, "integer must be a single octal digit");
     return static_cast<Ch>(d + '0');
+}
+
+template<class T>
+constexpr int ci_strcomp(const T* const left, const T* const right, const std::size_t count) noexcept {
+    static_assert(detail::is_ascii_compatible_impl<T>::value, "T must be ASCII compatible");
+
+    constexpr int64_t delta = 'a' - 'A';
+
+    int64_t a{}, b{}, c{};
+    for (std::size_t i = 0; i < count; ++i) {
+        a = int64_t(left[i]);
+        b = a - delta >= 26 ? a : a + delta; // cmov
+
+        c = int64_t(right[i]);
+        a = c - delta >= 26 ? c : c + delta; // cmov
+
+        if (b != a) {
+            return int(b - a);
+        }
+    }
+    return 0;
+}
+
+template<class T>
+constexpr int ci_strcomp(const T* const left, const std::size_t left_len, const T* const right, const std::size_t right_len) noexcept {
+    static_assert(detail::is_ascii_compatible_impl<T>::value, "T must be ASCII compatible");
+
+    if (left_len < right_len) { return -1; }
+    if (left_len > right_len) { return 1; }
+    return ci_strcomp(left, right, left_len);
 }
 
 }

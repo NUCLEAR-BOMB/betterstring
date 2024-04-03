@@ -1,28 +1,77 @@
+
+// Copyright 2024.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
+
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_range_equals.hpp>
 #include <array>
+#include <iterator>
+#include <vector>
 
 #include <betterstring/string_view.hpp>
 #include <betterstring/ascii.hpp>
 
-using namespace bs::literals;
-
 namespace {
 
+using namespace bs::literals;
+
 TEST_CASE("constructor", "[string_view]") {
-    const bs::string_view empty_str;
-    CHECK(empty_str.size() == 0);
-    CHECK(empty_str.data() == nullptr);
+    SECTION("default constructor") {
+        const bs::string_view empty_str;
+        CHECK(empty_str.size() == 0);
+        CHECK(empty_str.data() == nullptr);
+    }
+    SECTION("copy constructor") {
+        const bs::string_view str{"test string"};
 
-    const bs::string_view copy_str("test string"_sv);
-    CHECK(copy_str == "test string"_sv);
+        const bs::string_view copy_str{str};
+        CHECK(copy_str == "test string"_sv);
+    }
+    SECTION("from pointer and length") {
+        const char* str = "sample string";
+        const std::size_t str_len = 13;
 
-    const bs::string_view cut_str("test string", 4);
-    CHECK(cut_str == "test"_sv);
+        const bs::string_view result{str, str_len};
+        CHECK(result == "sample string");
+    }
+    SECTION("from string literal") {
+        const bs::string_view str1{"hello world"};
+        CHECK(str1 == "hello world");
 
-    constexpr auto cstring = "123456789";
-    const bs::string_view range_str(cstring + 1, cstring + 7);
-    CHECK(range_str == "234567"_sv);
+        decltype(auto) char_arr = "random string";
+        const bs::string_view str2{char_arr};
+        CHECK(str2 == "random string");
+    }
+    SECTION("from iterators") {
+        const char* first = "test string";
+        const char* last = first + 5;
+
+        const bs::string_view str1{first, last};
+        CHECK(str1 == "test ");
+
+        const bs::string_view str2{first, first};
+        CHECK(str2 == "");
+    }
+    SECTION("from range") {
+        const std::array arr_str{'t', 'e', 's', 't', ' ', 's', 't', 'r', 'i', 'n', 'g'};
+
+        const bs::string_view str1{arr_str};
+        CHECK(str1 == "test string");
+
+        std::vector<char> vec_str{std::initializer_list<char>{'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd'}};
+        const bs::string_view str2{vec_str};
+        CHECK(str2 == "hello world");
+
+        vec_str.emplace_back('!');
+        const bs::string_view str3{vec_str};
+        CHECK(str3 == "hello world!");
+    }
+    SECTION("from_c_string") {
+        const char* c_str1 = "test string";
+        bs::string_view str1 = bs::string_view::from_c_string(c_str1);
+        CHECK(str1 == "test string");
+    }
 }
 
 TEST_CASE("begin, end", "[string_view]") {
@@ -187,6 +236,15 @@ TEST_CASE("find", "[string_view]") {
         CHECK(str.find(""_sv) == 0);
         CHECK(str.find(""_sv, 3) == 3);
         CHECK(str.find("string"_sv, 8) == str.size());
+
+        CHECK(str.find("st ").index_opt() != std::nullopt);
+        CHECK(str.find("abc").index_opt() == std::nullopt);
+        CHECK(str.find(" string").index_opt() == 4);
+        CHECK(str.find("test string").index_opt() == 0);
+
+        CHECK(str.find("ing").ptr_opt() != std::nullopt);
+        CHECK(str.find("ing").ptr_opt() == str.data() + 8);
+        CHECK(str.find("xyz").ptr_opt() == std::nullopt);
     }
     SECTION("character") {
         CHECK(str.find('t') == 0);
@@ -227,7 +285,7 @@ TEST_CASE("rfind", "[string_view]") {
         CHECK(str.rfind("string"_sv) == 5);
         CHECK(str.rfind(" "_sv) == 4);
         CHECK(str.rfind("test"_sv, 8) == 0);
-        CHECK(str.rfind("string"_sv, 10) == 0);
+        CHECK(str.rfind("string"_sv, 10) == -1);
     }
     SECTION("character") {
         CHECK(str.rfind(' ') == 4);
@@ -246,25 +304,44 @@ TEST_CASE("split", "[string_view]") {
         CHECK_THAT("test string"_sv.split("t"_sv), RangeEquals(std::array{""_sv, "es"_sv, " s"_sv, "ring"_sv}));
         CHECK_THAT("aaaa"_sv.split(" "_sv), RangeEquals(std::array{"aaaa"_sv}));
 
-        CHECK("test string"_sv.split(" "_sv)[0] == "test"_sv);
-        CHECK("test string"_sv.split(" "_sv)[1] == "string"_sv);
-        CHECK("test string"_sv.split(" "_sv).count() == 2);
-        CHECK("  "_sv.split(" "_sv)[1] == ""_sv);
-
         const auto splited_str = "test string"_sv.split(" "_sv);
         CHECK_THAT(std::vector(splited_str.begin(), splited_str.end()), RangeEquals(std::array{"test"_sv, "string"_sv}));
+
+        const auto splited_str1 = "1 2 3 4 5 6 7 8 9"_sv.split(" "_sv);
+        {
+            auto it = splited_str1.begin();
+            CHECK(*it == "1");
+            std::advance(it, 3);
+            CHECK(*it == "4");
+        }
     }
     SECTION("character") {
         CHECK_THAT("test string"_sv.split(' '), RangeEquals(std::array{"test"_sv, "string"_sv}));
-
-        CHECK("test string"_sv.split('g').count() == 2);
-        CHECK("test string"_sv.split('g')[0] == "test strin"_sv);
-        CHECK("test string"_sv.split('g')[1] == ""_sv);
         CHECK_THAT("test string"_sv.split('g'), RangeEquals(std::array{"test strin"_sv, ""_sv}));
 
         const auto splited_str = "test string"_sv.split(' ');
         CHECK_THAT(std::vector(splited_str.begin(), splited_str.end()), RangeEquals(std::array{"test"_sv, "string"_sv}));
     }
+    SECTION("reverse split") {
+        const auto split = "test string hello world"_sv.split(' ');
+        {
+            auto it = split.rbegin();
+            CHECK(*it == "world");
+            std::advance(it, 2);
+            CHECK(*it == "string");
+            ++it;
+            CHECK(*it == "test");
+            ++it;
+            CHECK(it == split.rend());
+        }
+        CHECK_THAT(std::vector(split.rbegin(), split.rend()), RangeEquals(std::array{"world"_sv, "hello"_sv, "string"_sv, "test"_sv}));
+    }
+}
+
+TEST_CASE("rsplit", "[string_view]") {
+    using Catch::Matchers::RangeEquals;
+
+    CHECK_THAT("test string"_sv.rsplit(' '), RangeEquals(std::array{"string"_sv, "test"_sv}));
 }
 
 TEST_CASE("strip", "[string_view]") {
@@ -280,34 +357,34 @@ TEST_CASE("strip", "[string_view]") {
     CHECK("aaaaa"_sv.strip("a"_sv) == ""_sv);
 }
 
-TEST_CASE("lstrip", "[string_view]") {
+TEST_CASE("strip_left", "[string_view]") {
     SECTION("character") {
-        CHECK(" hello"_sv.lstrip(' ') == "hello"_sv);
-        CHECK("  hello"_sv.lstrip(' ') == "hello"_sv);
-        CHECK("hello "_sv.lstrip(' ') == "hello "_sv);
-        CHECK("hello  "_sv.lstrip(' ') == "hello  "_sv);
-        CHECK(" hello "_sv.lstrip(' ') == "hello "_sv);
+        CHECK(" hello"_sv.strip_left(' ') == "hello"_sv);
+        CHECK("  hello"_sv.strip_left(' ') == "hello"_sv);
+        CHECK("hello "_sv.strip_left(' ') == "hello "_sv);
+        CHECK("hello  "_sv.strip_left(' ') == "hello  "_sv);
+        CHECK(" hello "_sv.strip_left(' ') == "hello "_sv);
     }
     SECTION("string") {
-        CHECK("test string"_sv.lstrip("test"_sv) == " string"_sv);
-        CHECK("test string"_sv.lstrip("tes"_sv) == " string"_sv);
-        CHECK("test string"_sv.lstrip("t"_sv) == "est string"_sv);
-        CHECK("test string"_sv.lstrip("g"_sv) == "test string"_sv);
-        CHECK("test string"_sv.lstrip("string"_sv) == "est string"_sv);
+        CHECK("test string"_sv.strip_left("test"_sv) == " string"_sv);
+        CHECK("test string"_sv.strip_left("tes"_sv) == " string"_sv);
+        CHECK("test string"_sv.strip_left("t"_sv) == "est string"_sv);
+        CHECK("test string"_sv.strip_left("g"_sv) == "test string"_sv);
+        CHECK("test string"_sv.strip_left("string"_sv) == "est string"_sv);
     }
 }
 
-TEST_CASE("rstrip", "[string_view]") {
+TEST_CASE("strip_right", "[string_view]") {
     SECTION("string") {
-        CHECK("hello "_sv.rstrip(' ') == "hello"_sv);
-        CHECK("hello  "_sv.rstrip(' ') == "hello"_sv);
-        CHECK(" hello"_sv.rstrip(' ') == " hello"_sv);
-        CHECK(" hello "_sv.rstrip(' ') == " hello"_sv);
+        CHECK("hello "_sv.strip_right(' ') == "hello"_sv);
+        CHECK("hello  "_sv.strip_right(' ') == "hello"_sv);
+        CHECK(" hello"_sv.strip_right(' ') == " hello"_sv);
+        CHECK(" hello "_sv.strip_right(' ') == " hello"_sv);
 
-        CHECK("test string"_sv.rstrip("test"_sv) == "test string"_sv);
-        CHECK("test string"_sv.rstrip("string"_sv) == "test "_sv);
-        CHECK("test string"_sv.rstrip("g"_sv) == "test strin"_sv);
-        CHECK("test string"_sv.rstrip("t"_sv) == "test string"_sv);
+        CHECK("test string"_sv.strip_right("test"_sv) == "test string"_sv);
+        CHECK("test string"_sv.strip_right("string"_sv) == "test "_sv);
+        CHECK("test string"_sv.strip_right("g"_sv) == "test strin"_sv);
+        CHECK("test string"_sv.strip_right("t"_sv) == "test string"_sv);
     }
 }
 
@@ -356,35 +433,26 @@ TEST_CASE("count", "[string_view]") {
 TEST_CASE("find_first_of", "[string_view]") {
     const bs::string_view str = "test string"_sv;
 
-    SECTION("character") {
-        CHECK(str.find_first_of('t') == 0);
-        CHECK(str.find_first_of('g') == 10);
-        CHECK(str.find_first_of(' ') == 4);
-    }
-    SECTION("string") {
-        CHECK(str.find_first_of("t"_sv) == 0);
-        CHECK(str.find_first_of("g"_sv) == 10);
-        CHECK(str.find_first_of("s ing"_sv) == 2);
-        CHECK_FALSE(str.find_first_of(""_sv).found());
-        CHECK_FALSE(str.find_first_of("l"_sv).found());
-    }
+    CHECK(str.find_first_of("t"_sv) == 0);
+    CHECK(str.find_first_of("g"_sv) == 10);
+    CHECK(str.find_first_of("s ing"_sv) == 2);
+    CHECK_FALSE(str.find_first_of(""_sv).found());
+    CHECK_FALSE(str.find_first_of("l"_sv).found());
 }
 
 TEST_CASE("find_last_of", "[string_view]") {
     const bs::string_view str = "test string"_sv;
 
-    SECTION("character") {
-        CHECK(str.find_last_of('t').index() == 6);
-        CHECK(str.find_last_of('g').index() == 10);
-        CHECK(str.find_last_of(' ').index() == 4);
-    }
-    SECTION("string") {
-        CHECK(str.find_last_of("t"_sv) == 6);
-        CHECK(str.find_last_of("g"_sv) == 10);
-        CHECK(str.find_last_of("hei"_sv) == 8);
-        CHECK(str.find_last_of(""_sv).ptr_or_null() == nullptr);
-        CHECK(str.find_last_of("a"_sv).ptr_or_end() == str.data() + str.size());
-    }
+
+    CHECK(str.find_last_of("t"_sv) == 6);
+    CHECK(str.find_last_of("g"_sv) == 10);
+    CHECK(str.find_last_of("hei"_sv) == 8);
+    CHECK(str.find_last_of(""_sv).ptr_or_null() == nullptr);
+    CHECK(str.find_last_of("a"_sv).ptr_or_end() == str.data() - 1);
+    CHECK(str.find_last_of(" ").index_or(10) == 4);
+    CHECK(str.find_last_of("y").index_or(5) == 5);
+    CHECK(str.find_last_of("ten ").ptr_or(str.data() + 5) == str.data() + 9);
+    CHECK(str.find_last_of("xqqq").ptr_or(str.data() - 1) == str.data() - 1);
 }
 
 TEST_CASE("strip_first", "[string_view]") {
@@ -445,15 +513,119 @@ TEST_CASE("none_of", "[string_view]") {
 
 TEST_CASE("find_first_not_of", "[string_view]") {
     const bs::string_view str = "test string";
-    CHECK(str.find_first_not_of('t') == 1);
-    CHECK(str.find_first_not_of('e') == 0);
-    CHECK_FALSE(""_sv.find_first_not_of('a').found());
 
     CHECK(str.find_first_not_of("test") == 4);
     CHECK(str.find_first_not_of("tes") == 4);
     CHECK(str.find_first_not_of("tes ") == 7);
     CHECK(str.find_first_not_of("").found());
     CHECK_FALSE(""_sv.find_first_not_of("daksdh,aw").found());
+}
+
+TEST_CASE("find_last_not_of", "[string_view]") {
+    const bs::string_view str = "hello worldddd";
+
+    CHECK(str.find_last_not_of("dddd") == 9);
+    CHECK(str.find_last_not_of("dlorw") == 5);
+    CHECK(str.find_last_not_of("").found());
+    CHECK_FALSE(""_sv.find_first_not_of("4q34jtk").found());
+}
+
+TEST_CASE("contains_any_of", "[string_view]") {
+    CHECK("hello world"_sv.contains_any_of("xyz") == false);
+    CHECK("test string"_sv.contains_any_of("toql") == true);
+    CHECK("test string"_sv.contains_any_of("test string") == true);
+    CHECK("test string"_sv.contains_any_of("e") == true);
+    CHECK("test string"_sv.contains_any_of("") == false);
+}
+
+TEST_CASE("rcontains", "[string_view]") {
+    CHECK("test string"_sv.rcontains(' ') == true);
+    CHECK("test string"_sv.rcontains(" ") == true);
+    CHECK("test string"_sv.rcontains('z') == false);
+    CHECK("test string"_sv.rcontains("x") == false);
+}
+
+TEST_CASE("rcontains_any_of", "[string_view]") {
+    CHECK("test string"_sv.rcontains_any_of("aaaabbbbb") == false);
+    CHECK("test string"_sv.rcontains_any_of("ndwqh,mdbfj as") == true);
+    CHECK("test string"_sv.rcontains_any_of("") == false);
+}
+
+TEST_CASE("count_any_of", "[string_view]") {
+    CHECK("test str"_sv.count_any_of("t e") == 5);
+    CHECK("test str"_sv.count_any_of("") == 0);
+    CHECK("test str"_sv.count_any_of("t") == 3);
+    CHECK("test str"_sv.count_any_of("xyz") == 0);
+    CHECK("test str"_sv.count_any_of("re") == 2);
+}
+
+TEST_CASE("find_not", "[string_view]") {
+    SECTION("character") {
+        const bs::string_view str = "sample string";
+        CHECK(str.find_not('s') == 1);
+        CHECK(str.find_not('a') == 0);
+        CHECK(str.find_not('s', size_t(0)) == 1);
+        CHECK(str.find_not('s', 1) == 1);
+        CHECK(str.find_not('s', 7) == 8);
+
+        CHECK(str.find_not('s', str.data() + 0) == 1);
+        CHECK(str.find_not('s', str.data() + 1) == 1);
+        CHECK(str.find_not('s', str.data() + 7) == 8);
+        CHECK(str.find_not('s', str.data() + 8) == 8);
+    }
+    SECTION("string") {
+        const bs::string_view str = "test string";
+        CHECK(str.find_not("test") == 1);
+        CHECK(str.find_not("test2") == 0);
+        CHECK(str.find_not("t") == 1);
+        CHECK(str.find_not("test", size_t(0)) == 1);
+        CHECK(str.find_not("test", 1) == 1);
+        CHECK(str.find_not("str", 5) == 6);
+        CHECK(str.find_not("str", 4) == 4);
+        CHECK(str.find_not("str", 6) == 6);
+
+        CHECK(str.find_not("test", str.data()) == 1);
+        CHECK(str.find_not("test", str.data() + 1) == 1);
+    }
+}
+
+TEST_CASE("rfind_not", "[string_view]") {
+    SECTION("character") {
+        const bs::string_view str = "sample test string";
+        CHECK(str.rfind_not('g') == 16);
+        CHECK(str.rfind_not('n') == 17);
+        CHECK(str.rfind_not('g', str.size()) == 16);
+        CHECK(str.rfind_not('n', str.size()) == 17);
+        CHECK(str.rfind_not('t', 10) == 9);
+        CHECK(str.rfind_not('t', 9) == 8);
+
+        CHECK(str.rfind_not('g', str.data() + str.size()) == 16);
+        CHECK(str.rfind_not('n', str.data() + str.size()) == 17);
+    }
+    SECTION("string") {
+        const bs::string_view str = "test string";
+        CHECK(str.rfind_not("string") == 4);
+        CHECK(str.rfind_not("string2") == 4);
+        CHECK(str.rfind_not("string", str.size()) == 4);
+        CHECK(str.rfind_not("string2", str.size()) == 4);
+
+        CHECK(str.rfind_not("string", str.data() + str.size()) == 4);
+        CHECK(str.rfind_not("string2", str.data() + str.size()) == 4);
+    }
+}
+
+TEST_CASE("bs::string_view type properties", "[string_view]") {
+    CHECK(std::is_trivially_copy_constructible_v<bs::string_view>);
+    CHECK(std::is_trivially_move_constructible_v<bs::string_view>);
+    CHECK(std::is_trivially_copy_assignable_v<bs::string_view>);
+    CHECK(std::is_trivially_move_assignable_v<bs::string_view>);
+    CHECK(std::is_trivially_destructible_v<bs::string_view>);
+    CHECK(std::is_standard_layout_v<bs::string_view>);
+
+    CHECK_FALSE(std::is_polymorphic_v<bs::string_view>);
+    CHECK_FALSE(std::is_abstract_v<bs::string_view>);
+    CHECK_FALSE(std::is_final_v<bs::string_view>);
+    CHECK_FALSE(std::has_virtual_destructor_v<bs::string_view>);
 }
 
 }

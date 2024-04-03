@@ -1,9 +1,15 @@
+
+// Copyright 2024.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
+
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_tostring.hpp>
 
 #include <array>
 #include <sstream>
 #include <iomanip>
+
 #include <betterstring/string.hpp>
 
 namespace Catch {
@@ -15,9 +21,9 @@ namespace Catch {
     };
 }
 
-using namespace bs::literals;
-
 namespace {
+
+using namespace bs::literals;
 
 TEST_CASE("constructor", "[string]") {
     SECTION("default") {
@@ -75,19 +81,24 @@ TEST_CASE("constructor", "[string]") {
         CHECK(str2 == "long long long long long long long string");
     }
     SECTION("transfer ownership") {
-        char* const str_arr1 = new char[5];
+        using alloc_t = typename bs::string::allocator_type;
+        using alloc_traits = std::allocator_traits<alloc_t>;
+
+        alloc_t alloc{};
+
+        char* const str_arr1 = alloc_traits::allocate(alloc, 5);
         auto str = bs::string::transfer_ownership(str_arr1, 5);
         CHECK(str == "");
         str = "test";
         CHECK(str == "test");
 
-        char* const str_arr2 = new char[50];
+        char* const str_arr2 = alloc_traits::allocate(alloc, 50);
         str = bs::string::transfer_ownership(str_arr2, 50);
         CHECK(str == "");
         str = "long long long long long long long";
         CHECK(str == "long long long long long long long");
 
-        char* const str_arr3 = new char[40];
+        char* const str_arr3 = alloc_traits::allocate(alloc, 40);
         bs::strcopy(str_arr3, "hello world", 11);
         str = bs::string::transfer_ownership(str_arr3, 11, 40);
         CHECK(str == "hello world");
@@ -298,9 +309,19 @@ TEST_CASE(".at", "[string]") {
     CHECK(str.at(-2) == 'n');
     CHECK(str.at(str.size() - 1) == 'g');
 
+    CHECK(&(*str.at(0)).get() == &str[0]);
+
     CHECK_FALSE(str.at(3128) == 'a');
     CHECK_FALSE(str.at(-123).has_value());
     CHECK_FALSE(str.at(str.size()) == 'g');
+
+    *str.at(0) = 'a';
+    CHECK(str.at(0) == 'a');
+
+    str.at(5).value_or(str[4]) = 'x';
+    CHECK(str.at(5) == 'x');
+    str.at(11).value_or(str[4]) = 'x';
+    CHECK(str.at(4) == 'x');
 }
 
 TEST_CASE(".at_front", "[string]") {
@@ -308,6 +329,9 @@ TEST_CASE(".at_front", "[string]") {
     CHECK(str.at_front() == 't');
     str = "123"_sv;
     CHECK(str.at_front() == '1');
+
+    str.at_front().value_or(str[1]) = 'x';
+    CHECK(str.at(0) == 'x');
 
     str.clear();
     CHECK_FALSE(str.at_front().has_value());
@@ -431,6 +455,16 @@ TEST_CASE(".ends_with", "[string]") {
     CHECK_FALSE(empty_str.ends_with('a'));
     CHECK_FALSE(empty_str.ends_with("b"));
     CHECK_FALSE(empty_str.ends_with("b2"));
+}
+
+TEST_CASE("alignment check", "[string]") {
+    constexpr std::size_t required_alignment = bs::string::traits_type::string_container_alignment;
+
+    bs::string str;
+    for (std::size_t i = 0; i < 50; ++i) {
+        str.push_back(char(i * 7));
+        CHECK(std::uintptr_t(str.data()) % required_alignment == 0);
+    }
 }
 
 }

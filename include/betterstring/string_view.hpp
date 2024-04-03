@@ -1,3 +1,8 @@
+
+// Copyright 2024.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
+
 #pragma once
 
 #include <iterator>
@@ -9,6 +14,7 @@
 
 #include <betterstring/detail/preprocessor.hpp>
 #include <betterstring/detail/integer_cmps.hpp>
+#include <betterstring/detail/ranges_traits.hpp>
 #include <betterstring/functions.hpp>
 #include <betterstring/splited_string.hpp>
 #include <betterstring/char_traits.hpp>
@@ -23,28 +29,6 @@
 namespace bs
 {
 
-namespace detail {
-    template<class T>
-    class char_bitmap {
-    public:
-        constexpr bool mark(const T* first, const T* const last) noexcept {
-            BS_VERIFY(first != nullptr && last != nullptr, "first or last is null pointer");
-            for (; first != last; ++first) {
-                const auto ch = static_cast<unsigned char>(*first);
-                if constexpr (sizeof(T) != 1) if (ch >= 256) return false;
-                matches[ch] = true;
-            }
-            return true;
-        }
-        constexpr bool match(const T ch) const noexcept {
-            return matches[static_cast<unsigned char>(ch)];
-        }
-
-    private:
-        bool matches[256] = {};
-    };
-}
-
 struct slice {
     using index_type = std::ptrdiff_t;
 
@@ -57,7 +41,7 @@ struct slice {
     index_type stop;
 };
 
-template<class Traits = char_traits<char>>
+template<class Traits>
 class string_viewt {
 public:
     using traits_type            = Traits;
@@ -74,8 +58,8 @@ public:
     using difference_type        = typename Traits::difference_type;
 
 private:
-    using signed_size_type = std::make_signed_t<size_type>;
-    using self_find_result = bs::find_result<const value_type>;
+    using find_res = bs::find_result<const value_type, size_type>;
+    using sfind_res = bs::find_result<const value_type, std::make_signed_t<size_type>>;
 public:
 
     constexpr string_viewt() noexcept : string_data(nullptr), string_size(0) {}
@@ -100,7 +84,20 @@ public:
         : string_data(detail::to_address(first))
         , string_size(static_cast<size_type>(last - first)) {}
 
-    constexpr string_viewt(std::nullptr_t) = delete;
+    template<class Range, std::enable_if_t<
+        !std::is_same_v<detail::remove_cvref_t<Range>, string_viewt>
+        && !std::is_convertible_v<Range, const value_type*>
+        && !detail::has_conversion_operator<detail::remove_cvref_t<Range>&, string_viewt>
+        && detail::ranges::is_contiguous_range<Range>
+    , int> = 0>
+    constexpr string_viewt(BS_LIFETIMEBOUND Range&& range) noexcept(noexcept(detail::ranges::data(range), detail::ranges::size(range)))
+        : string_data{detail::ranges::data(range)}
+        , string_size{detail::ranges::size(range)} {}
+
+    [[nodiscard]] static constexpr string_viewt from_c_string(const const_pointer c_str) noexcept {
+        BS_VERIFY(c_str != nullptr, "c_str is null pointer");
+        return string_viewt{c_str, traits_type::length(c_str)};
+    }
 
     constexpr string_viewt& operator=(const string_viewt&) noexcept = default;
 
@@ -121,7 +118,7 @@ public:
     template<class Int, std::enable_if_t<std::is_integral_v<Int>, int> = 0>
     constexpr const_reference operator[](const Int index) const noexcept {
         BS_VERIFY((index + Int(size())) >= 0 && index < Int(size()), "index is out of range");
-        return data()[index < 0 ? index + size() : index];
+        return data()[index < 0 ? index + Int(size()) : index];
     }
 
     constexpr const_reference front() const noexcept {
@@ -137,6 +134,7 @@ public:
     BS_CONST_FN constexpr const_pointer data_end() const noexcept { return data() + size(); }
 
     BS_CONST_FN constexpr size_type size() const noexcept { return string_size; }
+    constexpr size_type size_bytes() const noexcept { return string_size * sizeof(value_type); }
     BS_CONST_FN constexpr size_type length() const noexcept { return size(); }
 
     BS_CONST_FN constexpr size_type max_size() const noexcept { return static_cast<size_type>(-1); }
@@ -163,8 +161,8 @@ public:
     constexpr string_viewt operator()(const Int1 start, const Int2 finish) const noexcept {
         BS_VERIFY((start + Int1(size())) >= 0 && start <= Int1(size()), "start index is out of range");
         BS_VERIFY((finish + Int2(size())) >= 0 && finish <= Int2(size()), "finish index is out of range");
-        const size_type start_index = start < 0 ? start + size() : start;
-        const size_type finish_index = finish < 0 ? finish + size() : finish;
+        const size_type start_index = start < 0 ? start + Int1(size()) : start;
+        const size_type finish_index = finish < 0 ? finish + Int2(size()) : finish;
         return string_viewt{data() + start_index, finish_index - start_index};
     }
     template<class Int1, class SliceEnd = slice_end_tag, std::enable_if_t<
@@ -172,7 +170,7 @@ public:
     , int> = 0>
     constexpr string_viewt operator()(const Int1 start, const SliceEnd) const noexcept {
         BS_VERIFY((start + Int1(size())) >= 0 && start <= Int1(size()), "start index is out of range");
-        const size_type start_index = start < 0 ? start + size() : start;
+        const size_type start_index = start < 0 ? start + Int1(size()) : start;
         return string_viewt{data() + start_index, size() - start_index};
     }
     constexpr string_viewt operator[](const bs::slice slice) const noexcept {
@@ -194,7 +192,7 @@ public:
     }
 
     constexpr bool starts_with(const string_viewt str) const noexcept {
-        if (size() < str.size()) return false;
+        if (size() < str.size()) { return false; }
         return traits_type::compare(data(), str.data(), str.size()) == 0;
     }
     constexpr bool starts_with(const value_type ch) const noexcept {
@@ -202,92 +200,116 @@ public:
     }
 
     constexpr bool ends_with(const string_viewt str) const noexcept {
-        if (size() < str.size()) return false;
+        if (size() < str.size()) { return false; }
         return traits_type::compare(data() + (size() - str.size()), str.data(), str.size()) == 0;
     }
     constexpr bool ends_with(const value_type ch) const noexcept {
         return !empty() && traits_type::eq(back(), ch);
     }
 
-    constexpr self_find_result find(const value_type ch) const noexcept {
+    constexpr find_res find(const value_type ch) const noexcept {
         return { data(), size(), traits_type::find(data(), size(), ch) };
     }
-    constexpr self_find_result find(const string_viewt str) const noexcept {
+    constexpr find_res find(const string_viewt str) const noexcept {
         return { data(), size(), traits_type::findstr(data(), size(), str.data(), str.size()) };
     }
-    constexpr self_find_result find(const value_type ch, const size_type start) const noexcept {
+    constexpr find_res find(const value_type ch, const size_type start) const noexcept {
         BS_VERIFY(start <= size(), "start is out of range");
         return { data(), size(), traits_type::find(data() + start, size() - start, ch) };
     }
-    constexpr self_find_result find(const string_viewt str, const size_type start) const noexcept {
+    constexpr find_res find(const string_viewt str, const size_type start) const noexcept {
         BS_VERIFY(start <= size(), "start is out of range");
         return { data(), size(), traits_type::findstr(data() + start, size() - start, str.data(), str.size()) };
     }
-    constexpr self_find_result find(const value_type ch, const const_pointer start) const noexcept {
+    constexpr find_res find(const value_type ch, const const_pointer start) const noexcept {
         BS_VERIFY(start >= data() && start <= data_end(), "start is out of range");
         return { data(), size(), traits_type::find(start, size() - (start - data()), ch) };
     }
-    constexpr self_find_result find(const string_viewt str, const const_pointer start) const noexcept {
+    constexpr find_res find(const string_viewt str, const const_pointer start) const noexcept {
         BS_VERIFY(start >= data() && start <= data_end(), "start is out of range");
         return { data(), size(), traits_type::findstr(start, size() - (start - data()), str.data(), str.size()) };
     }
 
-    constexpr self_find_result rfind(const value_type ch) const noexcept {
-        return { data(), 0, traits_type::rfind(data(), size(), ch), };
+    constexpr sfind_res rfind(const value_type ch) const noexcept {
+        return { data(), -1, traits_type::rfind(data(), size(), ch),};
     }
-    constexpr self_find_result rfind(const string_viewt str) const noexcept {
-        return { data(), 0, traits_type::rfindstr(data(), size(), str.data(), str.size()) };
+    constexpr sfind_res rfind(const string_viewt str) const noexcept {
+        return { data(), -1, traits_type::rfindstr(data(), size(), str.data(), str.size()) };
     }
-    constexpr self_find_result rfind(const value_type ch, const size_type start) const noexcept {
+    constexpr sfind_res rfind(const value_type ch, const size_type start) const noexcept {
         BS_VERIFY(start <= size(), "start is out of range");
-        return { data(), 0, traits_type::rfind(data(), start, ch) };
+        return { data(), -1, traits_type::rfind(data(), start, ch) };
     }
-    constexpr self_find_result rfind(const string_viewt str, const size_type start) const noexcept {
+    constexpr sfind_res rfind(const string_viewt str, const size_type start) const noexcept {
         BS_VERIFY(start <= size(), "start is out of range");
-        return { data(), 0, traits_type::rfindstr(data(), start, str.data(), str.size()) };
+        return { data(), -1, traits_type::rfindstr(data(), start, str.data(), str.size()) };
     }
-    constexpr self_find_result rfind(const value_type ch, const const_pointer start) const noexcept {
+    constexpr sfind_res rfind(const value_type ch, const const_pointer start) const noexcept {
         BS_VERIFY(start >= data() && start <= data_end(), "start is out of range");
-        return { data(), 0, traits_type::rfind(data(), (start - data()), ch) };
+        return { data(), -1, traits_type::rfind(data(), (start - data()), ch) };
     }
-    constexpr self_find_result rfind(const string_viewt str, const const_pointer start) const noexcept {
+    constexpr sfind_res rfind(const string_viewt str, const const_pointer start) const noexcept {
         BS_VERIFY(start >= data() && start <= data_end(), "start is out of range");
-        return { data(), 0, traits_type::rfindstr(start, (start - data()), str.data(), str.size()) };
+        return { data(), -1, traits_type::rfindstr(data(), (start - data()), str.data(), str.size())};
     }
 
-    constexpr self_find_result find_first_of(const value_type ch) const noexcept {
-        return this->find(ch);
-    }
-    constexpr self_find_result find_first_of(const string_viewt str) const noexcept {
-        return { data(), size(), traits_type::first_of(data(), size(), str.data(), str.size()) };
-    }
-
-    constexpr self_find_result find_last_of(const value_type ch) const noexcept {
-        return this->rfind(ch);
-    }
-    constexpr self_find_result find_last_of(const string_viewt str) const noexcept {
-        detail::char_bitmap<value_type> bitmap;
-        if (!bitmap.mark(str.data(), str.data() + str.size())) {
-            for (auto match_try = data() + size() - 1; match_try != data() - 1; --match_try) {
-                if (traits_type::find(str.data(), str.size(), *match_try) != nullptr) {
-                    return { data(), size(), match_try };
-                }
-            }
-            return { data(), size(), nullptr };
-        }
-        for (size_type i = size(); i != 0; --i) {
-            if (bitmap.match(data()[i - 1])) {
-                return { data(), size(), data() + i - 1 };
-            }
-        }
-        return { data(), size(), nullptr };
-    }
-
-    constexpr self_find_result find_first_not_of(const value_type ch) const noexcept {
+    constexpr find_res find_not(const value_type ch) const noexcept {
         return { data(), size(), traits_type::find_not(data(), size(), ch) };
     }
-    constexpr self_find_result find_first_not_of(const string_viewt str) const noexcept {
+    constexpr find_res find_not(const string_viewt str) const noexcept {
+        return { data(), size(), traits_type::findstr_not(data(), size(), str.data(), str.size()) };
+    }
+    constexpr find_res find_not(const value_type ch, const size_type start) const noexcept {
+        BS_VERIFY(start <= size(), "start is out of range");
+        return { data(), size(), traits_type::find_not(data() + start, size() - start, ch) };
+    }
+    constexpr find_res find_not(const string_viewt str, const size_type start) const noexcept {
+        BS_VERIFY(start <= size(), "start is out of range");
+        return { data(), size(), traits_type::findstr_not(data() + start, size() - start, str.data(), str.size()) };
+    }
+    constexpr find_res find_not(const value_type ch, const const_pointer start) const noexcept {
+        BS_VERIFY(start >= data() && start <= data_end(), "start is out of range");
+        return { data(), size(), traits_type::find_not(start, size() - (start - data()), ch) };
+    }
+    constexpr find_res find_not(const string_viewt str, const const_pointer start) const noexcept {
+        BS_VERIFY(start >= data() && start <= data_end(), "start is out of range");
+        return { data(), size(), traits_type::findstr_not(start, size() - (start - data()), str.data(), str.size()) };
+    }
+
+    constexpr sfind_res rfind_not(const value_type ch) const noexcept {
+        return { data(), -1, traits_type::rfind_not(data(), size(), ch),};
+    }
+    constexpr sfind_res rfind_not(const string_viewt str) const noexcept {
+        return { data(), -1, traits_type::rfindstr_not(data(), size(), str.data(), str.size()) };
+    }
+    constexpr sfind_res rfind_not(const value_type ch, const size_type start) const noexcept {
+        BS_VERIFY(start <= size(), "start is out of range");
+        return { data(), -1, traits_type::rfind_not(data(), start, ch) };
+    }
+    constexpr sfind_res rfind_not(const string_viewt str, const size_type start) const noexcept {
+        BS_VERIFY(start <= size(), "start is out of range");
+        return { data(), -1, traits_type::rfindstr_not(data(), start, str.data(), str.size()) };
+    }
+    constexpr sfind_res rfind_not(const value_type ch, const const_pointer start) const noexcept {
+        BS_VERIFY(start >= data() && start <= data_end(), "start is out of range");
+        return { data(), -1, traits_type::rfind_not(data(), (start - data()), ch) };
+    }
+    constexpr sfind_res rfind_not(const string_viewt str, const const_pointer start) const noexcept {
+        BS_VERIFY(start >= data() && start <= data_end(), "start is out of range");
+        return { data(), -1, traits_type::rfindstr_not(data(), (start - data()), str.data(), str.size())};
+    }
+
+    constexpr find_res find_first_of(const string_viewt str) const noexcept {
+        return { data(), size(), traits_type::first_of(data(), size(), str.data(), str.size()) };
+    }
+    constexpr sfind_res find_last_of(const string_viewt str) const noexcept {
+        return { data(), -1, traits_type::last_of(data(), size(), str.data(), str.size()) };
+    }
+    constexpr find_res find_first_not_of(const string_viewt str) const noexcept {
         return { data(), size(), traits_type::first_not_of(data(), size(), str.data(), str.size()) };
+    }
+    constexpr sfind_res find_last_not_of(const string_viewt str) const noexcept {
+        return { data(), -1, traits_type::last_not_of(data(), size(), str.data(), str.size()) };
     }
 
     constexpr bool contains(const value_type ch) const noexcept {
@@ -296,6 +318,19 @@ public:
     constexpr bool contains(const string_viewt str) const noexcept {
         return traits_type::findstr(data(), size(), str.data(), str.size()) != nullptr;
     }
+    constexpr bool contains_any_of(const string_viewt chs) const noexcept {
+        return traits_type::first_of(data(), size(), chs.data(), chs.size()) != nullptr;
+    }
+
+    constexpr bool rcontains(const value_type ch) const noexcept {
+        return traits_type::rfind(data(), size(), ch) != nullptr;
+    }
+    constexpr bool rcontains(const string_viewt str) const noexcept {
+        return traits_type::rfindstr(data(), size(), str.data(), str.size()) != nullptr;
+    }
+    constexpr bool rcontains_any_of(const string_viewt chs) const noexcept {
+        return traits_type::last_of(data(), size(), chs.data(), chs.size()) != nullptr;
+    }
 
     constexpr splited_string<string_viewt, string_viewt> split(const string_viewt separator) const noexcept {
         return splited_string<string_viewt, string_viewt>(*this, separator);
@@ -303,127 +338,74 @@ public:
     constexpr splited_string<string_viewt, value_type> split(const value_type character) const noexcept {
         return splited_string<string_viewt, value_type>(*this, character);
     }
+    constexpr reverse_splited_string<string_viewt, string_viewt> rsplit(const string_viewt separator) const noexcept {
+        return reverse_splited_string<string_viewt, string_viewt>{*this, separator};
+    }
+    constexpr reverse_splited_string<string_viewt, value_type> rsplit(const value_type separator) const noexcept {
+        return reverse_splited_string<string_viewt, value_type>{*this, separator};
+    }
 
     constexpr size_type count(const value_type ch) const noexcept {
         return traits_type::count(data(), size(), ch);
     }
     constexpr size_type count(const string_viewt str) const noexcept {
-        if (str.empty()) return this->size() + 1;
-
-        size_type result = 0;
-        const auto match_end = data() + size();
-        for (auto match_try = data();; ++match_try) {
-            match_try = traits_type::findstr(match_try, static_cast<size_type>(match_end - match_try), str.data(), str.size());
-            if (match_try == nullptr) return result;
-            ++result;
-        }
-        BS_UNREACHABLE();
+        return traits_type::countstr(data(), size(), str.data(), str.size());
+    }
+    constexpr size_type count_any_of(const string_viewt chs) const noexcept {
+        return traits_type::count_any_of(data(), size(), chs.data(), chs.size());
     }
 
-private:
-    template<class Fn>
-    constexpr string_viewt strip_impl(Fn match_fn) const noexcept {
-        const auto* left_it = data();
-        for (;; ++left_it) {
-            if (left_it == data() + size() || !match_fn(*left_it)) break;
-        }
-        const auto* right_it = data() + size() - 1;
-        if (left_it != data() + size()) {
-            for (;; --right_it) {
-                if (!match_fn(*right_it) || right_it == left_it) break;
-            }
-        }
-        return string_viewt{left_it, right_it + 1};
+    constexpr string_viewt strip(const value_type ch) const noexcept {
+        const auto first = traits_type::find_not(data(), size(), ch);
+        if (first == nullptr) { return string_viewt{}; }
+        const auto last = traits_type::rfind_not(data(), size(), ch);
+        BS_ASSUME(last != nullptr);
+        return string_viewt{first, last + 1};
     }
-    template<class Fn>
-    constexpr string_viewt lstrip_impl(Fn match_fn) const noexcept {
-        for (const auto* it = data();; ++it) {
-            if (it == data() + size() || !match_fn(*it)) {
-                return string_viewt{it, data() + size()};
-            }
-        }
-        BS_UNREACHABLE();
-    }
-    template<class Fn>
-    constexpr string_viewt rstrip_impl(Fn match_fn) const noexcept {
-        for (const auto* it = data() + size() - 1;; --it) {
-            if (!match_fn(*it) || it == data()) {
-                return string_viewt(data(), it + 1);
-            }
-        }
-        BS_UNREACHABLE();
-    }
-
-    template<class StripFn>
-    constexpr string_viewt strip_impl2(StripFn strip_fn, const value_type strip_ch) const noexcept {
-        return strip_fn([&](auto ch) { return ch == strip_ch; });
-    }
-    template<class StripFn>
-    constexpr string_viewt strip_impl2(StripFn strip_fn, const string_viewt chs) const noexcept {
-        detail::char_bitmap<value_type> bitmap;
-        bitmap.mark(chs.data(), chs.data() + chs.size());
-        if (!bitmap.mark(chs.data(), chs.data() + chs.size())) {
-            return strip_fn([&](auto ch) {
-                return traits_type::find(chs.data(), chs.size(), ch);
-            });
-        }
-
-        return strip_fn([&](auto ch) {
-            return bitmap.match(ch);
-        });
-    }
-    template<class StripFn>
-    constexpr string_viewt strip_impl2(StripFn strip_fn) const noexcept {
-        constexpr string_viewt strip_chs{"\t\n\v\f\r ", 6};
-        detail::char_bitmap<value_type> bitmap;
-
-        if (!bitmap.mark(strip_chs.data(), strip_chs.data() + strip_chs.size())) {
-            BS_UNREACHABLE();
-        }
-
-        return strip_fn([&](auto ch) { return bitmap.match(ch); });
-    }
-
-
-public:
-
-    constexpr string_viewt strip(const value_type strip_ch) const noexcept {
-        return strip_impl2([&](auto f) { return strip_impl(f); }, strip_ch);
-    }
+    BS_FLATTEN
     constexpr string_viewt strip(const string_viewt chs) const noexcept {
-        return strip_impl2([&](auto f) { return strip_impl(f); }, chs);
+        // hopefully the compiler is smart enough to merge two bitmaps into one
+        const auto first = traits_type::first_not_of(data(), size(), chs.data(), chs.size());
+        if (first == nullptr) { return string_viewt{}; }
+        const auto last = traits_type::last_not_of(data(), size(), chs.data(), chs.size());
+        BS_ASSUME(last != nullptr);
+        return string_viewt{first, last + 1};
     }
 
-    constexpr string_viewt lstrip(const value_type strip_ch) const noexcept {
-        return strip_impl2([&](auto f) { return lstrip_impl(f); }, strip_ch);
+    constexpr string_viewt strip_left(const value_type ch) const noexcept {
+        const auto first = traits_type::find_not(data(), size(), ch);
+        return string_viewt{first, data() + size()};
     }
-    constexpr string_viewt lstrip(const string_viewt chs) const noexcept {
-        return strip_impl2([&](auto f) { return lstrip_impl(f); }, chs);
+    constexpr string_viewt strip_left(const string_viewt chs) const noexcept {
+        const auto first = traits_type::first_not_of(data(), size(), chs.data(), chs.size());
+        return string_viewt{first, data() + size()};
     }
 
-    constexpr string_viewt rstrip(const value_type strip_ch) const noexcept {
-        return strip_impl2([&](auto f) { return rstrip_impl(f); }, strip_ch);
+    constexpr string_viewt strip_right(const value_type ch) const noexcept {
+        const auto last = traits_type::rfind_not(data(), size(), ch);
+        return string_viewt{data(), last + 1};
     }
-    constexpr string_viewt rstrip(const string_viewt chs) const noexcept {
-        return strip_impl2([&](auto f) { return rstrip_impl(f); }, chs);
+    constexpr string_viewt strip_right(const string_viewt chs) const noexcept {
+        const auto last = traits_type::last_not_of(data(), size(), chs.data(), chs.size());
+        return string_viewt{data(), last + 1};
     }
 
     constexpr string_viewt strip_first(const value_type ch) const noexcept {
-        if (!starts_with(ch)) return *this;
-        return string_viewt(data() + 1, size() - 1);
+        if (!starts_with(ch)) { return *this; }
+        return string_viewt{data() + 1, size() - 1};
     }
     constexpr string_viewt strip_first(const string_viewt str) const noexcept {
-        if (!starts_with(str)) return *this;
-        return string_viewt(data() + str.size(), size() - str.size());
+        if (!starts_with(str)) { return *this; }
+        return string_viewt{data() + str.size(), size() - str.size()};
     }
 
     constexpr string_viewt strip_last(const value_type ch) const noexcept {
-        if (!ends_with(ch)) return *this;
-        return string_viewt(data(), size() - 1);
+        if (!ends_with(ch)) { return *this; }
+        return string_viewt{data(), size() - 1};
     }
     constexpr string_viewt strip_last(const string_viewt str) const noexcept {
-        if (!ends_with(str)) return *this;
-        return string_viewt(data(), size() - str.size());
+        if (!ends_with(str)) { return *this; }
+        return string_viewt{data(), size() - str.size()};
     }
 
     template<class Predicate>
@@ -454,31 +436,29 @@ public:
         return true;
     }
 
-private:
-    static constexpr int trait_cmp(const string_viewt l, const string_viewt r) noexcept {
-        if (l.size() > r.size()) return 1;
-        if (l.size() < r.size()) return -1;
-        return Traits::compare(l.data(), r.data(), l.size());
+    friend constexpr bool operator==(const string_viewt left, const string_viewt right) noexcept {
+        if (left.size() != right.size()) { return false; }
+        return Traits::compare(left.data(), right.data(), left.size()) == 0;
     }
-public:
-
-    friend constexpr bool operator==(const string_viewt l, const string_viewt r) noexcept {
-        return trait_cmp(l, r) == 0;
+    friend constexpr bool operator!=(const string_viewt left, const string_viewt right) noexcept {
+        if (left.size() != right.size()) { return true; }
+        return Traits::compare(left.data(), right.data(), left.size()) != 0;
     }
-    friend constexpr bool operator!=(const string_viewt l, const string_viewt r) noexcept {
-        return trait_cmp(l, r) != 0;
+    friend constexpr bool operator>(const string_viewt left, const string_viewt right) noexcept {
+        if (left.size() != right.size()) { return left.size() > right.size(); }
+        return Traits::compare(left.data(), right.data(), left.size()) > 0;
     }
-    friend constexpr bool operator>(const string_viewt l, const string_viewt r) noexcept {
-        return trait_cmp(l, r) > 0;
+    friend constexpr bool operator>=(const string_viewt left, const string_viewt right) noexcept {
+        if (left.size() != right.size()) { return left.size() > right.size(); }
+        return Traits::compare(left.data(), right.data(), left.size()) >= 0;
     }
-    friend constexpr bool operator>=(const string_viewt l, const string_viewt r) noexcept {
-        return trait_cmp(l, r) >= 0;
+    friend constexpr bool operator<(const string_viewt left, const string_viewt right) noexcept {
+        if (left.size() != right.size()) { return left.size() < right.size(); }
+        return Traits::compare(left.data(), right.data(), left.size()) < 0;
     }
-    friend constexpr bool operator<(const string_viewt l, const string_viewt r) noexcept {
-        return trait_cmp(l, r) < 0;
-    }
-    friend constexpr bool operator<=(const string_viewt l, const string_viewt r) noexcept {
-        return trait_cmp(l, r) <= 0;
+    friend constexpr bool operator<=(const string_viewt left, const string_viewt right) noexcept {
+        if (left.size() != right.size()) { return left.size() < right.size(); }
+        return Traits::compare(left.data(), right.data(), left.size()) <= 0;
     }
 
 #ifndef BS_DONT_INCLUDE_STRING

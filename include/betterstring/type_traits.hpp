@@ -1,3 +1,8 @@
+
+// Copyright 2024.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
+
 #pragma once
 
 #include <betterstring/detail/preprocessor.hpp>
@@ -72,7 +77,14 @@ namespace detail {
     inline constexpr bool is_input_iterator<T, std::void_t<iterator_category<T>>>
         = std::is_base_of_v<std::input_iterator_tag, iterator_category<T>>;
 
+    template<class From, class To>
+    inline constexpr bool is_qualification_convertible =
+        std::is_constructible_v<From (*)[], To (*)[]>;
 
+    template<class T, class U, class = void>
+    inline constexpr bool has_conversion_operator = false;
+    template<class T, class U>
+    inline constexpr bool has_conversion_operator<T, U, std::void_t<decltype(std::declval<T>().operator U())>> = true;
 
     template<class T>
     struct is_character_impl : std::false_type {};

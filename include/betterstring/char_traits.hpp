@@ -1,3 +1,8 @@
+
+// Copyright 2024.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
+
 #pragma once
 
 #include <betterstring/functions.hpp>
@@ -29,6 +34,8 @@ public:
     using base::eof;
     using base::not_eof;
 #endif
+
+    static constexpr std::size_t string_container_alignment = 32;
 
     static constexpr void assign(char_type& dest, const char_type& src) noexcept {
         dest = src;
@@ -65,21 +72,43 @@ public:
     static constexpr const char_type* findstr(const char_type* const str, const std::size_t count, const char_type* const substr, const std::size_t substr_len) noexcept {
         return bs::strfind(str, count, substr, substr_len);
     }
+    static constexpr const char_type* findstr_not(const char_type* const str, const std::size_t count, const char_type* const needle, const std::size_t needle_len) noexcept {
+        return bs::strfindn(str, count, needle, needle_len);
+    }
+
     static constexpr const char_type* rfind(const char_type* const str, const std::size_t count, const char_type ch) noexcept {
         return bs::strrfind(str, count, ch);
+    }
+    static constexpr const char_type* rfind_not(const char_type* const str, const std::size_t count, const char_type ch) noexcept {
+        return bs::strrfindn(str, count, ch);
     }
     static constexpr const char_type* rfindstr(const char_type* const str, const std::size_t count, const char_type* const substr, const std::size_t substr_len) noexcept {
         return bs::strrfind(str, count, substr, substr_len);
     }
-    static constexpr const char_type* first_of(const char_type* const str, const std::size_t count, const char_type* const needle, const std::size_t needle_len) {
-        return bs::strfirstof(str, count, needle, needle_len);
-    }
-    static constexpr const char_type* first_not_of(const char_type* const str, const std::size_t count, const char_type* const needle, const std::size_t needle_len) {
-        return bs::strfirstnof(str, count, needle, needle_len);
+    static constexpr const char_type* rfindstr_not(const char_type* const str, const std::size_t count, const char_type* const substr, const std::size_t substr_len) noexcept {
+        return bs::strrfindn(str, count, substr, substr_len);
     }
 
+    static constexpr const char_type* first_of(const char_type* const str, const std::size_t count, const char_type* const needle, const std::size_t needle_len) noexcept {
+        return bs::strfirstof(str, count, needle, needle_len);
+    }
+    static constexpr const char_type* first_not_of(const char_type* const str, const std::size_t count, const char_type* const needle, const std::size_t needle_len) noexcept {
+        return bs::strfirstnof(str, count, needle, needle_len);
+    }
+    static constexpr const char_type* last_of(const char_type* const str, const std::size_t count, const char_type* const needle, const std::size_t needle_len) noexcept {
+        return bs::strlastof(str, count, needle, needle_len);
+    }
+    static constexpr const char_type* last_not_of(const char_type* const str, const std::size_t count, const char_type* const needle, const std::size_t needle_len) noexcept {
+        return bs::strlastnof(str, count, needle, needle_len);
+    }
     static constexpr size_type count(const char_type* const str, const size_type str_len, const char_type ch) noexcept {
         return static_cast<size_type>(bs::strcount(str, str_len, ch));
+    }
+    static constexpr size_type countstr(const char_type* const str, const size_type str_len, const char_type* const needle, const size_type needle_len) noexcept {
+        return static_cast<size_type>(bs::strcount(str, str_len, needle, needle_len));
+    }
+    static constexpr size_type count_any_of(const char_type* const str, const size_type str_len, const char_type* const needle, const size_type needle_len) noexcept {
+        return static_cast<size_type>(bs::strcountanyof(str, str_len, needle, needle_len));
     }
 };
 

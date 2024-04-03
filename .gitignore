@@ -6,6 +6,7 @@
 !.clang-tidy
 !CMakeLists.txt
 !CMakePresets.json
+!LICENSE_1_0.txt
 !include/
 !src/
 !test/

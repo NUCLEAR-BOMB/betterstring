@@ -9,12 +9,21 @@ add_executable(betterstring-test
     "ascii.cpp"
     "parsing.cpp"
     "string.cpp"
-    "cpu_dispatch.cpp"
+    "allocators.cpp"
+
+    "main.cpp"
 
     "util.hpp"
 )
 target_add_warnings(betterstring-test)
 target_link_libraries(betterstring-test PRIVATE betterstring)
+set_target_properties(betterstring-test PROPERTIES UNITY_BUILD FALSE)
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(betterstring-test PRIVATE
+        /Zc:inline /RTCs /RTCu
+    )
+endif()
 
 include(FetchContent)
 FetchContent_Declare(
@@ -27,21 +36,40 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2)
 
 target_compile_features(Catch2 PRIVATE cxx_std_17)
-target_link_libraries(betterstring-test PRIVATE Catch2::Catch2WithMain)
-set_target_properties(Catch2 PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:Catch2,INTERFACE_INCLUDE_DIRECTORIES>)
+target_link_libraries(betterstring-test PRIVATE Catch2::Catch2)
+set_target_properties(Catch2 PROPERTIES
+    INTERFACE_SYSTEM_INCLUDE_DIRECTORIES $<TARGET_PROPERTY:Catch2::Catch2,INTERFACE_INCLUDE_DIRECTORIES>
+)
 
 target_compile_definitions(betterstring-test PRIVATE CATCH_CONFIG_FAST_COMPILE)
 
-if (DEFINED catch2_SOURCE_DIR)
-    list(APPEND CMAKE_MODULE_PATH "${catch2_SOURCE_DIR}/extras")
+if (PRINT_STACKTRACE)
+    include(FetchContent)
+    FetchContent_Declare(
+        libassert
+        GIT_REPOSITORY https://github.com/jeremy-rifkin/libassert.git
+        GIT_TAG        v2.0.0
+    )
+    FetchContent_MakeAvailable(libassert)
+    target_link_libraries(betterstring-test PRIVATE libassert::assert)
+    target_suppress_warnings(libassert::assert)
+    get_target_name(libassert_name libassert::assert)
+
+    if (CMAKE_SYSTEM_NAME MATCHES "Windows")
+        add_custom_command(TARGET betterstring-test POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different $<TARGET_FILE:libassert::assert> $<TARGET_FILE_DIR:betterstring-test>
+        )
+    endif()
+    set(libassert_target libassert::assert)
 endif()
-include(CTest)
-include(Catch)
-catch_discover_tests(betterstring-test)
+
+set_target_properties(${libassert_name} Catch2 PROPERTIES FOLDER "external/")
 
 if (USE_SANITIZERS)
     include("${PROJECT_SOURCE_DIR}/cmake/sanitizers.cmake")
-    target_add_sanitizer(betterstring-test SANITIZERS Address UndefinedBehavior LIBRARIES Catch2 Catch2WithMain)
+    target_add_sanitizer(betterstring-test SANITIZERS Address Undefined
+        LIBRARIES Catch2::Catch2 ${libassert_target}
+    )
 endif()
 
 if (USE_CLANG_TIDY)
@@ -54,7 +82,10 @@ if (USE_CLANG_TIDY)
     )
 endif()
 
+set_target_properties(betterstring-test PROPERTIES
+    VS_DEBUGGER_ENVIRONMENT "UBSAN_OPTIONS=print_stacktrace=1 ASAN_OPTIONS=detect_odr_violation=0"
+)
 add_custom_target(run-betterstring-test VERBATIM
-    COMMAND "$<TARGET_FILE:betterstring-test>"
+    COMMAND "${CMAKE_COMMAND}" -E env "UBSAN_OPTIONS=print_stacktrace=1" "ASAN_OPTIONS=detect_odr_violation=0" "$<TARGET_FILE:betterstring-test>"
 )
 # dependency will be added automatically

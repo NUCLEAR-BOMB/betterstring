@@ -7,6 +7,15 @@
 
 #include "../util.hpp"
 
+static std::vector<uint64_t> generate_length_sequence(uint64_t max_pow2) {
+    std::vector<uint64_t> out;
+    for (std::size_t i = 1; i <= max_pow2; ++i) {
+        out.emplace_back(((1 << i) + (1 << (i - 1))) / 2);
+        out.emplace_back(1 << i);
+    }
+    return out;
+}
+
 ADD_BENCHMARK("strrfind_ch") {
     bench.title("bs::strrfind (character)");
 
@@ -54,19 +63,24 @@ ADD_BENCHMARK("strrfind_ch_aligned") {
 
 ADD_BENCHMARK("strcount_ch") {
     bench.title("bs::strcount (character)");
+    using ankerl::nanobench::Rng;
 
-    std::vector<char> homogeneous_string(1 << 21, 'a');
-    for (std::size_t i = 0; i <= 21; ++i) {
-        const std::size_t string_len = 1 << i;
-        if (string_len > homogeneous_string.size()) { throw std::logic_error("Sample length exceeds allocated capacity"); }
+    const std::size_t full_string_len = 1 << 21;
+    char* const string = new char[full_string_len];
+    std::generate_n(string, full_string_len, [rng = Rng{}]() mutable -> char { return rng(); });
 
+    const char count_for = Rng{}();
+
+    const std::vector<uint64_t> string_lengths_sequence = generate_length_sequence(21);
+    for (auto [string_len, index] : enumerate{string_lengths_sequence}) {
         bench.context("length", fmt::format("{}", string_len));
-        bench.run(fmt::format("length {}", string_len), [&]() {
-            std::size_t result = bs::strcount(homogeneous_string.data(), string_len, 'a');
-            // std::size_t result = std::count(homogeneous_string.data(), homogeneous_string.data() + string_len, 'a');
+        bench.run(fmt::format("length {} ({}/{})", string_len, index + 1, string_lengths_sequence.size()), [&]() {
+            std::size_t result = bs::strcount(string, string_len, count_for);
             bench.doNotOptimizeAway(result);
         });
     }
+
+    delete[] string;
 }
 
 #if BS_COMP_MSVC
@@ -153,7 +167,7 @@ ADD_BENCHMARK("strfirstof") {
         return;
     }
 
-    bench.title(fmt::format("bs::strfirst_of (seq length={})", char_seq_len.value()));
+    bench.title(fmt::format("bs::strfirstof (seq length={})", char_seq_len.value()));
 
     std::vector<char> string(1 << 21, 'X');
 
@@ -169,10 +183,42 @@ ADD_BENCHMARK("strfirstof") {
     for (std::size_t i = 0; i <= 21; ++i) {
         const std::size_t string_len = 1 << i;
 
-        string[string_len - 1] = 'Y';
+        string[string_len - 1] = char_seq[0];
         bench.context("length", fmt::format("{}", string_len));
         bench.run(fmt::format("length {}", string_len), [&]() {
             char* result = bs::strfirstof(string.data(), string_len, char_seq.data(), char_seq.size());
+            bench.doNotOptimizeAway(result);
+        });
+        string[string_len - 1] = 'X';
+    }
+}
+
+ADD_BENCHMARK("strfirstnof") {
+using ankerl::nanobench::Rng;
+    if (args.size() == 0) {
+        fmt::println("pass the character sequence length argument (first)");
+        return;
+    }
+    const auto char_seq_len = bs::parse<std::size_t>(args[0].data(), args[0].size());
+    if (char_seq_len.has_error()) {
+        fmt::println("bad number formatting");
+        return;
+    }
+
+    bench.title(fmt::format("bs::strfirstnof (seq length={})", char_seq_len.value()));
+
+    std::vector<char> string(1 << 21, 'X');
+
+    const std::vector<char> char_seq(char_seq_len.value(), 'X');
+
+    const std::vector<uint64_t> string_lengths_sequence = generate_length_sequence(21);
+    // const std::vector<uint64_t> string_lengths_sequence{24, 25, 26, 27, 28, 29, 30, 31, 32};
+    for (auto [string_len, index] : enumerate{string_lengths_sequence}) {
+        string[string_len - 1] = 'Y';
+        bench.context("length", fmt::format("{}", string_len));
+        bench.run(fmt::format("length {} ({}/{})", string_len, index + 1, string_lengths_sequence.size()),
+        [&]() {
+            char* result = bs::strfirstnof(string.data(), string_len, char_seq.data(), char_seq.size());
             bench.doNotOptimizeAway(result);
         });
         string[string_len - 1] = 'X';

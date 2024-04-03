@@ -38,7 +38,7 @@ The `<betterstring/string.hpp>` header provides these type aliases for `bs::stri
 | --------------------- | ---------------------------- |
 | **`value_type`**      | `typename Traits::char_type` |
 | **`size_type`**       | `typename Traits::size_type` |
-| **`allocator_type`**  | `std::allocator<value_type>` |
+| **`allocator_type`**  | unspecified                  |
 | **`pointer`**         | `value_type*`                |
 | **`const_pointer`**   | `const value_type*`          |
 | **`reference`**       | `value_type&`                |

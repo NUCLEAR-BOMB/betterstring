@@ -50,17 +50,6 @@ constexpr T* data(T(&array)[N]) noexcept;
 ```
 Returns `array`.
 
-## `bs::array_size`
-```cpp
-template<class T>
-constexpr auto array_size(const T& x) noexcept;
-```
-Returns length of the array, or, if it is single character returns `1`.
-
-- If `x` is any character, `1` is returned.
-- If `x` has the `.size()` method, returns result of this method.
-- Otherwise makes `static_assert` error.
-
 ## `bs::strlen`
 ```cpp
 template<class T>
@@ -151,6 +140,13 @@ If there is no character in this range, `nullptr` is returned.
 
 Supports fast implementation only for `char` type with processors having AVX2 and BMI2 processor extensions.
 
+Recommended preconditions[^1]:
+- Alignment of `str` to a multiple of 32 (i.e. `uintptr(str) % 32 == 0`)
+- `count` < 32
+- 32 <= `count` <= 256
+- If 32 <= `count` <= 256, then `count` closest to the previous multiple of the 32 (e.g. 42 -> 32, 64 -> 64, 145 -> 128)
+- If `count` > 256, then `count` closest to the previous multiple of the 256 (e.g. 300 -> 256, 532 -> 512)
+
 ```cpp
 template<class T>
 constexpr T* strrfind(T* haystack, std::size_t count, const T* needle, std::size_t needle_len) noexcept;
@@ -198,6 +194,13 @@ Counts number of occurrences of the character `ch` in the range [`str`, `str + c
 
 Supports fast implementation only for `char` type with processors having AVX2, BMI2 and POPCNT processor extensions.
 
+Recommended preconditions[^1]:
+- Alignment of `str` to a multiple of 32 (i.e. `uintptr(str) % 32 == 0`)
+- `count` <= 32
+- 32 < `count` <= 128
+- If 32 < `count` <= 128, then `count` closest to the previous multiple of the 32 (e.g. 42 -> 32, 64 -> 64, 145 -> 128)
+- If `count` > 128, then `count` closest to the previous multiple of the 128 (e.g. 150 -> 128, 683 -> 640, 256 -> 256)
+
 ## `bs::strfindn`
 ```cpp
 template<class T>
@@ -205,6 +208,17 @@ constexpr T* strfindn(T* str, std::size_t count, T ch) noexcept;
 ```
 Returns a pointer to first occurrence of the character that is **not** `ch` in the range [`str`, `str + count`). \
 If no match is found, `nullptr` is returned.
+<br/><br/>
+
+```cpp
+template<class T>
+constexpr T* strfindn(T* str, std::size_t count, const T* needle, std::size_t needle_len) noexcept;
+```
+Returns a pointer to first absence of the substring [`needle`, `needle + needle_len`) in the range [`str`, `str + count`). \
+If there is no absence of that substring, `nullptr` is returned.
+
+Postcondition:
+- If returned pointer is not `nullptr`, then the range [`/*result*/`, `/*result*/ + needle_len`) is always valid.
 
 ## `bs::strfirstof`
 ```cpp
@@ -221,3 +235,5 @@ template<class T>
 constexpr T* strfirstnof(T* str, std::size_t count, const T* needle, std::size_t needle_size) noexcept;
 ```
 Returns a pointer to first absence of the any character in the sequence [`needle`, `needle + needle_size`) in the range [`str`, `str + count`).
+
+[^1]: A precondition that can possibly improve performance of the function.

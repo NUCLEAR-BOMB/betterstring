@@ -1,4 +1,8 @@
 
+; // Copyright 2024.
+; // Distributed under the Boost Software License, Version 1.0.
+; // (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
+
 OPTION AVXENCODING:PREFER_VEX
 
 PAGE_SIZE equ 1 SHL 12 ; 4096
@@ -76,6 +80,7 @@ vec_x4:
 
     vpcmpeqb ymm1, ymm0, YMMWORD PTR [rcx + 32*0]
     vpmovmskb r8, ymm1
+    xor r9d, r9d
     popcnt r9, r8
     add rax, r9
     cmp rdx, 32*2
@@ -83,6 +88,7 @@ vec_x4:
 
     vpcmpeqb ymm1, ymm0, YMMWORD PTR [rcx + 32*1]
     vpmovmskb r8, ymm1
+    xor r9d, r9d
     popcnt r9, r8
     add rax, r9
     cmp rdx, 32*3
@@ -90,6 +96,7 @@ vec_x4:
 
     vpcmpeqb ymm1, ymm0, YMMWORD PTR [rcx + 32*2]
     vpmovmskb r8, ymm1
+    xor r9d, r9d
     popcnt r9, r8
     add rax, r9
 
@@ -101,6 +108,7 @@ vec_last:
     neg dl                  ; rdx = 32 - rdx
     shrx r8d, r8d, edx
 
+    xor r9d, r9d
     popcnt r9, r8
     add rax, r9
 
@@ -127,6 +135,7 @@ small:
 
     bzhi r8, r9, rdx        ; discard comparisons of characters beyond the end of the string
 
+    xor eax, eax
     popcnt rax, r8
 
     vzeroupper

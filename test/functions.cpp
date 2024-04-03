@@ -1,15 +1,14 @@
-#define BS_DONT_INCLUDE_STRING
 
-#include <betterstring/string_view.hpp>
-#include <betterstring/functions.hpp>
+// Copyright 2024.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
+
+#include <catch2/catch_test_macros.hpp>
 #include <string>
 #include <cstdlib>
 
-#include <catch2/catch_test_macros.hpp>
-
 #include "util.hpp"
-
-using namespace bs::literals;
+#include <betterstring/functions.hpp>
 
 namespace {
 
@@ -362,6 +361,20 @@ TEST_CASE("bs::strcount", "[functions]") {
         CHECK(bs::strcount(str3, 11, 'a') == 11);
         page_free(str3);
     }
+    SECTION("string") {
+        CHECK(bs::strcount("hello world", 11, "ll", 2) == 1);
+        CHECK(bs::strcount("tteesstt  ssttrriinngg", 22, "st", 2) == 2);
+        CHECK(bs::strcount("tteesstt  ssttrriinngg", 22, "tt", 2) == 3);
+        CHECK(bs::strcount("tteesstt  ssttrriinngg", 22, " ", 1) == 2);
+        CHECK(bs::strcount("tteesstt  ssttrriinngg", 22, "gg", 2) == 1);
+        CHECK(bs::strcount("tteesstt  ssttrriinngg", 22, "t", 1) == 6);
+        CHECK(bs::strcount("test string", 11, "test string", 11) == 1);
+        CHECK(bs::strcount("test string", 11, "test string!", 12) == 0);
+        CHECK(bs::strcount("", 0, "", 0) == 1);
+        CHECK(bs::strcount("aaaaaaaaaaaaaaaaa", 17, "", 0) == 18);
+        CHECK(bs::strcount("", 0, "a", 1) == 0);
+        CHECK(bs::strcount("a", 1, "a", 1) == 1);
+    }
 }
 
 TEST_CASE("bs::strfindn", "[functions]") {
@@ -447,6 +460,29 @@ TEST_CASE("bs::strfindn", "[functions]") {
 
         page_free(str11);
     }
+    SECTION("string") {
+        const char* str1 = "test string";
+        CHECK(bs::strfindn(str1, 11, "test", 4) == &str1[1]);
+        const char* str2 = "tttttttest string";
+        CHECK(bs::strfindn(str2, 17, "test", 4) == &str2[0]);
+        const char* str3 = "tttttttest string";
+        CHECK(bs::strfindn(str3, 17, "ttt", 3) == &str3[5]);
+        const char* str4 = "aaaaaaaaaaa";
+        CHECK(bs::strfindn(str4, 11, "a", 1) == nullptr);
+        CHECK(bs::strfindn(str4, 11, "aa", 2) == nullptr);
+        CHECK(bs::strfindn(str4, 11, "aaa", 3) == nullptr);
+        CHECK(bs::strfindn(str4, 11, "aaaaa", 5) == nullptr);
+        const char* str5 = "hello";
+        CHECK(bs::strfindn(str5, 5, "hello", 5) == nullptr);
+        const char* str6 = "hellohello";
+        CHECK(bs::strfindn(str6, 10, "hello", 5) == &str6[1]);
+        const char* str7 = "aabaa";
+        CHECK(bs::strfindn(str7, 5, "aab", 3) == &str7[1]);
+        const char* str8 = "aaab";
+        CHECK(bs::strfindn(str8, 4, "aaa", 3) == &str8[1]);
+        const char* str9 = "aaaaaaab";
+        CHECK(bs::strfindn(str9, 8, "aaaaaa", 6) == &str9[2]);
+    }
 }
 
 TEST_CASE("bs::strfirstof", "[functions]") {
@@ -478,6 +514,66 @@ TEST_CASE("bs::strfirstnof", "[functions]") {
     CHECK(bs::strfirstnof(str1, 11, "helo wrd", 8) == nullptr);
     CHECK(bs::strfirstnof(str1, 11, "helo ", 5) == &str1[6]);
     CHECK(bs::strfirstnof(str1, 11, "", 0) == &str1[0]);
+}
+
+TEST_CASE("bs::strlastof", "[functions]") {
+    const char* str1 = "test string";
+    CHECK(bs::strlastof(str1, 11, "str", 3) == &str1[7]);
+    CHECK(bs::strlastof(str1, 11, "t", 1) == &str1[6]);
+    CHECK(bs::strlastof(str1, 11, "tttteetsss", 10) == &str1[6]);
+    CHECK(bs::strlastof(str1, 11, "test string", 11) == &str1[10]);
+    CHECK(bs::strlastof(str1, 11, "test stringtest stringtest string", 33) == &str1[10]);
+}
+
+TEST_CASE("bs::strlastnof", "[functions]") {
+    const char* str1 = "test string";
+    CHECK(bs::strlastnof(str1, 11, "", 0) == &str1[10]);
+    CHECK(bs::strlastnof(str1, 11, "test string", 11) == nullptr);
+    CHECK(bs::strlastnof(str1, 11, "string", 6) == &str1[4]);
+    CHECK(bs::strlastnof(str1, 11, "string ", 7) == &str1[1]);
+    CHECK(bs::strlastnof(str1, 11, "g", 1) == &str1[9]);
+    CHECK(bs::strlastnof(str1, 11, "ggggggnnnnggiii", 15) == &str1[7]);
+}
+
+TEST_CASE("bs::strrfindn", "[functions]") {
+    SECTION("character") {
+        const char* str1 = "hello world";
+        CHECK(bs::strrfindn(str1, 11, 'd') == &str1[9]);
+        CHECK(bs::strrfindn(str1, 11, 'l') == &str1[10]);
+        const char* str2 = "aaaaaaabbbbb";
+        CHECK(bs::strrfindn(str2, 12, 'b') == &str2[6]);
+        const char* str3 = "bbbbbbbbbbbbbb";
+        CHECK(bs::strrfindn(str3, 14, 'b') == nullptr);
+    }
+    SECTION("string") {
+        const char* str1 = "test string";
+        CHECK(bs::strrfindn(str1, 11, "test", 4) == &str1[7]);
+        CHECK(bs::strrfindn(str1, 11, "string", 6) == &str1[4]);
+        CHECK(bs::strrfindn(str1, 11, "ing", 3) == &str1[7]);
+        CHECK(bs::strrfindn(str1, 11, "strin", 5) == &str1[6]);
+        CHECK(bs::strrfindn(str1, 11, "test string", 11) == nullptr);
+        CHECK(bs::strrfindn(str1, 11, "test string2", 12) == nullptr);
+        CHECK(bs::strrfindn(str1, 11, "", 0) == &str1[10]);
+        const char* str2 = "test stringggg";
+        CHECK(bs::strrfindn(str2, 14, "g", 1) == &str2[9]);
+        CHECK(bs::strrfindn(str2, 14, "gg", 2) == &str2[9]);
+        CHECK(bs::strrfindn(str2, 14, "ggggg", 5) == &str2[9]);
+        CHECK(bs::strrfindn(str2, 14, "gggggg", 6) == &str2[8]);
+        CHECK(bs::strrfindn(str2, 14, "ggggggg", 7) == &str2[7]);
+        const char* str3 = "test stringg";
+        CHECK(bs::strrfindn(str3, 12, "g", 1) == &str3[9]);
+    }
+}
+
+TEST_CASE("bs::strcountanyof", "[functions]") {
+    const char* str1 = "test string";
+    CHECK(bs::strcountanyof(str1, 11, " ", 1) == 1);
+    CHECK(bs::strcountanyof(str1, 11, "st", 2) == 5);
+    CHECK(bs::strcountanyof(str1, 11, "si", 2) == 3);
+    CHECK(bs::strcountanyof(str1, 11, "", 0) == 0);
+    CHECK(bs::strcountanyof(str1, 11, "ing", 3) == 3);
+    CHECK(bs::strcountanyof(str1, 11, "xyz", 3) == 0);
+    CHECK(bs::strcountanyof(str1, 11, "txyz", 4) == 3);
 }
 
 }
