@@ -9,37 +9,7 @@ PAGE_SIZE equ 1 SHL 12 ; 4096
 ; size_t      needle_len (r9) - lenght of the needle
 ;
 ; Finds the first occurrence of the substring [needle, needle + needle_len) in the string [haystack, haystack + count).
-;
-; Implemented algorithm (without page boundary check & out of range reads):
-; if (needle_len > count) { return nullptr; }
-; if (needle_len == 0) { return haystack; }
-; 
-; __m256i first = _mm256_set1_epi8(needle[0])
-; __m256i last = _mm256_set1_epi8(needle[needle_len - 1])
-; for (size_t i = 0; i < count; i += 32) {
-;     __m256i block_first = _mm256_loadu_si256((__m256i*)(haystack + i));
-;     __m256i block_last = _mm256_loadu_si256((__m256i*)(haystack + i + needle_len - 1));
-;     __m256i eq_first = _mm256_cmpeq_epi8(first, block_first);
-;     __m256i eq_last = _mm256_cmpeq_epi8(last, block_last);
-;     __m256i first_and_last = _mm256_and_si256(eq_first, eq_last);
-;     uint32_t mask = _mm256_movemask_epi8(first_and_last);
-;     while (mask != 0) {
-;         uint32_t position = tzcnt(mask);
-;         uint32_t j = 0;
-;         while (true) {
-;             __m256i haystack_block = _mm256_loadu_si256((__m256i*)(haystack + i + position));
-;             __m256i needle_block = _mm256_loadu_si256((__m256i*)needle);
-;             __m256i match_eq = _mm256_cmpeq_epi8(haystack_block, needle_block);
-;             uint32_t match = _mm256_movemask_epi8(match_eq);
-;             if (match != 0xFFFFFFFF) { break; }
-;             j += 32;
-;             if (j >= needle_len) { return haystack + i + position; }
-;         }
-;         btr(mask, position);
-;     }
-; }
-; return nullptr;
-;
+
 
 MM_SHUFFLE MACRO d:REQ, c:REQ, b:REQ, a:REQ
     EXITM <(d SHL 6) OR (c SHL 4) OR (b SHL 2) OR (a)>
@@ -125,6 +95,25 @@ return_haystack_no_vzeroupper:
     mov rax, rcx ; rcx - haystack pointer
     ret
 
+; xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx - YMM word
+; aaaaaaa - needle
+; bbbbbbbbbbbbbbbbbbbb - haystack
+; ########### - uninitialized page
+; ??????????? - garbage data
+;                                   | after haystack begins next page which contents may be uninitialized
+;                    ????????????bbbbbbbbbbbbbbbbbbbb###########
+;                                |            | needle may be located here (haystack + count - needle_len)
+;                                aaaaaaa      aaaaaaa###########
+;                    | last available YMM word (haystack + count - 32)
+;                    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+;       | first YMM word (haystack + needle_len - 32)
+;       xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+;                                | match last character in needle (haystack + count - 32)
+;                    ????????????AAAAAAAAAAAAAAAAAAAA
+;                          | match first character in needle (haystack + count - 32 - needle + 1)
+;                          | including first character of last possible needle location
+;              ????????????AAAAAAAAAAAAAAAAAAAA
+;
 cross_page:
     ; mov BYTE PTR [0], 1
 

@@ -22,6 +22,8 @@ L(needle_cross_page_continue):
     ; vpshufb ymm5, ymm5, YMMWORD PTR [L(needle_shuffle_mask)]
     ; vpermq ymm5, ymm5, MM_SHUFFLE(1, 0, 3, 2)
 
+; ===================== LOOP 1 PROLOGUE =====================
+
     add rcx, r9
 
     xor r8, r8
@@ -57,6 +59,8 @@ L(vec1_loop_end):
     cmp rdx, rax
     jbe L(vec_last)
 
+; ===================== LOOP 2 PROLOGUE =====================
+
     vpcmpeqb ymm2, ymm0, YMMWORD PTR [rcx + 32]
     vpcmpeqb ymm3, ymm1, YMMWORD PTR [rcx + r9 - 1 + 32]
     add rcx, r9
@@ -85,6 +89,72 @@ L(vec2_loop):
 L(vec2_loop_end):
     sub rcx, r9
     lea rax, [r9 + 32*3 - 1]
+    cmp rdx, rax
+    jbe L(vec_last)
+
+; ===================== LOOP 3 PROLOGUE =====================
+
+    vpcmpeqb ymm2, ymm0, YMMWORD PTR [rcx + 32*2]
+    vpcmpeqb ymm3, ymm1, YMMWORD PTR [rcx + r9 - 1 + 32*2]
+    add rcx, r9
+    vpand ymm4, ymm2, ymm3
+    vpmovmskb eax, ymm4
+
+L(vec3_loop):
+    test eax, eax
+    jz L(vec3_loop_end)
+
+    xor r10d, r10d
+    tzcnt r10d, eax
+
+    vpcmpeqb ymm2, ymm5, YMMWORD PTR [rcx + r10 - 32 + 32*2]
+    btr eax, r10d
+
+    vpmovmskb r11d, ymm2
+    andn r11d, r11d, r8d
+    jnz L(vec3_loop)
+
+    lea rax, [rcx + r10 + 32*2] ; return match position
+    sub rax, r9
+    vzeroupper
+    ret
+
+L(vec3_loop_end):
+    sub rcx, r9
+    lea rax, [r9 + 32*4 - 1]
+    cmp rdx, rax
+    jbe L(vec_last)
+
+; ===================== LOOP 4 PROLOGUE =====================
+
+    vpcmpeqb ymm2, ymm0, YMMWORD PTR [rcx + 32*3]
+    vpcmpeqb ymm3, ymm1, YMMWORD PTR [rcx + r9 - 1 + 32*3]
+    add rcx, r9
+    vpand ymm4, ymm2, ymm3
+    vpmovmskb eax, ymm4
+
+L(vec4_loop):
+    test eax, eax
+    jz L(vec4_loop_end)
+
+    xor r10d, r10d
+    tzcnt r10d, eax
+
+    vpcmpeqb ymm2, ymm5, YMMWORD PTR [rcx + r10 - 32 + 32*3]
+    btr eax, r10d
+
+    vpmovmskb r11d, ymm2
+    andn r11d, r11d, r8d
+    jnz L(vec4_loop)
+
+    lea rax, [rcx + r10 + 32*3] ; return match position
+    sub rax, r9
+    vzeroupper
+    ret
+
+L(vec4_loop_end):
+    sub rcx, r9
+    lea rax, [r9 + 32*5 - 1]
     cmp rdx, rax
     jbe L(vec_last)
 
@@ -137,6 +207,7 @@ L(vec_last_loop_end):
     align 16
 L(needle_cross_page):
     sub rsp, 64
+    ; failed store forwarding
     vmovdqu ymm5, YMMWORD PTR [r8]
     vmovdqu YMMWORD PTR [rsp + 32], ymm5
     vmovdqu ymm5, YMMWORD PTR [rsp + r9]
