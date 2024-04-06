@@ -22,7 +22,7 @@ set_target_properties(betterstring-test PROPERTIES UNITY_BUILD FALSE)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(betterstring-test PRIVATE
-        /Zc:inline /RTCs /RTCu
+        /Zc:inline $<$<CONFIG:Debug>:/RTCs /RTCu>
     )
 endif()
 
