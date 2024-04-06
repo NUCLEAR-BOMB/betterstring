@@ -33,6 +33,7 @@ set(main_headers
     "include/betterstring/safe_functions.hpp"
     "include/betterstring/find_result.hpp"
     "include/betterstring/allocators.hpp"
+    "include/betterstring/unicode.hpp"
 )
 set(detail_headers
     "include/betterstring/detail/preprocessor.hpp"
