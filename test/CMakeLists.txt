@@ -3,7 +3,6 @@ include("${PROJECT_SOURCE_DIR}/cmake/compiler_warnings.cmake")
 
 add_executable(betterstring-test
     "string_view.cpp"
-    "functions.cpp"
     "safe_functions.cpp"
     "char_traits.cpp"
     "ascii.cpp"
@@ -11,12 +10,16 @@ add_executable(betterstring-test
     "string.cpp"
     "allocators.cpp"
 
+    "functions/strfind.cpp"
+    "functions/functions.cpp"
+
     "main.cpp"
 
     "util.hpp"
 )
 target_add_warnings(betterstring-test)
 target_link_libraries(betterstring-test PRIVATE betterstring)
+target_include_directories(betterstring-test PRIVATE "${PROJECT_SOURCE_DIR}/test")
 set_target_properties(betterstring-test PROPERTIES UNITY_BUILD FALSE)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
