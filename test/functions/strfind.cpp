@@ -121,6 +121,54 @@ TEST_CASE("bs::strfind", "[functions]") {
         CHECK(bs::strfind(haystack_page, 186, "8081", 4) == &haystack_page[150]);
         CHECK(bs::strfind(haystack_page, 186, "86878889909192939495", 20) == &haystack_page[162]);
 
+        std::memcpy(haystack_page, "012345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879808182838485868788899091929394959697989910010110210310410510610710810911011111211311411511611711811912012112212", 261);
+        CHECK(bs::strfind(haystack_page, 261, "172737", 6) == &haystack_page[133]);
+        CHECK(bs::strfind(haystack_page, 261, "485868", 6) == &haystack_page[159]);
+        CHECK(bs::strfind(haystack_page, 261, "788899", 6) == &haystack_page[165]);
+        CHECK(bs::strfind(haystack_page, 261, "001011", 6) == &haystack_page[191]);
+        CHECK(bs::strfind(haystack_page, 261, "031041", 6) == &haystack_page[200]);
+        CHECK(bs::strfind(haystack_page, 261, "011111", 6) == &haystack_page[222]);
+        CHECK(bs::strfind(haystack_page, 261, "141151", 6) == &haystack_page[233]);
+        CHECK(bs::strfind(haystack_page, 261, "112212", 6) == &haystack_page[255]);
+
+        std::memcpy(haystack_page, "012345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879808182838485868788899091929394959697989910010110210310410510610710810911011111211311411511611711811912012112212312412512", 270);
+        CHECK(bs::strfind(haystack_page, 270, "412512", 6) == &haystack_page[264]);
+        CHECK(bs::strfind(haystack_page, 270, "116117", 6) == &haystack_page[238]);
+        CHECK(bs::strfind(haystack_page, 270, "11611711811912012112212312412512", 32) == &haystack_page[238]);
+        CHECK(bs::strfind(haystack_page, 270, "13114115", 8) == &haystack_page[230]);
+        CHECK(bs::strfind(haystack_page, 270, "05106107", 8) == &haystack_page[206]);
+        CHECK(bs::strfind(haystack_page, 270, "92939495969798991", 17) == &haystack_page[174]);
+
+        std::memset(haystack_page, 'a', 4096);
+        std::memset(haystack_page + (4096 - 5), 'b', 5);
+        CHECK(bs::strfind(haystack_page, 4096, "bbbbb", 5) == &haystack_page[4096 - 5]);
+        CHECK(bs::strfind(haystack_page, 4096, "ccccc", 5) == nullptr);
+        // bad test
+        // CHECK(bs::strfind(haystack_page, 4096, "aaaaa", 5) == &haystack_page[0]);
+
+        std::memcpy(haystack_page + (4096 - 180), "012345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879808182838485868788899091929394", 180);
+        CHECK(bs::strfind(haystack_page + (4096 - 180), 180, "091929394", 9) == &haystack_page[4096 - 180 + 171]);
+        CHECK(bs::strfind(haystack_page + (4096 - 180), 180, "79808182838", 11) == &haystack_page[4096 - 180 + 148]);
+        CHECK(bs::strfind(haystack_page + (4096 - 180), 180, "5767778", 7) == &haystack_page[4096 - 180 + 141]);
+
+        std::memcpy(haystack_page + (4096 - 261), "012345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879808182838485868788899091929394959697989910010110210310410510610710810911011111211311411511611711811912012112212", 261);
+        CHECK(bs::strfind(haystack_page + (4096 - 261), 261, "172737", 6) == &haystack_page[4096 - 261 + 133]);
+        CHECK(bs::strfind(haystack_page + (4096 - 261), 261, "485868", 6) == &haystack_page[4096 - 261 + 159]);
+        CHECK(bs::strfind(haystack_page + (4096 - 261), 261, "788899", 6) == &haystack_page[4096 - 261 + 165]);
+        CHECK(bs::strfind(haystack_page + (4096 - 261), 261, "001011", 6) == &haystack_page[4096 - 261 + 191]);
+        CHECK(bs::strfind(haystack_page + (4096 - 261), 261, "031041", 6) == &haystack_page[4096 - 261 + 200]);
+        CHECK(bs::strfind(haystack_page + (4096 - 261), 261, "011111", 6) == &haystack_page[4096 - 261 + 222]);
+        CHECK(bs::strfind(haystack_page + (4096 - 261), 261, "141151", 6) == &haystack_page[4096 - 261 + 233]);
+        CHECK(bs::strfind(haystack_page + (4096 - 261), 261, "112212", 6) == &haystack_page[4096 - 261 + 255]);
+
+        std::memcpy(haystack_page + (4096 - 270), "012345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273747576777879808182838485868788899091929394959697989910010110210310410510610710810911011111211311411511611711811912012112212312412512", 270);
+        CHECK(bs::strfind(haystack_page + (4096 - 270), 270, "412512", 6) == &haystack_page[4096 - 270 + 264]);
+        CHECK(bs::strfind(haystack_page + (4096 - 270), 270, "116117", 6) == &haystack_page[4096 - 270 + 238]);
+        CHECK(bs::strfind(haystack_page + (4096 - 270), 270, "11611711811912012112212312412512", 32) == &haystack_page[4096 - 270 + 238]);
+        CHECK(bs::strfind(haystack_page + (4096 - 270), 270, "13114115", 8) == &haystack_page[4096 - 270 + 230]);
+        CHECK(bs::strfind(haystack_page + (4096 - 270), 270, "05106107", 8) == &haystack_page[4096 - 270 + 206]);
+        CHECK(bs::strfind(haystack_page + (4096 - 270), 270, "92939495969798991", 17) == &haystack_page[4096 - 270 + 174]);
+
         char* const needle_page = static_cast<char*>(page_alloc());
 
         const char* const str1 = "0123456789101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354";

@@ -1,7 +1,6 @@
 
 PAGE_SIZE equ 1 SHL 12 ; 4096
 
-.code
 
 ; const char* haystack (rcx) - pointer to string to compare
 ; size_t      count (rdx) - lenght of the string
@@ -10,13 +9,15 @@ PAGE_SIZE equ 1 SHL 12 ; 4096
 ;
 ; Finds the first occurrence of the substring [needle, needle + needle_len) in the string [haystack, haystack + count).
 
-
 MM_SHUFFLE MACRO d:REQ, c:REQ, b:REQ, a:REQ
     EXITM <(d SHL 6) OR (c SHL 4) OR (b SHL 2) OR (a)>
 ENDM
 
-betterstring_strfind_str_avx2 PROC
+; Use COFF's feature grouped sections to define text section with 64 byte alignment
+_TEXT$align64 SEGMENT ALIGN(64)
 
+    align 64
+betterstring_strfind_str_avx2 PROC
     cmp r9, rdx ; check if needle length is greater than haystack size.
     ja return_zero_no_vzeroupper
 
@@ -114,6 +115,7 @@ return_haystack_no_vzeroupper:
 ;                          | including first character of last possible needle location
 ;              ????????????AAAAAAAAAAAAAAAAAAAA
 ;
+    align 16
 cross_page:
     ; mov BYTE PTR [0], 1
 
@@ -162,7 +164,7 @@ cross_page_loop_less_vec:
     vzeroupper
     ret
 
-    align 16
+    align 64
 large_vec:
     vpcmpeqb ymm2, ymm0, YMMWORD PTR [rcx]
     vpcmpeqb ymm3, ymm1, YMMWORD PTR [rcx + r9 - 1]
@@ -175,11 +177,11 @@ large_vec:
 
     include strfind_str/vec_needle.asm
 
-    align 16
+    align 64
 cross_page_vec:
     include strfind_str/cross_page_vec_needle.asm
 
-    align 16
+    align 64
 needle_cross_page_left:
     sub rsp, 64
     vmovdqu ymm2, YMMWORD PTR [r8 + r9 - 32]
@@ -198,5 +200,7 @@ needle_cross_page_right:
     jmp needle_cross_page_right_continue
 
 betterstring_strfind_str_avx2 ENDP
+
+_TEXT$align64 ENDS
 
 END
