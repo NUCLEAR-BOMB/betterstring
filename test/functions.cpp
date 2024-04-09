@@ -477,4 +477,11 @@ TEST_CASE("bs::strcountanyof", "[functions]") {
     CHECK(bs::strcountanyof(str1, 11, "txyz", 4) == 3);
 }
 
+TEST_CASE("bs::strcountn", "[functions]") {
+    CHECK(bs::strcountn("aaaa", 4, 'a') == 0);
+    CHECK(bs::strcountn("bbbb", 4, 'a') == 4);
+    CHECK(bs::strcountn("aaaabbbb", 8, 'a') == 4);
+    CHECK(bs::strcountn("bbbbaaaaaaaaaaaa", 16, 'a') == 4);
+}
+
 }
