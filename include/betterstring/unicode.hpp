@@ -12,9 +12,9 @@
 namespace bs {
 
 #if BS_HAS_CHAR8_T
-enum class u8char_t : char8_t {};
+using u8char_t = char8_t;
 #else
-enum class u8char_t : unsigned char {};
+using u8char_t = char;
 #endif
 
 enum class utf_error : uint32_t {
@@ -64,11 +64,11 @@ class utf_traits<u8char_t> {
 public:
     using size_type = std::size_t;
 
-    static constexpr utf_result<uint8_t> length(const u8char_t ch) noexcept {
-        if ((uint8_t(ch) & 0b1000'0000) == 0b0000'0000) { return 1; }
-        if ((uint8_t(ch) & 0b1110'0000) == 0b1100'0000) { return 2; }
-        if ((uint8_t(ch) & 0b1111'0000) == 0b1110'0000) { return 3; }
-        if ((uint8_t(ch) & 0b1111'1000) == 0b1111'0000) { return 3; }
+    static constexpr utf_result<uint8_t> length(const uint8_t ch) noexcept {
+        if ((ch & 0b1000'0000) == 0b0000'0000) { return 1; }
+        if ((ch & 0b1110'0000) == 0b1100'0000) { return 2; }
+        if ((ch & 0b1111'0000) == 0b1110'0000) { return 3; }
+        if ((ch & 0b1111'1000) == 0b1111'0000) { return 3; }
         return utf_error::bad_lead;
     }
 };
