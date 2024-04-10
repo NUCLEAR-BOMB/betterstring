@@ -57,12 +57,29 @@ private:
 };
 
 namespace utf8 {
-    static constexpr utf_result<uint8_t> sequence_length(const uint8_t ch) noexcept {
+    constexpr utf_result<size_t> sequence_length(const uint8_t ch) noexcept {
         if ((ch & 0b1000'0000) == 0b0000'0000) { return 1; }
         if ((ch & 0b1110'0000) == 0b1100'0000) { return 2; }
         if ((ch & 0b1111'0000) == 0b1110'0000) { return 3; }
         if ((ch & 0b1111'1000) == 0b1111'0000) { return 3; }
         return utf_error::bad_lead;
+    }
+    constexpr void append(u8char_t* const ptr, const char32_t ch) noexcept {
+        if (ch < 0x00080) {
+            ptr[0] = u8char_t(ch);
+        } else if (ch < 0x00800) {
+            ptr[0] = u8char_t((ch >> (6*1))      | 0b1100'0000);
+            ptr[1] = u8char_t((ch & 0b0011'1111) | 0b1000'0000);
+        } else if (ch < 0x10000) {
+            ptr[0] =  u8char_t((ch >> (6*2))                | 0b1110'0000);
+            ptr[1] = u8char_t(((ch >> (6*1)) & 0b0011'1111) | 0b1000'0000);
+            ptr[2] =  u8char_t((ch & 0b0011'1111)           | 0b1000'0000);
+        } else {
+            ptr[0] =  u8char_t((ch >> (6*3))                | 0b1111'0000);
+            ptr[1] = u8char_t(((ch >> (6*2)) & 0b0011'1111) | 0b1000'0000);
+            ptr[2] = u8char_t(((ch >> (6*1)) & 0b0011'1111) | 0b1000'0000);
+            ptr[3] =  u8char_t((ch & 0b0011'1111)           | 0b1000'0000);
+        }
     }
 }
 
