@@ -100,6 +100,15 @@ TEST_CASE("codepoint", "[unicode]") {
 
     const bs::codepoint ch3 = U'𐍈';
     CHECK(uint32_t(ch3) == 0x10348);
+
+    const std::optional ch4 = bs::codepoint::from(U'ह');
+    CHECK(ch4 == 0x0939);
+
+    const std::optional ch5 = bs::codepoint::from(static_cast<char32_t>(0x0F0F0F0F));
+    CHECK(ch5 == std::nullopt);
+
+    const bs::codepoint ch6{};
+    CHECK(ch6 == U'\U00000000');
 }
 
 }

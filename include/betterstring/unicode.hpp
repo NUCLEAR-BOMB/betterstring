@@ -8,6 +8,7 @@
 #include <betterstring/detail/preprocessor.hpp>
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 
 namespace bs {
 
@@ -62,8 +63,15 @@ constexpr bool is_valid_codepoint(const char32_t ch) noexcept {
 
 class codepoint {
 public:
+    constexpr codepoint() noexcept = default;
+
     constexpr codepoint(const char32_t val_) noexcept : val{val_} {
         BS_VERIFY(bs::is_valid_codepoint(val_), "Invalid unicode code point");
+    }
+
+    [[nodiscard]] static constexpr std::optional<codepoint> from(const char32_t val) noexcept {
+        if (!bs::is_valid_codepoint(val)) { return std::nullopt; }
+        return codepoint{val};
     }
 
     constexpr operator char32_t&() noexcept { return val; }
