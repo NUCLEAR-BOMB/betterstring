@@ -79,4 +79,27 @@ TEST_CASE("utf8::append", "[unicode]") {
     CHECK(buffer10 == std::array{0b0000'0000_u8});
 }
 
+TEST_CASE("is_valid_codepoint", "[unicode]") {
+    CHECK(bs::is_valid_codepoint(U'$'));
+    CHECK(bs::is_valid_codepoint(U'£'));
+    CHECK(bs::is_valid_codepoint(U'€'));
+    CHECK(bs::is_valid_codepoint(U'𐍈'));
+    CHECK(bs::is_valid_codepoint(U'\U001096B3'));
+    CHECK(bs::is_valid_codepoint(U'\U00000000'));
+
+    CHECK_FALSE(bs::is_valid_codepoint(static_cast<char32_t>(0x00110000)));
+    CHECK_FALSE(bs::is_valid_codepoint(static_cast<char32_t>(0x00110001)));
+}
+
+TEST_CASE("codepoint", "[unicode]") {
+    const char32_t ch1 = static_cast<char32_t>(1114112);
+    CHECK(ch1 == static_cast<char32_t>(1114112));
+
+    const bs::codepoint ch2 = U'$';
+    CHECK(ch2 == U'$');
+
+    const bs::codepoint ch3 = U'𐍈';
+    CHECK(uint32_t(ch3) == 0x10348);
+}
+
 }

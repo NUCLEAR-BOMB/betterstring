@@ -56,6 +56,23 @@ private:
     utf_error err;
 };
 
+constexpr bool is_valid_codepoint(const char32_t ch) noexcept {
+    return uint32_t(ch) <= 0x10FFFF && (uint32_t(ch) < 0xD800 || uint32_t(ch) > 0xDFFF);
+}
+
+class codepoint {
+public:
+    constexpr codepoint(const char32_t val_) noexcept : val{val_} {
+        BS_VERIFY(bs::is_valid_codepoint(val_), "Invalid unicode code point");
+    }
+
+    constexpr operator char32_t&() noexcept { return val; }
+    constexpr operator const char32_t&() const noexcept { return val; }
+
+private:
+    char32_t val{};
+};
+
 namespace utf8 {
     constexpr utf_result<size_t> sequence_length(const uint8_t ch) noexcept {
         if ((ch & 0b1000'0000) == 0b0000'0000) { return 1; }
