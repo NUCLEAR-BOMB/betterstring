@@ -246,21 +246,51 @@ TEST_CASE("bs::strcount", "[functions]") {
         str1[7] = 'b';
         CHECK(bs::strcount(str1, 32*5, 'b') == 2);
 
-        char str2[32*9 + 1];
-        str2[32*9] = '\0';
-        bs::strfill(str2, 32*9, 'X');
-        str2[6] = 'Y';
-        str2[23] = 'Y';
-        str2[32] = 'Y';
-        str2[200] = 'Y';
-        CHECK(bs::strcount(str2, 32*9, 'Y') == 4);
+        char* const str_page = (char*)page_alloc();
+        std::memset(str_page + (4096 - 10), 'a', 10);
+        CHECK(bs::strcount(str_page + (4096 - 10), 10, 'a') == 10);
+        std::memcpy(str_page, "aaaaaaaaaaa", 11);
+        CHECK(bs::strcount(str_page, 11, 'a') == 11);
+        std::memset(str_page, 'a', 288);
+        CHECK(bs::strcount(str_page, 288, 'a') == 288);
+        CHECK(bs::strcount(str_page, 287, 'a') == 287);
+        CHECK(bs::strcount(str_page, 256, 'a') == 256);
 
-        char* const str3 = (char*)page_alloc();
-        bs::strfill(str3 + (4096 - 10), 10, 'a');
-        CHECK(bs::strcount(str3 + (4096 - 10), 10, 'a') == 10);
-        bs::strfill(str3, 11, 'a');
-        CHECK(bs::strcount(str3, 11, 'a') == 11);
-        page_free(str3);
+        std::memcpy(str_page + 7, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbb", 40);
+        CHECK(bs::strcount(str_page + 7, 40, 'a') == 32);
+        std::memcpy(str_page + 23, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", 96);
+        CHECK(bs::strcount(str_page + 23, 96, 'a') == 64);
+        std::memcpy(str_page + 31, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", 128);
+        CHECK(bs::strcount(str_page + 31, 128, 'a') == 64);
+        std::memset(str_page + 45, 'a', 288);
+        CHECK(bs::strcount(str_page + 45, 288, 'a') == 288);
+
+        std::memset(str_page + 64, 'X', 288);
+        (str_page + 64)[6] = 'Y';
+        (str_page + 64)[23] = 'Y';
+        (str_page + 64)[32] = 'Y';
+        (str_page + 64)[200] = 'Y';
+        CHECK(bs::strcount(str_page + 64, 288, 'Y') == 4);
+        (str_page + 64)[287] = 'Y';
+        CHECK(bs::strcount(str_page + 64, 288, 'Y') == 5);
+        std::memset(str_page + 65, 'a', 304);
+        CHECK(bs::strcount(str_page + 65, 304, 'a') == 304);
+
+        std::memset(str_page + 32, '0', 161);
+        (str_page + 32)[10] = '1';
+        (str_page + 32)[40] = '1';
+        (str_page + 32)[70] = '1';
+        (str_page + 32)[100] = '1';
+        (str_page + 32)[130] = '1';
+        (str_page + 32)[160] = '1';
+        CHECK(bs::strcount(str_page + 32, 161, '1') == 6);
+
+        std::memcpy(str_page + (4096 - 20), "01234567891011121314", 20);
+        CHECK(bs::strcount(str_page + (4096 - 20), 20, '1') == 7);
+        std::memcpy(str_page + (4096 - 10), "01101", 5);
+        CHECK(bs::strcount(str_page + (4096 - 10), 5, '1') == 3);
+
+        page_free(str_page);
     }
     SECTION("string") {
         CHECK(bs::strcount("hello world", 11, "ll", 2) == 1);

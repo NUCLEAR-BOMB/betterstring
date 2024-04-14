@@ -365,6 +365,8 @@ constexpr std::size_t strcount(const T* str, const std::size_t count, const deta
         if constexpr (std::is_same_v<T, char>) {
             using detail::cpu_features;
             if (cpu_features.value & (cpu_features.AVX2 + cpu_features.BMI2 + cpu_features.POPCNT)) {
+                if (str == nullptr) { return 0; }
+
                 return detail::betterstring_strcount_char_avx2(str, count, ch);
             }
         }
