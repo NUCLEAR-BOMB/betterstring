@@ -87,11 +87,11 @@ TEST_CASE("uint32", "[parsing]") {
     CHECK(bs::parse<uint32_t>("4294967296", 10) == bs::parse_error::out_of_range);
     CHECK(bs::parse<uint32_t>("10000000000", 11) == bs::parse_error::too_long);
 
-    static constexpr bs::parse_result constexpr_val1 = bs::parse<uint32_t>("123", 3);
+    static constexpr bs::parse_result<uint32_t> constexpr_val1 = bs::parse<uint32_t>("123", 3);
     CHECK(constexpr_val1 == 123);
-    static constexpr bs::parse_result constexpr_val2 = bs::parse<uint32_t>("aa", 2);
+    static constexpr bs::parse_result<uint32_t> constexpr_val2 = bs::parse<uint32_t>("aa", 2);
     CHECK(constexpr_val2 == bs::parse_error::invalid_argument);
-    static constexpr bs::parse_result constexpr_val3 = bs::parse<uint32_t>("133278947392427621", 18);
+    static constexpr bs::parse_result<uint32_t> constexpr_val3 = bs::parse<uint32_t>("133278947392427621", 18);
     CHECK(constexpr_val3 == bs::parse_error::out_of_range);
 }
 

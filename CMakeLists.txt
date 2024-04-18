@@ -41,6 +41,7 @@ set(detail_headers
     "include/betterstring/detail/cpu_features.hpp"
     "include/betterstring/detail/reference_wrapper.hpp"
     "include/betterstring/detail/ranges_traits.hpp"
+    "include/betterstring/detail/result_with_sentinel.hpp"
 )
 set(asm_src
     "src/strrfind_char_avx2.asm"
