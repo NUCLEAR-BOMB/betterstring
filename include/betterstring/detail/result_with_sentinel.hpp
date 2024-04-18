@@ -33,6 +33,11 @@ public:
         BS_VERIFY(err == sentinel, "called value() with no value");
         return val;
     }
+    constexpr value_type value_or(const value_type default_val) const noexcept {
+        if (err != sentinel) { return default_val; }
+        return val;
+    }
+
     constexpr value_type unchecked_value() const noexcept {
         return val;
     }
