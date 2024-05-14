@@ -41,8 +41,6 @@ MM256_SET1_EPI8 MACRO out_reg:REQ, location:REQ
     vpbroadcastb out_reg, location
 ENDM
 
-.code
-
 ; const char* string (rcx) - pointer to string to compare
 ; size_t      count (rdx) - lenght of the string
 ; const char* needle (r8) - pointer to character sequence
@@ -51,6 +49,10 @@ ENDM
 ; Finds the position of first character that equal to one of the characters in the character sequence.
 ;
 ; Note that this function uses AVX2 and BMI2 processor extensions.
+
+; Use COFF's feature grouped sections to define text section with 64 byte alignment
+_TEXT$align64 SEGMENT ALIGN(64)
+    align 64
 betterstring_strfirstof_avx2 PROC
 
 IF 1
@@ -74,35 +76,36 @@ cmp_jump_table:
     dd cmp_5-cmp_jump_table
     dd cmp_6-cmp_jump_table
 
-    align 16
+    align 64
 cmp_0:
     xor rax, rax
     ret
 
-    align 16
+    align 64
 cmp_1:
     include strfirstof/cmp_1.asm
 
-    align 16
+    align 64
 cmp_2:
     include strfirstof/cmp_2.asm
 
-    align 16
+    align 64
 cmp_3:
     include strfirstof/cmp_3.asm
 
-    align 16
+    align 64
 cmp_4:
     include strfirstof/cmp_4.asm
 
-    align 16
+    align 64
 cmp_5:
     include strfirstof/cmp_5.asm
 
-    align 16
+    align 64
 cmp_6:
     include strfirstof/cmp_6.asm
 
+    align 64
 cmp_bitmap:
     sub rsp, 256
 
@@ -116,40 +119,66 @@ cmp_bitmap:
     vmovdqu YMMWORD PTR [rsp + 32*6], ymm0
     vmovdqu YMMWORD PTR [rsp + 32*7], ymm0
 
-    mov rax, 0FFh
+    mov rax, rcx
+    mov rcx, 0FFh
 
     align 16
 cmp_bitmap_mark_loop:
     movzx r10, BYTE PTR [r8 + r9 - 1]
-    mov BYTE PTR [rsp + r10], al
+    mov BYTE PTR [rsp + r10], cl
+
     dec r9
     jnz cmp_bitmap_mark_loop
-    ; r9 is zero
 
-    vzeroupper
+    test rdx, 1
+    jz cmp_bitmap_loop
 
-    ; use r9 as counter register
-    align 16
+    movzx r11, BYTE PTR [rax]
+    test BYTE PTR [rsp + r11], cl
+    jnz cmp_bitmap_return_0
+
+    inc rax
+    dec rdx
+    jz cmp_bitmap_nullptr
+
+    align 64
 cmp_bitmap_loop:
-    movzx r10, BYTE PTR [rcx + r9]
+    movzx r10, BYTE PTR [rax]
+    test BYTE PTR [rsp + r10], cl
+    jnz cmp_bitmap_return_0
 
-    test al, BYTE PTR [rsp + r10]
-    jnz cmp_bitmap_return
+    movzx r11, BYTE PTR [rax + 1]
+    test BYTE PTR [rsp + r11], cl
+    jnz cmp_bitmap_return_1
 
-    inc r9
-    cmp r9, rdx
-    jne cmp_bitmap_loop
+    add rax, 2
+    sub rdx, 2
+    jnz cmp_bitmap_loop
 
+cmp_bitmap_nullptr:
+    vzeroupper
     add rsp, 256
-
-    xor rax, rax
+    xor eax, eax
     ret
 
     align 16
-cmp_bitmap_return:
+cmp_bitmap_return_0:
     add rsp, 256
+    vzeroupper
+    ret
 
-    lea rax, [rcx + r9]
+    align 16
+cmp_bitmap_return_1:
+    add rsp, 256
+    inc rax
+    vzeroupper
+    ret
+
+    align 16
+cmp_bitmap_return_n1:
+    add rsp, 256
+    dec rax
+    vzeroupper
     ret
 
 ELSE
@@ -177,5 +206,6 @@ ENDIF
 
 betterstring_strfirstof_avx2 ENDP
 
+_TEXT$align64 ENDS
 
 END
