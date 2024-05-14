@@ -180,12 +180,13 @@ ADD_BENCHMARK("strfirstof") {
         if (ch == string[0]) { goto random_again; }
     }
 
-    for (std::size_t i = 0; i <= 21; ++i) {
-        const std::size_t string_len = 1 << i;
+    const std::vector<uint64_t> string_lengths_sequence = generate_length_sequence(21);
 
+    for (auto [string_len, index] : enumerate{string_lengths_sequence}) {
         string[string_len - 1] = char_seq[0];
         bench.context("length", fmt::format("{}", string_len));
-        bench.run(fmt::format("length {}", string_len), [&]() {
+        bench.run(fmt::format("length {} ({}/{})", string_len, index + 1, string_lengths_sequence.size()),
+        [&]() {
             char* result = bs::strfirstof(string.data(), string_len, char_seq.data(), char_seq.size());
             bench.doNotOptimizeAway(result);
         });
