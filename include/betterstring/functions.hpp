@@ -12,7 +12,7 @@
 #include <cstddef>
 
 #include <betterstring/detail/preprocessor.hpp>
-#include <betterstring/detail/cpu_features.hpp>
+#include <betterstring/detail/cpu_isa.hpp>
 #include <betterstring/type_traits.hpp>
 
 namespace bs {
@@ -70,8 +70,8 @@ constexpr std::size_t strlen(const T* const str) noexcept {
 
     if (!detail::is_constant_evaluated()) {
         if constexpr (std::is_same_v<T, char>) {
-            using detail::cpu_features;
-            if (cpu_features.value & (cpu_features.AVX2 + cpu_features.BMI2)) {
+            using namespace detail::isa;
+            if (AVX2 & BMI2) {
                 return detail::betterstring_strlen_avx2(str);
             }
             return std::strlen(str);
@@ -269,8 +269,8 @@ template<class T>
 constexpr T* strrfind(T* const str, const std::size_t count, const detail::type_identity_t<T> ch) noexcept {
     if (!detail::is_constant_evaluated()) {
         if constexpr (std::is_same_v<std::remove_const_t<T>, char>) {
-            using detail::cpu_features;
-            if (cpu_features.value & (cpu_features.AVX2 + cpu_features.BMI2)) {
+            using namespace detail::isa;
+            if (AVX2 & BMI2) {
                 return const_cast<char*>(detail::betterstring_strrfind_char_avx2(str, count, ch));
             } else {
                 for (std::size_t i = count; i > 0; --i) {
@@ -363,8 +363,8 @@ template<class T>
 constexpr std::size_t strcount(const T* str, const std::size_t count, const detail::type_identity_t<T> ch) noexcept {
     if (!detail::is_constant_evaluated()) {
         if constexpr (std::is_same_v<T, char>) {
-            using detail::cpu_features;
-            if (cpu_features.value & (cpu_features.AVX2 + cpu_features.BMI2 + cpu_features.POPCNT)) {
+            using namespace detail::isa;
+            if (AVX2 & BMI2 & POPCNT) {
                 if (str == nullptr) { return 0; }
 
                 return detail::betterstring_strcount_char_avx2(str, count, ch);
@@ -410,8 +410,8 @@ template<class T>
 constexpr T* strfindn(T* str, std::size_t count, detail::type_identity_t<T> ch) noexcept {
     if (!detail::is_constant_evaluated()) {
         if constexpr (std::is_same_v<std::remove_const_t<T>, char>) {
-            using detail::cpu_features;
-            if (cpu_features.value & (cpu_features.AVX2 + cpu_features.BMI2)) {
+            using namespace detail::isa;
+            if (AVX2 & BMI2) {
                 return const_cast<char*>(detail::betterstring_strfindn_char_avx2(str, count, ch));
             }
         }
@@ -478,8 +478,8 @@ template<class T>
 constexpr T* strfirstof(T* str, std::size_t count, const detail::type_identity_t<T>* needle, std::size_t needle_size) noexcept {
     if (!detail::is_constant_evaluated()) {
         if constexpr (std::is_same_v<std::remove_const_t<T>, char>) {
-            using detail::cpu_features;
-            if (cpu_features.value & (cpu_features.AVX2 + cpu_features.BMI2)) {
+            using namespace detail::isa;
+            if (AVX2 & BMI2) {
                 return const_cast<char*>(detail::betterstring_strfirstof_avx2(str, count, needle, needle_size));
             }
         }

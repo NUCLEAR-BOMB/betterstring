@@ -1,4 +1,3 @@
-
 // Copyright 2024.
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at https://www.boost.org/LICENSE_1_0.txt)
@@ -6,6 +5,8 @@
 #pragma once
 
 #include <betterstring/detail/preprocessor.hpp>
+
+#include <isa_availability.h>
 
 #if BS_COMP_MSVC
     #include <immintrin.h>
@@ -61,16 +62,32 @@ inline uint64_t xgetbv(unsigned int a) {
 }
 #endif
 
+template<class T>
+constexpr bool has_single_bit(const T x) noexcept {
+    return (x ^ (x - 1)) > (x - 1);
+}
+
 struct alignas(64) cpu_features_t {
     uint64_t value{};
     uint64_t _dummy[7];
-
-    enum : uint64_t {
-        AVX2 = (1 << 0),
-        BMI2 = (1 << 1),
-        POPCNT = (1 << 2),
-    };
 };
+
+template<uint64_t Mask>
+struct isa_tester {
+    static constexpr uint64_t mask = Mask;
+
+    constexpr operator bool() const noexcept;
+};
+template<uint64_t Mask1, uint64_t Mask2>
+constexpr isa_tester<Mask1 | Mask2> operator&(const isa_tester<Mask1>, const isa_tester<Mask2>) noexcept {
+    return {};
+}
+
+namespace isa {
+    inline constexpr isa_tester<(1 << 0)> AVX2;
+    inline constexpr isa_tester<(1 << 1)> BMI2;
+    inline constexpr isa_tester<(1 << 2)> POPCNT;
+}
 
 // CPUID:
 // https://en.wikipedia.org/wiki/CPUID
@@ -91,20 +108,29 @@ inline cpu_features_t dynamic_cpu_features_initializer() noexcept {
     const bool bmi2 = regs.ebx & (1 << 8);
 
     cpu_features_t features{};
-    features.value |= bmi2 ? features.BMI2 : 0;
-    features.value |= popcnt ? features.POPCNT : 0;
+    features.value |= bmi2 ? isa::BMI2.mask : 0;
+    features.value |= popcnt ? isa::POPCNT.mask : 0;
 
     if (osxsave && avx2) {
         uint64_t xcr0 = xgetbv(BS_XFEATURE_ENABLED_MASK);
         const bool os_sse = xcr0 & (1 << 1); // XMM regs
         const bool os_avx = xcr0 & (1 << 2); // YMM regs
         if (os_sse && os_avx) {
-            features.value |= avx2 ? features.AVX2 : 0;
+            features.value |= avx2 ? isa::AVX2.mask : 0;
         }
     }
     return features;
 }
 
 inline const cpu_features_t cpu_features = dynamic_cpu_features_initializer();
+
+template<uint64_t Mask>
+constexpr isa_tester<Mask>::operator bool() const noexcept {
+    if constexpr (has_single_bit(Mask)) {
+        return (cpu_features.value & Mask) != 0;
+    } else {
+        return ((~cpu_features.value) & Mask) == 0;
+    }
+}
 
 }
