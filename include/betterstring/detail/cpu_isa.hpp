@@ -6,8 +6,6 @@
 
 #include <betterstring/detail/preprocessor.hpp>
 
-#include <isa_availability.h>
-
 #if BS_COMP_MSVC
     #include <immintrin.h>
     #include <intrin.h>
